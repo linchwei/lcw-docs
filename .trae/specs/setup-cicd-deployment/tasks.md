@@ -1,17 +1,17 @@
 # Tasks
 
-- [ ] Task 1: 用户自行推送代码到 GitHub
-  - [ ] SubTask 1.1: 用户在本地执行 `git push -u origin main`（需自行解决网络/代理问题）
-  - [ ] SubTask 1.2: AI 确认代码已推送到 GitHub
+- [x] Task 1: 用户自行推送代码到 GitHub
+  - [x] SubTask 1.1: 用户在本地执行 `git push -u origin main`
+  - [x] SubTask 1.2: AI 确认代码已推送到 GitHub
 
 - [x] Task 2: 修改 docker-compose.deploy.yml 端口绑定（无域名场景）
   - [x] SubTask 2.1: web 端口从 `127.0.0.1:80:80` 改为 `80:80`（无域名无需 Nginx SSL 终止）— 原本已是 80:80
   - [x] SubTask 2.2: server 端口从 `127.0.0.1:8082:8082` 改为 `8082:8082`（无域名需直接访问 API）
 
-- [ ] Task 3: 在服务器上克隆项目并配置 .env
-  - [ ] SubTask 3.1: SSH 到服务器，以 deploy 用户克隆项目到 /home/deploy/lcw-docs
-  - [ ] SubTask 3.2: 生成 .env 文件（含自动生成的 DB_PASSWORD、JWT_SECRET、CORS_ORIGINS、MINIMAX_API_KEY）
-  - [ ] SubTask 3.3: 上传 .env 到服务器，设置权限 600
+- [x] Task 3: 在服务器上克隆项目并配置 .env
+  - [x] SubTask 3.1: SSH 到服务器，以 deploy 用户克隆项目到 /home/deploy/lcw-docs
+  - [x] SubTask 3.2: 生成 .env 文件（含自动生成的 DB_PASSWORD、JWT_SECRET、CORS_ORIGINS、MINIMAX_API_KEY）
+  - [x] SubTask 3.3: 上传 .env 到服务器，设置权限 600
 
 - [ ] Task 4: 首次启动 Docker Compose 并初始化数据库
   - [ ] SubTask 4.1: 临时启用 DB_SYNCHRONIZE=true

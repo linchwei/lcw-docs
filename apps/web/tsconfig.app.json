@@ -1,6 +1,7 @@
 {
     "extends": "../../tsconfig.client.json",
     "include": ["src"],
+    "exclude": ["src/test", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/**/*.spec.tsx"],
     "compilerOptions": {
         "baseUrl": ".",
         "ignoreDeprecations": "6.0",

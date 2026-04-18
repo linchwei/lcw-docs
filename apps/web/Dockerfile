@@ -19,7 +19,7 @@ COPY . .
 RUN pnpm --filter @lcw-doc/core build && \
     pnpm --filter @lcw-doc/react build && \
     pnpm --filter @lcw-doc/shadcn build && \
-    pnpm --filter @lcw-doc/web build
+    pnpm --filter @lcw-doc/web exec vite build
 
 FROM nginx:alpine AS production
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html

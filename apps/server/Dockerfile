@@ -22,7 +22,6 @@ FROM node:20-alpine AS production
 WORKDIR /app
 COPY --from=build /app/apps/server/dist ./dist
 COPY --from=build /app/apps/server/node_modules ./node_modules
-COPY --from=build /app/packages/core/dist ./packages/core/dist
 
 ENV NODE_ENV=production
 EXPOSE 8082

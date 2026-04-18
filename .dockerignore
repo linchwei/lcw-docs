@@ -1,0 +1,11 @@
+node_modules
+dist
+.turbo
+.git
+.env
+*.md
+.vscode
+.cspell
+.trae
+.devcontainer
+docs

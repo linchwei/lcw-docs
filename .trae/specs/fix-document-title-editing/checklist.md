@@ -1,0 +1,9 @@
+- [x] 文档标题可在 contentEditable 区域正常编辑，不会被 React 重新渲染覆盖
+- [x] 标题编辑后 debounce 保存到后端，显示"已保存"状态
+- [x] 保存成功后页面查询数据刷新，面包屑导航标题同步更新
+- [x] 后端 update 方法正确抛出 NotFoundException（throw 而非 return）
+- [x] 后端 update 方法只更新合法字段（title、emoji），过滤 pageId 等字段
+- [x] 后端 update 方法返回数据库实际数据
+- [x] 后端 fetch 方法正确抛出 NotFoundException
+- [x] 后端 update 接口添加 DTO 验证
+- [x] TypeScript 编译无错误

@@ -1,0 +1,9 @@
+{
+    "extends": "../../tsconfig.client.json",
+    "include": ["src/**/*"],
+    "compilerOptions": {
+        "baseUrl": ".",
+        "ignoreDeprecations": "6.0",
+        "jsx": "react-jsx"
+    }
+}

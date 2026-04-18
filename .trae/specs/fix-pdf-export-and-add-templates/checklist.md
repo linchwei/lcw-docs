@@ -1,0 +1,13 @@
+- [x] PDF 导出使用 iframe + srcdoc 方式渲染，不再将完整 HTML 设置为 div innerHTML
+- [x] PDF 导出等待 iframe 加载完成后再调用 html2pdf
+- [x] PDF 导出内容完整显示（标题、段落、列表、表格等）
+- [x] PDF 导出失败时显示"导出失败，请稍后重试"toast
+- [x] 模板数据文件包含 4 个分类共 11 个模板的 Markdown 内容
+- [x] TemplateDialog 组件按分类展示模板卡片，支持搜索过滤
+- [x] 点击模板卡片可预览模板完整结构
+- [x] "使用此模板"按钮创建新文档并注入模板内容
+- [x] DocList 页面有"从模板创建"入口
+- [x] Aside 侧边栏有"从模板创建"入口
+- [x] handleEditorReady 中增加模板内容注入逻辑（sessionStorage + replaceBlocks）
+- [x] 模板内容注入后光标定位到文档开头
+- [x] 所有 11 个模板均可正常创建并编辑

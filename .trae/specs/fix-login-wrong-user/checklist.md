@@ -1,0 +1,2 @@
+- [x] AuthService.login() 使用 user.id 而非 user.userId 创建 JWT payload
+- [x] MCP 浏览器验证：登录后显示正确的用户名（非 testUser）

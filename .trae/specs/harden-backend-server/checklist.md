@@ -1,0 +1,12 @@
+- [x] 优雅关闭：收到 SIGTERM 时完成进行中的请求后关闭
+- [x] AllExceptionsFilter 捕获所有异常并返回结构化响应
+- [x] 数据库配置从环境变量读取，生产环境禁用 synchronize
+- [x] 全局 ValidationPipe 启用 whitelist 和 transform
+- [x] 用户注册端点有 DTO 验证
+- [x] JWT 密钥不在代码中有弱默认值
+- [x] Helmet 安全头中间件已启用
+- [x] 请求体大小限制为 1MB
+- [x] 健康检查在数据库不可用时返回 503
+- [x] Y.js storeUpdate 有 await 和错误处理
+- [x] PM2 ecosystem.config.js 文件存在且配置正确
+- [x] MCP 浏览器验证：前后端正常工作，登录、文档创建等功能正常

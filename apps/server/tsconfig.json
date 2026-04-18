@@ -1,0 +1,10 @@
+{
+    "extends": "../../tsconfig.server.json",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "ignoreDeprecations": "6.0",
+        "declaration": false
+    },
+    "exclude": ["node_modules", "dist", "vitest.config.ts", "src/test"]
+}

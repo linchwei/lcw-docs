@@ -1,0 +1,4 @@
+- [x] ConfirmDialog 组件创建完成，支持 title/description/onConfirm/variant 属性
+- [x] DocList 中 window.confirm 已替换为 ConfirmDialog
+- [x] PageTags 中 window.confirm 已替换为 ConfirmDialog
+- [x] TypeScript 编译通过

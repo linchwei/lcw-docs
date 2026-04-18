@@ -1,0 +1,13 @@
+- [x] SelectionAIMenu 包含"润色"、"缩写"、"扩写"、"解释"操作
+- [x] 后端 TagEntity 和 PageTagEntity 已创建
+- [x] 标签 CRUD API 正常工作（创建/列出/更新/删除标签）
+- [x] 为文档添加/移除标签 API 正常工作
+- [x] 按标签查询文档 API 正常工作
+- [x] 文档编辑页可添加/移除标签
+- [x] PageEntity 包含 coverImage 字段
+- [x] 文档编辑页显示封面图区域
+- [x] 封面图可设置和移除
+- [x] 后端 backlinks API 返回引用当前文档的其他文档
+- [x] 前端 BacklinksPanel 组件正常显示反向链接列表
+- [x] TypeScript 编译无错误
+- [x] 前后端服务正常启动

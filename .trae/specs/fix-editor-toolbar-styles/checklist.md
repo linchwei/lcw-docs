@@ -1,0 +1,12 @@
+- [x] `packages/shadcn/src/` 下所有组件类名已从 `bn-xxx` 迁移到 `bn:xxx` 格式
+- [x] 所有变体前缀已从 `variant:bn-xxx` 迁移到 `bn:variant:xxx` 格式
+- [x] `packages/shadcn/src/lib/utils.ts` 中 tailwind-merge prefix 配置为 `'bn:'`
+- [x] `apps/web/src/editor-styles.css` 使用 `@import "tailwindcss" prefix(bn)` 配置
+- [x] `apps/web/src/editor-styles.css` 包含 `@source` 指令扫描 shadcn 和 react 包目录
+- [x] `apps/web/src/editor-styles.css` 包含 `@theme` 块定义颜色令牌
+- [x] `tw-animate-css` 已安装并通过 `@import` 加载（替代已废弃的 `tailwindcss-animate`）
+- [x] `apps/web/src/index.css` 不包含对 `packages/shadcn/src` 的 `@source` 扫描
+- [x] 浏览器中 `bn\:xxx` 前缀的 Tailwind 工具类 CSS 规则已正确生成
+- [x] 编辑器格式化工具栏样式正确显示（背景色、边框、按钮图标）
+- [x] 加粗、斜体等格式化按钮可用
+- [x] 侧边菜单、建议菜单样式正确

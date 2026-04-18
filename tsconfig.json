@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "ignoreDeprecations": "6.0",
+        "declaration": true,
+        "declarationMap": true,
+        "importHelpers": true,
+        "inlineSources": true,
+        "isolatedModules": true,
+        "lib": ["ESNext"],
+        "moduleResolution": "node10",
+        "noErrorTruncation": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "preserveWatchOutput": true,
+        "sourceMap": true,
+        "strict": true,
+        "strictBindCallApply": false,
+        "target": "es2018",
+        "noUncheckedIndexedAccess": true
+    }
+}

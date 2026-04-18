@@ -1,0 +1,12 @@
+- [x] main.ts 中已移除 WsAdapter 相关代码（import 和 useWebSocketAdapter 调用）
+- [x] DocYjsGateway 不再使用 @WebSocketGateway() 装饰器
+- [x] DocYjsGateway 实现 OnModuleInit 接口
+- [x] DocYjsGateway 通过 HttpAdapterHost 获取 HTTP Server
+- [x] HTTP Server 注册了 upgrade 事件处理器
+- [x] upgrade 处理器正确匹配 /doc-yjs- 开头的路径
+- [x] WebSocket 连接时执行 JWT 验证
+- [x] WebSocket 连接时调用 setupWSConnection
+- [x] 非法路径（不以 /doc-yjs- 开头）的连接被拒绝
+- [x] 无 Token 的连接被拒绝
+- [x] TypeScript 编译无错误
+- [x] 编辑器中输入文本后，刷新页面内容仍然存在

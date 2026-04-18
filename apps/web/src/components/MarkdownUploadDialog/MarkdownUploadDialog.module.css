@@ -1,0 +1,299 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.5);
+    animation: overlayFadeIn 0.2s ease;
+}
+
+.content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 50;
+    max-width: 560px;
+    width: 90vw;
+    max-height: 85vh;
+    transform: translate(-50%, -50%);
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: contentSlideIn 0.25s ease;
+}
+
+.dialogTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #37352f;
+    margin: 0;
+}
+
+.dialogDesc {
+    font-size: 13px;
+    color: #9b9a97;
+    margin: 0;
+}
+
+.closeBtn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #9b9a97;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.closeBtn:hover {
+    background: #f5f5f4;
+}
+
+.dropZone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 24px;
+    border: 2px dashed #d4d4d4;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.dropZone:hover {
+    border-color: #097fe8;
+    background: #f0f9ff;
+}
+
+.dropZoneActive {
+    border-color: #097fe8;
+    background: #e0f2fe;
+}
+
+.dropIcon {
+    color: #9b9a97;
+    transition: color 0.2s ease;
+}
+
+.dropZone:hover .dropIcon {
+    color: #097fe8;
+}
+
+.dropText {
+    font-size: 15px;
+    font-weight: 500;
+    color: #37352f;
+    margin: 0;
+}
+
+.dropHint {
+    font-size: 13px;
+    color: #9b9a97;
+    margin: 0;
+}
+
+.fileInput {
+    display: none;
+}
+
+.progressSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 24px;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    color: #097fe8;
+}
+
+.progressText {
+    font-size: 14px;
+    color: #37352f;
+    margin: 0;
+}
+
+.progressBar {
+    width: 100%;
+    max-width: 300px;
+    height: 6px;
+    background: #e5e5e5;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #097fe8, #38bdf8);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.previewSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.previewHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #37352f;
+}
+
+.fileName {
+    font-weight: 500;
+}
+
+.previewStats {
+    color: #9b9a97;
+    margin-left: auto;
+}
+
+.failedCount {
+    color: #ef4444;
+}
+
+.titlePreview {
+    font-size: 14px;
+    color: #37352f;
+    padding: 8px 12px;
+    background: #f7f6f3;
+    border-radius: 8px;
+}
+
+.previewList {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.markdownPreview {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #37352f;
+    margin: 0;
+    padding: 12px;
+    background: #fafaf9;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+.moreLines {
+    font-size: 12px;
+    color: #9b9a97;
+    margin: 0;
+    text-align: center;
+    padding: 4px 0;
+}
+
+.previewActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #ebebea;
+}
+
+.cancelBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d4;
+    background: #ffffff;
+    color: #37352f;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.cancelBtn:hover {
+    background: #f5f5f4;
+}
+
+.generateBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #097fe8;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.generateBtn:hover {
+    opacity: 0.9;
+}
+
+.generateBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.resultSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 24px;
+}
+
+.successIcon {
+    color: #22c55e;
+}
+
+.errorIcon {
+    color: #ef4444;
+}
+
+.resultText {
+    font-size: 15px;
+    color: #37352f;
+    text-align: center;
+    margin: 0;
+}
+
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes contentSlideIn {
+    from { opacity: 0; transform: translate(-50%, -48%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

@@ -1,0 +1,10 @@
+{
+    "extends": "../../tsconfig.client.json",
+    "include": ["src/**/*", "tests/**/*"],
+    "compilerOptions": {
+        "baseUrl": ".",
+        "ignoreDeprecations": "6.0",
+        "declaration": true,
+        "declarationMap": true
+    }
+}

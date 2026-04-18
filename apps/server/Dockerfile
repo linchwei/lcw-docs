@@ -21,12 +21,7 @@ RUN cd apps/server && rm -rf dist && npx tsc -p tsconfig.build.json --incrementa
 
 FROM base AS production
 WORKDIR /app
-COPY --from=build /app/apps/server/dist ./apps/server/dist
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/apps/server/node_modules ./apps/server/node_modules
-COPY --from=build /app/packages/core/build ./packages/core/build
-COPY --from=build /app/apps/server/package.json ./apps/server/package.json
-COPY --from=build /app/packages/core/package.json ./packages/core/package.json
+COPY --from=build /app .
 
 ENV NODE_ENV=production
 WORKDIR /app/apps/server

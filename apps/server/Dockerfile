@@ -25,8 +25,9 @@ COPY --from=build /app/apps/server/dist ./apps/server/dist
 COPY --from=build /app/packages/core/build ./packages/core/build
 COPY --from=build /app/packages/core/package.json ./packages/core/package.json
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages/core/package.json ./packages/core/
 COPY apps/server/package.json ./apps/server/
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+RUN pnpm config set auto-install-peers true && pnpm install --prod --frozen-lockfile
 
 ENV NODE_ENV=production
 WORKDIR /app/apps/server

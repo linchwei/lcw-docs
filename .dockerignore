@@ -8,4 +8,4 @@ dist
 .cspell
 .trae
 .devcontainer
-docs
+/docs

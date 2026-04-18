@@ -17,7 +17,7 @@ COPY --from=deps /app/packages ./packages
 COPY --from=deps /app/apps ./apps
 COPY . .
 RUN pnpm --filter @lcw-doc/core build
-RUN cd apps/server && ls src/ && ls src/main.ts && rm -rf dist tsconfig.tsbuildinfo && npx tsc -p tsconfig.build.json --listEmittedFiles 2>&1 | head -30 && ls dist/
+RUN cd apps/server && find src -type f -name '*.ts' | head -20 && rm -rf dist tsconfig.tsbuildinfo && npx tsc -p tsconfig.build.json --listEmittedFiles | head -20 && ls dist/
 
 FROM node:20-alpine AS production
 WORKDIR /app

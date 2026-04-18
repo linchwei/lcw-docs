@@ -23,8 +23,6 @@ WORKDIR /app
 COPY --from=build /app/apps/server/dist ./dist
 COPY --from=build /app/apps/server/node_modules ./node_modules
 COPY --from=build /app/packages/core/dist ./packages/core/dist
-COPY --from=build /app/packages/react/dist ./packages/react/dist
-COPY --from=build /app/packages/shadcn/dist ./packages/shadcn/dist
 
 ENV NODE_ENV=production
 EXPOSE 8082

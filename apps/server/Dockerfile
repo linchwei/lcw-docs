@@ -21,7 +21,12 @@ RUN cd apps/server && rm -rf dist && npx tsc -p tsconfig.build.json --incrementa
 
 FROM base AS production
 WORKDIR /app
-COPY --from=build /app .
+COPY --from=build /app/apps/server/dist ./apps/server/dist
+COPY --from=build /app/packages/core/build ./packages/core/build
+COPY --from=build /app/packages/core/package.json ./packages/core/package.json
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps/server/package.json ./apps/server/
+RUN pnpm install --prod --frozen-lockfile
 
 ENV NODE_ENV=production
 WORKDIR /app/apps/server

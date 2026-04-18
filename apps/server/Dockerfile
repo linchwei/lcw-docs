@@ -22,7 +22,8 @@ RUN cd apps/server && rm -rf dist && npx tsc -p tsconfig.build.json --incrementa
 FROM node:20-alpine AS production
 WORKDIR /app
 COPY --from=build /app/apps/server/dist ./dist
-COPY --from=build /app/apps/server/node_modules ./node_modules
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/packages/core/build ./packages/core/build
 
 ENV NODE_ENV=production
 EXPOSE 8082

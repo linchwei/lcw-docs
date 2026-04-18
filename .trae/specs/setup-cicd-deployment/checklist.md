@@ -1,0 +1,11 @@
+- [ ] 代码已推送到 GitHub 仓库 linchwei/lcw-docs
+- [ ] docker-compose.deploy.yml 端口绑定已调整为无域名场景
+- [ ] 服务器上项目已克隆到 /home/deploy/lcw-docs
+- [ ] .env 文件已上传到服务器，权限为 600
+- [ ] Docker Compose 已启动，postgres/server/web 容器运行正常
+- [ ] 数据库已初始化（DB_SYNCHRONIZE 已关闭）
+- [ ] http://106.53.73.48 可正常访问前端页面
+- [ ] http://106.53.73.48/api/health 返回健康状态
+- [ ] GitHub Actions SSH 密钥对已生成，公钥已添加到服务器
+- [ ] GitHub Secrets 已配置（DEPLOY_HOST、DEPLOY_USER、DEPLOY_SSH_KEY、DEPLOY_PATH、DEPLOY_ENV）
+- [ ] 推送 tag 可触发自动部署流程

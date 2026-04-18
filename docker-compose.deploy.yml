@@ -43,7 +43,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
       NODE_ENV: production
     ports:
-      - "127.0.0.1:8082:8082"
+      - "8082:8082"
     logging:
       driver: json-file
       options:

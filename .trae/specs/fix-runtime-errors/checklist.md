@@ -1,7 +1,0 @@
-- [x] dialog.tsx 组件已创建，导出所有必要的 Dialog 子组件
-- [x] TypeScript 编译无错误（apps/web, packages/shadcn-shared-ui）
-- [x] Vite 开发服务器启动无错误
-- [x] 浏览器访问 http://localhost:5173 页面正常加载（无 Vite overlay 错误）
-- [x] 登录流程正常（注册 → 登录 → 跳转文档列表）
-- [x] 文档编辑器正常渲染，可输入文字
-- [x] Ctrl+/ 快捷键面板正常弹出

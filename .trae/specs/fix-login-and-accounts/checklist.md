@@ -1,5 +1,0 @@
-- [x] testuser/test123 可以正常登录
-- [x] testuser2/test123456 可以正常登录
-- [x] testuser123/test123 可以正常登录
-- [x] docs/accounts.md 包含所有账号和密码信息
-- [x] 同一浏览器换 tab 不需要重新登录

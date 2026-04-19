@@ -1,8 +1,0 @@
-- [x] 后端服务正常启动，无 TypeORM 错误
-- [x] 前端页面正常加载，无 Vite 导入错误
-- [x] CollaboratorEntity 的 pageId 仅通过 @Column 定义，无 @ManyToOne 冲突
-- [x] NotificationBell 不使用不存在的 ScrollArea 组件
-- [x] NotificationEntity 的 ManyToOne 关系正常工作
-- [x] TypeScript 编译无错误
-- [x] MCP 浏览器验证：前端页面正常加载，无控制台错误
-- [x] MCP 浏览器验证：后端 API 正常响应（/api/health 返回 200）

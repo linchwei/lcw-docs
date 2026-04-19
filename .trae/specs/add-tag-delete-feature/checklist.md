@@ -1,5 +1,0 @@
-- [x] DocList 标签选择器中每个标签有删除按钮
-- [x] 删除标签前有确认提示
-- [x] 删除标签后 tags 和 batchPageTags 缓存刷新
-- [x] PageTags 组件标签选择器中每个标签有删除按钮
-- [x] TypeScript 编译通过

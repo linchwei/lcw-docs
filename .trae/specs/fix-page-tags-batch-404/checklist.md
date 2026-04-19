@@ -1,5 +1,0 @@
-- [x] tag.controller.ts 中 Throttle 从 @nestjs/throttler 导入，不再从 @nestjs/common 导入
-- [x] 项目中无其他文件错误地从 @nestjs/common 导入 Throttle
-- [x] 服务器重启后 POST /api/page-tags/batch 返回非 404 响应
-- [x] 服务器重启后 GET /api/tags 返回 401（认证守卫生效，路由正常注册）
-- [x] 前端 DocList 页面标签批量查询功能正常工作

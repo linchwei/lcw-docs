@@ -1,3 +1,0 @@
-- [x] package.json 中包含 deploy、deploy:minor、deploy:major 三个脚本
-- [x] deploy 脚本执行后能自动 push main、创建 patch 版本 tag、push tag
-- [x] 未提交更改时 deploy 命令会中止（npm version 自身会检查工作区状态）

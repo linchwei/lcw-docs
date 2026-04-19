@@ -1,7 +1,0 @@
-- [x] ForbiddenException 自定义异常类已创建，包含 code 枚举和中文 message
-- [x] AllExceptionsFilter 在 403 响应中包含 code 字段
-- [x] collaborator.service.ts 所有 ForbiddenException 已替换为具体中文消息 + 错误码
-- [x] page.service.ts 的 ForbiddenException 已替换为具体中文消息 + 错误码
-- [x] 前端 request.ts 拦截器对 403 错误使用 toast 展示具体消息
-- [x] 403 错误无 message 时前端展示默认提示 "您没有执行此操作的权限"
-- [x] TypeScript 编译通过，无 ForbiddenException 直接使用残留，代码逻辑正确

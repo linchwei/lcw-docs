@@ -1,4 +1,0 @@
-- [x] database.ts 中 synchronize 逻辑已改为由 DB_SYNCHRONIZE 环境变量统一控制
-- [x] 服务器上 server 容器重启后数据库表已成功创建（\dt 显示 13 张表）
-- [x] /api/user/register 接口不再返回 500 错误
-- [x] DB_SYNCHRONIZE 已改回 "false"，避免后续自动同步

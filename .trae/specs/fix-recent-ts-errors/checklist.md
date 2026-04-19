@@ -1,4 +1,0 @@
-- [x] apps/server/tsconfig.json 排除 vitest.config.ts 和 src/test
-- [x] apps/server 目录 `npx tsc --noEmit` 无错误
-- [x] 项目根目录 `pnpm typecheck` 所有包通过
-- [x] MCP GetDiagnostics 无 TypeScript 诊断错误

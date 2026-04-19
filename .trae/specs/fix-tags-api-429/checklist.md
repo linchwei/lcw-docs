@@ -1,8 +1,0 @@
-- [x] 后端 batchGetPageTagsSchema Zod 校验已添加，限制 pageIds 数组最多 50 个元素
-- [x] 后端 tag.service.ts 中 batchGetPageTags 方法实现，返回 Record<pageId, Tag[]>
-- [x] 后端 tag.controller.ts 中 POST /page-tags/batch 端点已添加
-- [x] 后端 tag 读取端点添加了 @Throttle() 装饰器，限流放宽至 10秒/100次
-- [x] 前端 tag.ts 服务中 batchFetchPageTags 方法已添加
-- [x] 前端 DocList 页面不再对每个卡片独立 useQuery，改为列表层批量查询
-- [x] 前端 QueryClient 配置了默认 staleTime: 30_000
-- [x] 打开文档列表页时不再触发 429 错误

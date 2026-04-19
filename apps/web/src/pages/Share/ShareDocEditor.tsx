@@ -57,14 +57,14 @@ export function ShareDocEditor({ pageId, shareId, password, permission }: ShareD
     }, [])
 
     const doc = useMemo(() => new Y.Doc(), [pageId])
-    const wsUrl = import.meta.env.VITE_WS_HOST ? `wss://${import.meta.env.VITE_WS_HOST}` : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
     const provider = useMemo(() => {
+        const wsUrl = (window as any).__WS_URL__ || 'ws://localhost:8082'
         const wsParams: any = {
             connect: false,
             params: { shareId, ...(password ? { password } : {}) },
         }
         return new WebsocketProvider(wsUrl, `doc-yjs-${pageId}`, doc, wsParams)
-    }, [pageId, doc, wsUrl, shareId, password])
+    }, [pageId, doc, shareId, password])
 
     useEffect(() => {
         provider.connect()

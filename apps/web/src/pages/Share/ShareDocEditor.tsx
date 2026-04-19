@@ -57,7 +57,7 @@ export function ShareDocEditor({ pageId, shareId, password, permission }: ShareD
     }, [])
 
     const doc = useMemo(() => new Y.Doc(), [pageId])
-    const wsUrl = import.meta.env.VITE_WS_HOST ? `wss://${import.meta.env.VITE_WS_HOST}` : 'ws://localhost:8082'
+    const wsUrl = import.meta.env.VITE_WS_HOST ? `wss://${import.meta.env.VITE_WS_HOST}` : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
     const provider = useMemo(() => {
         const wsParams: any = {
             connect: false,

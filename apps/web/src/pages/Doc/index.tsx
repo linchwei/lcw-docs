@@ -74,7 +74,7 @@ export const Doc = () => {
     pageRef.current = page
     const pageId = params?.id
     const doc = useMemo(() => new Y.Doc(), [pageId])
-    const wsUrl = import.meta.env.VITE_WS_HOST ? `wss://${import.meta.env.VITE_WS_HOST}` : 'ws://localhost:8082'
+    const wsUrl = import.meta.env.VITE_WS_HOST ? `wss://${import.meta.env.VITE_WS_HOST}` : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
     const provider = useMemo(() => {
         const token = localStorage.getItem('token')
         const wsParams = token ? { connect: false, params: { token } } : { connect: false }

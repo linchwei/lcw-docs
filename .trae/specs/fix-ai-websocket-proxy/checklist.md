@@ -1,0 +1,5 @@
+- [x] nginx.conf 中 /api/ location 包含 proxy_buffering off 和 X-Accel-Buffering no
+- [x] nginx.conf 中 /api/ 的 proxy_read_timeout 为 300s
+- [x] AI chat 接口返回正确的 SSE 响应头（Content-Type: text/event-stream）
+- [x] AI 聊天能正常流式返回数据到前端
+- [x] WebSocket /doc-yjs- 连接能正常建立（Nginx 配置已正确，需前端实际验证）

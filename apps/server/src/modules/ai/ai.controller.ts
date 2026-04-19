@@ -1,6 +1,7 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common'
+import { Body, Controller, Post, Request, Res, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger'
+import type { Response } from 'express'
 
 import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
 import { ChatDto, chatSchema } from './ai.dto'
@@ -37,7 +38,29 @@ export class AiController {
     })
     @ApiResponse({ status: 200, description: '成功，返回SSE流式响应', schema: { properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } } } })
     @Post('chat')
-    async chat(@Body(new ZodValidationPipe(chatSchema)) body: ChatDto, @Request() req) {
-        return this.aiService.chatStream(body.messages as import('./ai.service').ChatMessage[])
+    async chat(@Body(new ZodValidationPipe(chatSchema)) body: ChatDto, @Request() req, @Res() res: Response) {
+        const upstream = await this.aiService.chatStream(body.messages as import('./ai.service').ChatMessage[])
+
+        res.setHeader('Content-Type', 'text/event-stream')
+        res.setHeader('Cache-Control', 'no-cache')
+        res.setHeader('Connection', 'keep-alive')
+        res.setHeader('X-Accel-Buffering', 'no')
+        res.flushHeaders()
+
+        if (!upstream.body) {
+            res.end()
+            return
+        }
+
+        const reader = upstream.body.getReader()
+        const pump = async () => {
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+                res.write(value)
+            }
+            res.end()
+        }
+        pump().catch(() => res.end())
     }
 }

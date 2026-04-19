@@ -1,0 +1,4 @@
+- [x] Doc/index.tsx 中 WebSocket URL 使用 window.location 自动推算
+- [x] Share/ShareDocEditor.tsx 中 WebSocket URL 使用 window.location 自动推算
+- [x] 服务器上 web 镜像已重新构建并部署
+- [x] WebSocket 连接能成功建立（构建产物中不再包含 ws://localhost:8082）

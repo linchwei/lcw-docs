@@ -11,7 +11,7 @@ export default () => {
             password: process.env.DB_PASSWORD || 'postgres',
             database: process.env.DB_DATABASE || 'postgres',
             entities: [join(__dirname, '../', '**/**.entity{.ts,.js}')],
-            synchronize: isProd ? false : (process.env.DB_SYNCHRONIZE === 'true'),
+            synchronize: process.env.DB_SYNCHRONIZE === 'true',
             poolSize: parseInt(process.env.DB_POOL_SIZE, 10) || 20,
             connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT, 10) || 5000,
             extra: {

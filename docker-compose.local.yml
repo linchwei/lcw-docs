@@ -55,7 +55,7 @@ services:
 
   web:
     build:
-      context: /home/deploy/lcw-docs
+      context: .
       dockerfile: apps/web/Dockerfile
     container_name: lcw-docs-web
     restart: unless-stopped

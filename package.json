@@ -1,84 +1,87 @@
 {
-  "name": "lcw-docs",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build:watch": "turbo build:watch",
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "dev:server": "pnpm --filter @lcw-doc/server start:dev",
-    "dev:desktop": "pnpm --filter @lcw-doc/desktop tauri dev",
-    "docker:start": "docker compose -p lcw-docs -f docker-compose.yml up -d",
-    "docker:stop": "docker compose -p lcw-docs -f docker-compose.yml down",
-    "docker:deploy": "docker compose -p lcw-docs -f docker-compose.deploy.yml up -d",
-    "docker:build-deploy": "pnpm build && pnpm docker:deploy",
-    "docker:deploy:stop": "docker compose -p lcw-docs -f docker-compose.deploy.yml down",
-    "clean": "run-s clean:build clean:caches",
-    "clean:build": "pnpm --filter @lcw/* clean",
-    "clean:caches": " rimraf .turbo/cache **/*/.turbo",
-    "clean:deps": "rimraf node_modules **/*/node_modules",
-    "clean:all": "run-s clean:build clean:caches clean:deps",
-    "lint": "eslint",
-    "lint:staged": "lint-staged",
-    "spellcheck": "cspell lint --dot --gitignore --color --cache --show-suggestions \"(packages|apps)/**/*.@(html|js|cjs|mjs|ts|tsx|css|scss|md)\"",
-    "typecheck": "turbo typecheck",
-    "test": "turbo test",
-    "test:coverage": "turbo test:coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "commit": "git-cz",
-    "prepare": "husky"
-  },
-  "keywords": [],
-  "author": "lcw",
-  "license": "ISC",
-  "packageManager": "pnpm@10.33.0",
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-git"
+    "name": "lcw-docs",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build:watch": "turbo build:watch",
+        "build": "turbo build",
+        "dev": "turbo dev",
+        "dev:server": "pnpm --filter @lcw-doc/server start:dev",
+        "dev:desktop": "pnpm --filter @lcw-doc/desktop tauri dev",
+        "docker:start": "docker compose -p lcw-docs -f docker-compose.yml up -d",
+        "docker:stop": "docker compose -p lcw-docs -f docker-compose.yml down",
+        "docker:deploy": "docker compose -p lcw-docs -f docker-compose.deploy.yml up -d",
+        "docker:build-deploy": "pnpm build && pnpm docker:deploy",
+        "docker:deploy:stop": "docker compose -p lcw-docs -f docker-compose.deploy.yml down",
+        "clean": "run-s clean:build clean:caches",
+        "clean:build": "pnpm --filter @lcw/* clean",
+        "clean:caches": " rimraf .turbo/cache **/*/.turbo",
+        "clean:deps": "rimraf node_modules **/*/node_modules",
+        "clean:all": "run-s clean:build clean:caches clean:deps",
+        "lint": "eslint",
+        "lint:staged": "lint-staged",
+        "spellcheck": "cspell lint --dot --gitignore --color --cache --show-suggestions \"(packages|apps)/**/*.@(html|js|cjs|mjs|ts|tsx|css|scss|md)\"",
+        "typecheck": "turbo typecheck",
+        "test": "turbo test",
+        "test:coverage": "turbo test:coverage",
+        "test:e2e": "playwright test",
+        "test:e2e:headed": "playwright test --headed",
+        "commit": "git-cz",
+        "ship": "git push origin main && npm version patch && git push origin main --tags",
+        "ship:minor": "git push origin main && npm version minor && git push origin main --tags",
+        "ship:major": "git push origin main && npm version major && git push origin main --tags",
+        "prepare": "husky"
+    },
+    "keywords": [],
+    "author": "lcw",
+    "license": "ISC",
+    "packageManager": "pnpm@10.33.0",
+    "config": {
+        "commitizen": {
+            "path": "node_modules/cz-git"
+        }
+    },
+    "lint-staged": {
+        "*.{md,json}": [
+            "prettier --cache --write --no-error-on-unmatched-pattern"
+        ],
+        "*.{css,less}": [
+            "prettier --cache --write"
+        ],
+        "*.{js,jsx}": [
+            "eslint --fix",
+            "prettier --cache --write"
+        ],
+        "*.{ts,tsx}": [
+            "eslint --fix",
+            "prettier --cache --parser=typescript --write"
+        ]
+    },
+    "devDependencies": {
+        "@commitlint/cli": "20.5.0",
+        "@commitlint/config-conventional": "20.5.0",
+        "@eslint/js": "9.39.4",
+        "@playwright/test": "^1.59.1",
+        "@types/node": "25.5.2",
+        "commitizen": "4.3.1",
+        "cspell": "10.0.0",
+        "cz-git": "1.12.0",
+        "eslint": "^9.0.0",
+        "eslint-plugin-prettier": "5.5.5",
+        "eslint-plugin-react-hooks": "^7.0.1",
+        "eslint-plugin-react-refresh": "0.5.2",
+        "eslint-plugin-simple-import-sort": "13.0.0",
+        "fast-glob": "3.3.3",
+        "globals": "17.4.0",
+        "husky": "9.1.7",
+        "lint-staged": "16.4.0",
+        "npm-run-all2": "8.0.4",
+        "prettier": "3.8.1",
+        "rimraf": "6.1.3",
+        "tsup": "8.5.1",
+        "turbo": "2.9.5",
+        "typescript": "6.0.2",
+        "typescript-eslint": "8.58.1"
     }
-  },
-  "lint-staged": {
-    "*.{md,json}": [
-      "prettier --cache --write --no-error-on-unmatched-pattern"
-    ],
-    "*.{css,less}": [
-      "prettier --cache --write"
-    ],
-    "*.{js,jsx}": [
-      "eslint --fix",
-      "prettier --cache --write"
-    ],
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --cache --parser=typescript --write"
-    ]
-  },
-  "devDependencies": {
-    "@commitlint/cli": "20.5.0",
-    "@commitlint/config-conventional": "20.5.0",
-    "@eslint/js": "9.39.4",
-    "@playwright/test": "^1.59.1",
-    "@types/node": "25.5.2",
-    "commitizen": "4.3.1",
-    "cspell": "10.0.0",
-    "cz-git": "1.12.0",
-    "eslint": "^9.0.0",
-    "eslint-plugin-prettier": "5.5.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "0.5.2",
-    "eslint-plugin-simple-import-sort": "13.0.0",
-    "fast-glob": "3.3.3",
-    "globals": "17.4.0",
-    "husky": "9.1.7",
-    "lint-staged": "16.4.0",
-    "npm-run-all2": "8.0.4",
-    "prettier": "3.8.1",
-    "rimraf": "6.1.3",
-    "tsup": "8.5.1",
-    "turbo": "2.9.5",
-    "typescript": "6.0.2",
-    "typescript-eslint": "8.58.1"
-  }
 }

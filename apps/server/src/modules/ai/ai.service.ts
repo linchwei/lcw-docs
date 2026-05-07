@@ -11,19 +11,19 @@ export class AiService {
     constructor(private readonly configService: ConfigService) {}
 
     async chatStream(messages: ChatMessage[]) {
-        const apiKey = this.configService.get<string>('MINIMAX_API_KEY')
+        const apiKey = this.configService.get<string>('DEEPSEEK_API_KEY')
         if (!apiKey) {
-            throw new Error('MINIMAX_API_KEY is not configured')
+            throw new Error('DEEPSEEK_API_KEY is not configured')
         }
 
-        const response = await fetch('https://api.minimaxi.com/v1/text/chatcompletion_v2', {
+        const response = await fetch('https://api.deepseek.com/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'MiniMax-M2.7',
+                model: 'deepseek-chat',
                 messages,
                 stream: true,
             }),

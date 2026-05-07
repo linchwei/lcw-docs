@@ -23,7 +23,7 @@ export class AiService {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'deepseek-chat',
+                model: 'DeepSeek-V4-Flash',
                 messages,
                 stream: true,
             }),

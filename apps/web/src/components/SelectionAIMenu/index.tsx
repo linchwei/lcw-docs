@@ -25,10 +25,18 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
     const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
     const [selectedText, setSelectedText] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     const updatePosition = () => {
         const selection = window.getSelection()
         if (!selection || selection.isCollapsed || !selection.rangeCount) {
+            setPosition(null)
+            setSelectedText('')
+            return
+        }
+
+        const editorElement = document.querySelector('.bn-editor')
+        if (editorElement && !editorElement.contains(selection.anchorNode)) {
             setPosition(null)
             setSelectedText('')
             return
@@ -145,13 +153,39 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
                 }
             }
         } catch {
+            setErrorMessage('AI 服务暂时不可用，请稍后再试')
         } finally {
             setIsGenerating(false)
+            setTimeout(() => setErrorMessage(''), 3000)
         }
     }
 
     if (!position || !selectedText) {
         return null
+    }
+
+    if (errorMessage) {
+        return ReactDOM.createPortal(
+            <div
+                style={{
+                    position: 'absolute',
+                    top: position?.top || 0,
+                    left: position?.left || 0,
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                    padding: '8px 12px',
+                    backgroundColor: '#fef2f2',
+                    color: '#dc2626',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                    border: '1px solid #fecaca',
+                }}
+            >
+                {errorMessage}
+            </div>,
+            document.body
+        )
     }
 
     return ReactDOM.createPortal(
@@ -172,6 +206,34 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
                 border: '1px solid #e9e9e7',
             }}
         >
+            <button
+                onClick={(e) => {
+                    e.stopPropagation()
+                    setPosition(null)
+                    setSelectedText('')
+                }}
+                style={{
+                    padding: '2px',
+                    color: '#999',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    lineHeight: 1,
+                }}
+                onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f5f5f4'
+                }}
+                onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
+                }}
+            >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+            </button>
             <div style={{ display: 'flex', alignItems: 'center', paddingRight: '4px', borderRight: '1px solid #e9e9e7', marginRight: '2px' }}>
                 <Sparkles size={14} color="#6B45FF" />
             </div>

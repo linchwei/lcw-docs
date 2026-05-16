@@ -23,7 +23,7 @@ export class AiService {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'DeepSeek-V4-Flash',
+                model: 'deepseek-v4-flash',
                 messages,
                 stream: true,
             }),

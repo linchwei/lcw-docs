@@ -1,31 +1,19 @@
-/**
- * 代码块内容模块
- * 定义编辑器中的代码块，支持语法高亮和多语言切换
- * 使用 Shiki 作为语法高亮引擎
- */
 import { InputRule, isTextSelection } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'
-import { createHighlightPlugin, Parser } from 'prosemirror-highlight'
-import { createParser } from 'prosemirror-highlight/shiki'
-import { BundledLanguage, bundledLanguagesInfo, createHighlighter, Highlighter } from 'shiki'
+import { createHighlightPlugin } from 'prosemirror-highlight'
+import { createParser } from 'prosemirror-highlight/refractor'
+import { refractor } from 'refractor'
 
 import { createBlockSpecFromStronglyTypedTiptapNode, createStronglyTypedTiptapNode, PropSchema } from '../../schema/index'
 import { createDefaultBlockDOMOutputSpec } from '../defaultBlockHelpers'
 import { defaultSupportedLanguages, SupportedLanguageConfig } from './defaultSupportedLanguages'
 
-/**
- * 代码块配置选项接口
- */
 interface CodeBlockOptions {
     defaultLanguage: string
     indentLineWithTab: boolean
     supportedLanguages: SupportedLanguageConfig[]
 }
 
-/**
- * 代码块的属性模式定义
- * language 属性指定代码语言，支持从默认支持的语言列表中选择
- */
 export const defaultCodeBlockPropSchema = {
     language: {
         default: 'javascript',
@@ -33,10 +21,6 @@ export const defaultCodeBlockPropSchema = {
     },
 } satisfies PropSchema
 
-/**
- * 代码块的 TipTap 节点定义
- * 禁用 marks（不允许内联格式），支持代码内容
- */
 const CodeBlockContent = createStronglyTypedTiptapNode({
     name: 'codeBlock',
     content: 'inline*',
@@ -45,10 +29,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
     code: true,
     defining: true,
 
-    /**
-     * 代码块配置选项
-     * 支持设置默认语言、Tab 缩进和可选语言列表
-     */
     addOptions() {
         return {
             defaultLanguage: 'javascript',
@@ -57,10 +37,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
         }
     },
 
-    /**
-     * 定义代码块属性
-     * language 属性存储代码语言标识符
-     */
     addAttributes() {
         return {
             language: {
@@ -105,10 +81,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
         }
     },
 
-    /**
-     * HTML 解析规则
-     * 支持从自定义 div 和 pre 标签解析
-     */
     parseHTML() {
         return [
             {
@@ -121,10 +93,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
         ]
     },
 
-    /**
-     * HTML 渲染规则
-     * 创建包含 pre 和 code 标签的 DOM 结构
-     */
     renderHTML({ HTMLAttributes }) {
         const pre = document.createElement('pre')
         const { dom, contentDOM } = createDefaultBlockDOMOutputSpec(this.name, 'code', this.options.domAttributes?.blockContent || {}, {
@@ -142,10 +110,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
         }
     },
 
-    /**
-     * 创建自定义节点视图
-     * 添加语言选择下拉框
-     */
     addNodeView() {
         const supportedLanguages = this.options.supportedLanguages as SupportedLanguageConfig[]
 
@@ -163,10 +127,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
                 this.options.domAttributes?.inlineContent || {}
             )
 
-            /**
-             * 语言切换处理函数
-             * 更新节点的语言属性
-             */
             const handleLanguageChange = (event: Event) => {
                 const language = (event.target as HTMLSelectElement).value
 
@@ -202,6 +162,8 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
                         return false
                     }
 
+                    select.value = newNode.attrs.language || this.options.defaultLanguage
+
                     return true
                 },
                 destroy: () => {
@@ -211,62 +173,30 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
         }
     },
 
-    /**
-     * 添加 ProseMirror 插件
-     * 使用 Shiki 实现语法高亮
-     */
     addProseMirrorPlugins() {
-        let highlighter: Highlighter | undefined
-        let parser: Parser | undefined
+        const baseParser = createParser(refractor)
 
-        const supportedLanguages = this.options.supportedLanguages as SupportedLanguageConfig[]
-
-        /**
-         * 懒加载语法解析器
-         * 按需加载语言高亮支持
-         */
-        const lazyParser: Parser = options => {
-            if (!highlighter) {
-                return createHighlighter({
-                    themes: ['github-dark'],
-                    langs: [],
-                }).then(createdHighlighter => {
-                    highlighter = createdHighlighter
-                })
+        const safeParser = (options: Parameters<typeof baseParser>[0]) => {
+            const lang = options.language
+            if (!lang || lang === 'text' || !refractor.registered(lang)) {
+                return []
             }
-
-            const language = options.language
-
-            if (
-                language &&
-                language !== 'text' &&
-                !highlighter.getLoadedLanguages().includes(language) &&
-                supportedLanguages.find(({ id }) => id === language) &&
-                bundledLanguagesInfo.find(({ id }) => id === language)
-            ) {
-                return highlighter.loadLanguage(language as BundledLanguage)
+            try {
+                return baseParser(options)
+            } catch {
+                return []
             }
-
-            if (!parser) {
-                parser = createParser(highlighter)
-            }
-
-            return parser(options)
         }
 
-        const shikiLazyPlugin = createHighlightPlugin({
-            parser: lazyParser,
+        const refractorPlugin = createHighlightPlugin({
+            parser: safeParser,
             languageExtractor: node => node.attrs.language,
             nodeTypes: [this.name],
         })
 
-        return [shikiLazyPlugin]
+        return [refractorPlugin]
     },
 
-    /**
-     * 输入规则
-     * 支持使用 ``` 语言名 + 空格快捷创建代码块
-     */
     addInputRules() {
         const supportedLanguages = this.options.supportedLanguages as SupportedLanguageConfig[]
 
@@ -298,13 +228,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
         ]
     },
 
-    /**
-     * 快捷键定义
-     * Delete: 删除空代码块
-     * Tab: 插入两个空格
-     * Enter: 在代码块内换行或退出代码块
-     * Shift-Enter: 在代码块后创建新段落
-     */
     addKeyboardShortcuts() {
         return {
             Delete: ({ editor }) => {
@@ -377,15 +300,8 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
     },
 })
 
-/**
- * 代码块完整定义
- */
 export const CodeBlock = createBlockSpecFromStronglyTypedTiptapNode(CodeBlockContent, defaultCodeBlockPropSchema)
 
-/**
- * 自定义代码块工厂函数
- * 允许创建支持不同默认语言和语言列表的代码块
- */
 export function customizeCodeBlock(options: Partial<CodeBlockOptions>) {
     return createBlockSpecFromStronglyTypedTiptapNode(CodeBlockContent.configure(options), {
         language: {

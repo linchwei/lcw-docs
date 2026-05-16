@@ -195,7 +195,6 @@ export const Doc = () => {
 
         return () => {
             provider.disconnect()
-            doc.destroy()
             setGlobalEditor(null)
         }
     }, [pageId, provider, doc, indexeddbProvider, setGlobalEditor])

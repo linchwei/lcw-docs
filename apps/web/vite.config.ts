@@ -25,6 +25,10 @@ export default defineConfig({
                 target: 'http://localhost:8082',
                 changeOrigin: true,
             },
+            '/doc-yjs-': {
+                target: 'ws://localhost:8082',
+                ws: true,
+            },
         },
     },
 })

@@ -1,5 +1,5 @@
 import { LcwDocEditor } from '@lcw-doc/core'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 import { WordCountResult, calculateSelectionWordCount, calculateWordCount } from '@/utils/wordCount'
 
@@ -31,7 +31,7 @@ export function useWordCount(editor: LcwDocEditor<any, any, any> | null): WordCo
     const [state, setState] = useState<WordCountState>(initialState)
     const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-    const updateWordCount = () => {
+    const updateWordCount = useCallback(() => {
         if (!editor) return
 
         try {
@@ -82,7 +82,7 @@ export function useWordCount(editor: LcwDocEditor<any, any, any> | null): WordCo
         } catch {
             // ignore errors during calculation
         }
-    }
+    }, [editor])
 
     useEffect(() => {
         if (!editor) return

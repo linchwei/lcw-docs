@@ -289,6 +289,53 @@ NESTED BLOCKS
     transition-delay: 0.1s;
 }
 
+/* Refractor token colors for dark code blocks */
+.bn-block-content[data-content-type='codeBlock'] .token.comment,
+.bn-block-content[data-content-type='codeBlock'] .token.prolog,
+.bn-block-content[data-content-type='codeBlock'] .token.doctype,
+.bn-block-content[data-content-type='codeBlock'] .token.cdata {
+    color: #8b949e;
+}
+.bn-block-content[data-content-type='codeBlock'] .token.punctuation {
+    color: #c9d1d9;
+}
+.bn-block-content[data-content-type='codeBlock'] .token.property,
+.bn-block-content[data-content-type='codeBlock'] .token.tag,
+.bn-block-content[data-content-type='codeBlock'] .token.boolean,
+.bn-block-content[data-content-type='codeBlock'] .token.number,
+.bn-block-content[data-content-type='codeBlock'] .token.constant,
+.bn-block-content[data-content-type='codeBlock'] .token.symbol,
+.bn-block-content[data-content-type='codeBlock'] .token.deleted {
+    color: #79c0ff;
+}
+.bn-block-content[data-content-type='codeBlock'] .token.selector,
+.bn-block-content[data-content-type='codeBlock'] .token.attr-name,
+.bn-block-content[data-content-type='codeBlock'] .token.string,
+.bn-block-content[data-content-type='codeBlock'] .token.char,
+.bn-block-content[data-content-type='codeBlock'] .token.builtin,
+.bn-block-content[data-content-type='codeBlock'] .token.inserted {
+    color: #a5d6ff;
+}
+.bn-block-content[data-content-type='codeBlock'] .token.operator,
+.bn-block-content[data-content-type='codeBlock'] .token.entity,
+.bn-block-content[data-content-type='codeBlock'] .token.url {
+    color: #d2a8ff;
+}
+.bn-block-content[data-content-type='codeBlock'] .token.atrule,
+.bn-block-content[data-content-type='codeBlock'] .token.attr-value,
+.bn-block-content[data-content-type='codeBlock'] .token.keyword {
+    color: #ff7b72;
+}
+.bn-block-content[data-content-type='codeBlock'] .token.function,
+.bn-block-content[data-content-type='codeBlock'] .token.class-name {
+    color: #d2a8ff;
+}
+.bn-block-content[data-content-type='codeBlock'] .token.regex,
+.bn-block-content[data-content-type='codeBlock'] .token.important,
+.bn-block-content[data-content-type='codeBlock'] .token.variable {
+    color: #ffa657;
+}
+
 /* FILES */
 
 /* Add block button & default preview */

@@ -1,5 +1,5 @@
 import { BlockSchema, checkBlockIsFileBlock, checkBlockIsFileBlockWithPlaceholder, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { ChangeEvent, KeyboardEvent, useCallback, useMemo, useState } from 'react'
+import { ChangeEvent, KeyboardEvent, useState } from 'react'
 import { RiInputField } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -17,7 +17,7 @@ export const FileCaptionButton = () => {
 
     const selectedBlocks = useSelectedBlocks(editor)
 
-    const fileBlock = useMemo(() => {
+    const fileBlock = (() => {
         if (selectedBlocks.length !== 1) {
             return undefined
         }
@@ -30,10 +30,9 @@ export const FileCaptionButton = () => {
         }
 
         return undefined
-    }, [editor, selectedBlocks])
+    })()
 
-    const handleEnter = useCallback(
-        (event: KeyboardEvent) => {
+    const handleEnter = (event: KeyboardEvent) => {
             if (fileBlock && event.key === 'Enter') {
                 event.preventDefault()
                 editor.updateBlock(fileBlock, {
@@ -42,11 +41,9 @@ export const FileCaptionButton = () => {
                     },
                 })
             }
-        },
-        [currentEditingCaption, editor, fileBlock]
-    )
+        }
 
-    const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => setCurrentEditingCaption(event.currentTarget.value), [])
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => setCurrentEditingCaption(event.currentTarget.value)
 
     if (!fileBlock || checkBlockIsFileBlockWithPlaceholder(fileBlock, editor) || !editor.isEditable) {
         return null

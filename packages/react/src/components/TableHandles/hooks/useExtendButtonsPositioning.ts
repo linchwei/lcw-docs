@@ -1,5 +1,5 @@
 import { size, useFloating, useTransitionStyles } from '@floating-ui/react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 function useExtendButtonPosition(orientation: 'addOrRemoveRows' | 'addOrRemoveColumns', show: boolean, referencePosTable: DOMRect | null) {
     const { refs, update, context, floatingStyles } = useFloating({
@@ -39,18 +39,15 @@ function useExtendButtonPosition(orientation: 'addOrRemoveRows' | 'addOrRemoveCo
         })
     }, [orientation, referencePosTable, refs])
 
-    return useMemo(
-        () => ({
-            isMounted: isMounted,
-            ref: refs.setFloating,
-            style: {
-                display: 'flex',
-                ...styles,
-                ...floatingStyles,
-            },
-        }),
-        [floatingStyles, isMounted, refs.setFloating, styles]
-    )
+    return {
+        isMounted: isMounted,
+        ref: refs.setFloating,
+        style: {
+            display: 'flex',
+            ...styles,
+            ...floatingStyles,
+        },
+    }
 }
 
 export function useExtendButtonsPositioning(
@@ -64,11 +61,8 @@ export function useExtendButtonsPositioning(
     const addOrRemoveRowsButton = useExtendButtonPosition('addOrRemoveRows', showAddOrRemoveRowsButton, referencePosTable)
     const addOrRemoveColumnsButton = useExtendButtonPosition('addOrRemoveColumns', showAddOrRemoveColumnsButton, referencePosTable)
 
-    return useMemo(
-        () => ({
-            addOrRemoveRowsButton,
-            addOrRemoveColumnsButton,
-        }),
-        [addOrRemoveColumnsButton, addOrRemoveRowsButton]
-    )
+    return {
+        addOrRemoveRowsButton,
+        addOrRemoveColumnsButton,
+    }
 }

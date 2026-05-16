@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Page } from '@/types/page'
@@ -16,10 +15,7 @@ export function MentionContent(props: MentionContentProps) {
         queryKey: ['pages'],
     })
 
-    const page = useMemo(() => {
-        if (cachedTitle) return { title: cachedTitle, emoji: cachedIcon }
-        return pages?.find(page => page.pageId === pageId)
-    }, [pages, pageId, cachedTitle, cachedIcon])
+    const page = cachedTitle ? { title: cachedTitle, emoji: cachedIcon } : pages?.find(page => page.pageId === pageId)
 
     return (
         <Link to={`/doc/${pageId}`} className={`px-2 py-[3px] mx-1 bg-purple-200 rounded-full`}>

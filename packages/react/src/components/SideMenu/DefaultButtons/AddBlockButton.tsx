@@ -6,7 +6,7 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-import { useCallback } from 'react'
+
 import { AiOutlinePlus } from 'react-icons/ai'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -26,7 +26,7 @@ export const AddBlockButton = <
 
     const editor = useLcwDocEditor<BSchema, I, S>()
 
-    const onClick = useCallback(() => {
+    const onClick = () => {
         const blockContent = props.block.content
         const isBlockEmpty = blockContent !== undefined && Array.isArray(blockContent) && blockContent.length === 0
 
@@ -38,7 +38,7 @@ export const AddBlockButton = <
             editor.setTextCursorPosition(insertedBlock)
             editor.openSuggestionMenu('/')
         }
-    }, [editor, props.block])
+    }
 
     return (
         <Components.SideMenu.Button

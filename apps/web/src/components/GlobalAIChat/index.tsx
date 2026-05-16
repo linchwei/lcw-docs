@@ -1,6 +1,6 @@
 import { PartialBlock } from '@lcw-doc/core'
 import { ArrowUp, FileInput, MessageSquare, Sparkles, X } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 
 import { useEditorContext } from '@/context/EditorContext'
@@ -62,13 +62,13 @@ export function GlobalAIChat() {
         }
     }, [])
 
-    const scrollToBottom = useCallback(() => {
+    const scrollToBottom = () => {
         setTimeout(() => {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         }, 50)
-    }, [])
+    }
 
-    const handleSend = useCallback(async () => {
+    const handleSend = async () => {
         if (!keyword.trim() || isGenerating) return
 
         setIsGenerating(true)
@@ -179,9 +179,9 @@ export function GlobalAIChat() {
             }
             setIsGenerating(false)
         }
-    }, [keyword, isGenerating, chatHistory, editor, scrollToBottom])
+    }
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = () => {
         abortRef.current?.abort()
         setIsGenerating(false)
         if (streamContent) {
@@ -189,9 +189,9 @@ export function GlobalAIChat() {
             setMessages(prev => [...prev, assistantMessage])
             setStreamContent('')
         }
-    }, [streamContent])
+    }
 
-    const handleInsertToDoc = useCallback(() => {
+    const handleInsertToDoc = () => {
         if (!editor || !lastBlocks) return
 
         try {
@@ -201,16 +201,16 @@ export function GlobalAIChat() {
         } catch (err) {
             console.error('Insert to doc error:', err)
         }
-    }, [editor, lastBlocks])
+    }
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             if (!isGenerating) {
                 handleSend()
             }
         }
-    }, [isGenerating, handleSend])
+    }
 
     return (
         <>

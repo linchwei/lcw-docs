@@ -1,5 +1,5 @@
 import { createReactBlockSpec } from '@lcw-doc/react'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 const CALLOUT_CONFIG = {
     info: { icon: '💡', bg: '#eef4fc', color: '#097fe8', label: '信息' },
@@ -43,10 +43,10 @@ function CalloutContent({ calloutType, editor, blockId, contentRef }: {
     const [showMenu, setShowMenu] = useState(false)
     const config = CALLOUT_CONFIG[calloutType]
 
-    const handleTypeChange = useCallback((type: CalloutType) => {
+    const handleTypeChange = (type: CalloutType) => {
         editor.updateBlock(blockId, { type: 'callout', props: { calloutType: type } })
         setShowMenu(false)
-    }, [editor, blockId])
+    }
 
     return (
         <div style={{

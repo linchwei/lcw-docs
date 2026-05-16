@@ -6,7 +6,7 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
 import { useLcwDocEditor } from '../../../hooks/useLcwDocEditor'
@@ -39,8 +39,7 @@ export const UploadTab = <
         }
     }, [uploadFailed])
 
-    const handleFileChange = useCallback(
-        (file: File | null) => {
+    const handleFileChange = (file: File | null) => {
             if (file === null) {
                 return
             }
@@ -69,9 +68,7 @@ export const UploadTab = <
             }
 
             upload(file)
-        },
-        [block, editor, setLoading]
-    )
+        }
 
     const config = editor.schema.blockSchema[block.type]
     const accept = config.isFileBlock && config.fileBlockAccept?.length ? config.fileBlockAccept.join(',') : '*/*'

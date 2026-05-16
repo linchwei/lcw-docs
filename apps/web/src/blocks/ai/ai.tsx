@@ -1,6 +1,6 @@
 import { createReactBlockSpec } from '@lcw-doc/react'
 import { AlertTriangle, Check, Loader2, RotateCcw, Send, Sparkles, X } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { chatWithAI, ChatMessage } from '@/services'
 
@@ -41,7 +41,7 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
     const [error, setError] = useState('')
     const abortRef = useRef<AbortController | null>(null)
 
-    const handleGenerate = useCallback(async (promptText: string) => {
+    const handleGenerate = async (promptText: string) => {
         if (!promptText.trim()) return
 
         editor.updateBlock(blockId, { type: 'ai', props: { status: 'generating', prompt: promptText } })
@@ -109,14 +109,14 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
         } finally {
             abortRef.current = null
         }
-    }, [editor, blockId])
+    }
 
-    const handleStop = useCallback(() => {
+    const handleStop = () => {
         abortRef.current?.abort()
         editor.updateBlock(blockId, { type: 'ai', props: { status: 'done' } })
-    }, [editor, blockId])
+    }
 
-    const handleAccept = useCallback(async () => {
+    const handleAccept = async () => {
         const content = streamContent || ''
         try {
             const blocks = await editor.tryParseMarkdownToBlocks(content)
@@ -127,19 +127,19 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
                 content: content ? [{ type: 'text', text: content, styles: {} }] : undefined,
             }])
         }
-    }, [editor, blockId, streamContent])
+    }
 
-    const handleDiscard = useCallback(() => {
+    const handleDiscard = () => {
         editor.removeBlocks([blockId])
-    }, [editor, blockId])
+    }
 
-    const handleRegenerate = useCallback(() => {
+    const handleRegenerate = () => {
         setStreamContent('')
         setError('')
         editor.updateBlock(blockId, { type: 'ai', props: { status: 'idle' } })
-    }, [editor, blockId])
+    }
 
-    const handleRetry = useCallback(() => {
+    const handleRetry = () => {
         setStreamContent('')
         setError('')
         if (initialPrompt) {
@@ -147,14 +147,14 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
         } else {
             editor.updateBlock(blockId, { type: 'ai', props: { status: 'idle' } })
         }
-    }, [editor, blockId, initialPrompt, handleGenerate])
+    }
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             handleGenerate(inputValue)
         }
-    }, [inputValue, handleGenerate])
+    }
 
     return (
         <div style={{

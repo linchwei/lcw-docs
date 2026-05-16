@@ -1,5 +1,5 @@
 import { Sparkles } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 
 import { chatWithAI, ChatMessage } from '@/services'
@@ -26,7 +26,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
     const [selectedText, setSelectedText] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
 
-    const updatePosition = useCallback(() => {
+    const updatePosition = () => {
         const selection = window.getSelection()
         if (!selection || selection.isCollapsed || !selection.rangeCount) {
             setPosition(null)
@@ -53,7 +53,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
             top: rect.top + window.scrollY - 40,
             left: rect.left + window.scrollX + rect.width / 2,
         })
-    }, [])
+    }
 
     useEffect(() => {
         const handleSelectionChange = () => {
@@ -70,7 +70,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
         }
     }, [updatePosition, isGenerating])
 
-    const handleAction = useCallback(async (action: typeof aiActions[0]) => {
+    const handleAction = async (action: typeof aiActions[0]) => {
         if (!selectedText || isGenerating) return
 
         setIsGenerating(true)
@@ -148,7 +148,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
         } finally {
             setIsGenerating(false)
         }
-    }, [selectedText, isGenerating, editor])
+    }
 
     if (!position || !selectedText) {
         return null

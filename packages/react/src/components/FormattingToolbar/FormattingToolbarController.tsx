@@ -1,6 +1,6 @@
 import { flip, offset } from '@floating-ui/react'
 import { BlockSchema, DefaultProps, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { FC, useMemo, useRef, useState } from 'react'
+import { FC, useRef, useState } from 'react'
 
 import { useEditorContentOrSelectionChange } from '../../hooks/useEditorContentOrSelectionChange'
 import { useLcwDocEditor } from '../../hooks/useLcwDocEditor'
@@ -61,7 +61,7 @@ export const FormattingToolbarController = (props: { formattingToolbar?: FC<Form
         },
     })
 
-    const combinedRef = useMemo(() => mergeRefs([divRef, ref]), [divRef, ref])
+    const combinedRef = mergeRefs([divRef, ref])
 
     if (!isMounted || !state) {
         return null

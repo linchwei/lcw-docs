@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export const usePrefersColorScheme = () => {
-    const darkQuery = useMemo(() => window.matchMedia?.('(prefers-color-scheme: dark)'), [])
-    const lightQuery = useMemo(() => window.matchMedia?.('(prefers-color-scheme: light)'), [])
+    const darkQuery = window.matchMedia?.('(prefers-color-scheme: dark)')
+    const lightQuery = window.matchMedia?.('(prefers-color-scheme: light)')
     const isDark = darkQuery?.matches
     const isLight = lightQuery?.matches
 

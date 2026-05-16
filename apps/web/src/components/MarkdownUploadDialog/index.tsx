@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { AlertCircle, CheckCircle2, FileUp, Loader2, Upload, X } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import * as srv from '@/services'
@@ -32,7 +32,7 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
     const [errorMessage, setErrorMessage] = useState('')
     const [isDragging, setIsDragging] = useState(false)
 
-    const resetState = useCallback(() => {
+    const resetState = () => {
         setStep('select')
         setProgress(0)
         setFileName('')
@@ -40,9 +40,9 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
         setExtractedTitle('')
         setErrorMessage('')
         setIsDragging(false)
-    }, [])
+    }
 
-    const processFile = useCallback(async (file: File) => {
+    const processFile = async (file: File) => {
         if (!file.name.endsWith('.md')) {
             setErrorMessage('仅支持 .md 格式文件')
             setStep('error')
@@ -82,35 +82,35 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
         }
 
         reader.readAsText(file)
-    }, [])
+    }
 
-    const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) processFile(file)
         if (fileInputRef.current) fileInputRef.current.value = ''
-    }, [processFile])
+    }
 
-    const handleDragOver = useCallback((e: React.DragEvent) => {
+    const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
         setIsDragging(true)
-    }, [])
+    }
 
-    const handleDragLeave = useCallback((e: React.DragEvent) => {
+    const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
         setIsDragging(false)
-    }, [])
+    }
 
-    const handleDrop = useCallback((e: React.DragEvent) => {
+    const handleDrop = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
         setIsDragging(false)
         const file = e.dataTransfer.files?.[0]
         if (file) processFile(file)
-    }, [processFile])
+    }
 
-    const handleGenerate = useCallback(async () => {
+    const handleGenerate = async () => {
         setStep('generating')
 
         try {
@@ -127,7 +127,7 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
             setErrorMessage(`文档创建失败：${err.message || '未知错误'}`)
             setStep('error')
         }
-    }, [markdownContent, extractedTitle, navigate, onOpenChange])
+    }
 
     const previewLines = markdownContent.split('\n').slice(0, 20)
     const totalLines = markdownContent.split('\n').length

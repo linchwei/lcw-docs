@@ -1,5 +1,5 @@
 import { BlockSchema, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { FC, useCallback, useEffect } from 'react'
+import { FC, useEffect } from 'react'
 
 import { useLcwDocContext } from '../../../editor/LcwDocContext'
 import { useLcwDocEditor } from '../../../hooks/useLcwDocEditor'
@@ -23,14 +23,11 @@ export function GridSuggestionMenuWrapper<Item>(props: {
 
     const { getItems, gridSuggestionMenuComponent, query, clearQuery, closeMenu, onItemClick, columns } = props
 
-    const onItemClickCloseMenu = useCallback(
-        (item: Item) => {
+    const onItemClickCloseMenu = (item: Item) => {
             closeMenu()
             clearQuery()
             onItemClick?.(item)
-        },
-        [onItemClick, closeMenu, clearQuery]
-    )
+        }
 
     const { items, usedQuery, loadingState } = useLoadSuggestionMenuItems(query, getItems)
 

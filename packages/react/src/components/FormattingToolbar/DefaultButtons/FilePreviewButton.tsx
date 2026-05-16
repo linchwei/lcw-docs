@@ -5,7 +5,6 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-import { useCallback, useMemo } from 'react'
 import { RiImageAddFill } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -21,7 +20,7 @@ export const FilePreviewButton = () => {
 
     const selectedBlocks = useSelectedBlocks(editor)
 
-    const fileBlock = useMemo(() => {
+    const fileBlock = (() => {
         if (selectedBlocks.length !== 1) {
             return undefined
         }
@@ -33,9 +32,9 @@ export const FilePreviewButton = () => {
         }
 
         return undefined
-    }, [editor, selectedBlocks])
+    })()
 
-    const onClick = useCallback(() => {
+    const onClick = () => {
         if (fileBlock) {
             editor.updateBlock(fileBlock, {
                 props: {
@@ -43,7 +42,7 @@ export const FilePreviewButton = () => {
                 },
             })
         }
-    }, [editor, fileBlock])
+    }
 
     if (!fileBlock || checkBlockIsFileBlockWithPlaceholder(fileBlock, editor) || !editor.isEditable) {
         return null

@@ -1,5 +1,5 @@
 import { BlockSchema, formatKeyboardShortcut, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { IconType } from 'react-icons'
 import { RiBold, RiCodeFill, RiItalic, RiStrikethrough, RiUnderline } from 'react-icons/ri'
 
@@ -70,12 +70,12 @@ export const BasicTextStyleButton = <Style extends BasicTextStyle>(props: { basi
         editor.toggleStyles({ [style]: true } as any)
     }
 
-    const show = useMemo(() => {
+    const show = (() => {
         if (!basicTextStyleInSchema) {
             return false
         }
         return !!selectedBlocks.find(block => block.content !== undefined)
-    }, [basicTextStyleInSchema, selectedBlocks])
+    })()
 
     if (!show || !editor.isEditable) {
         return null

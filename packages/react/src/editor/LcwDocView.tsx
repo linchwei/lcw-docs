@@ -2,7 +2,7 @@
 import './styles.css'
 
 import { BlockSchema, InlineContentSchema, mergeCSSClasses, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
-import { forwardRef, HTMLAttributes, ReactNode, Ref, useCallback, useEffect, useMemo, useState } from 'react'
+import { forwardRef, HTMLAttributes, ReactNode, Ref, useEffect, useState } from 'react'
 
 import { usePrefersColorScheme } from '../hooks/usePrefersColorScheme'
 import { EditorContent } from './EditorContent'
@@ -46,13 +46,7 @@ function LcwDocViewComponent<BSchema extends BlockSchema, ISchema extends Inline
 
     const prefersColorScheme = usePrefersColorScheme()
 
-    const editorColorScheme = useMemo(() => {
-        if (theme) {
-            return theme
-        }
-
-        return prefersColorScheme
-    }, [prefersColorScheme, theme])
+    const editorColorScheme = theme || prefersColorScheme
 
     const [contentEditableProps, setContentEditableProps] = useState<Record<string, string>>({})
 
@@ -84,32 +78,25 @@ function LcwDocViewComponent<BSchema extends BlockSchema, ISchema extends Inline
         return editor.onSelectionChange(onSelectionChange)
     }, [editor, onSelectionChange])
 
-    const renderChildren = useMemo(() => {
-        return (
-            <LcwDocDefaultUI
-                formattingToolbar={formattingToolbar}
-                linkToolbar={linkToolbar}
-                slashMenu={slashMenu}
-                emojiPicker={emojiPicker}
-                sideMenu={sideMenu}
-                filePanel={filePanel}
-                tableHandles={tableHandles}
-            >
-                {children}
-            </LcwDocDefaultUI>
-        )
-    }, [formattingToolbar, linkToolbar, slashMenu, emojiPicker, sideMenu, filePanel, tableHandles, children])
-
-    const setElementRenderer = useCallback(
-        (elementRenderer: (node: React.ReactNode, container: HTMLElement) => void) => {
-            ;(editor as any).elementRenderer = elementRenderer
-        },
-        [editor]
+    const renderChildren = (
+        <LcwDocDefaultUI
+            formattingToolbar={formattingToolbar}
+            linkToolbar={linkToolbar}
+            slashMenu={slashMenu}
+            emojiPicker={emojiPicker}
+            sideMenu={sideMenu}
+            filePanel={filePanel}
+            tableHandles={tableHandles}
+        >
+            {children}
+        </LcwDocDefaultUI>
     )
 
-    const context = useMemo(() => {
-        return { editor, setContentEditableProps }
-    }, [editor, setContentEditableProps])
+    const setElementRenderer = (elementRenderer: (node: React.ReactNode, container: HTMLElement) => void) => {
+            ;(editor as any).elementRenderer = elementRenderer
+        }
+
+    const context = { editor, setContentEditableProps }
 
     return (
         <LcwDocContext.Provider value={context as any}>

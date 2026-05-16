@@ -6,7 +6,7 @@ import { SidebarInset, SidebarTrigger } from '@lcw-doc/shadcn-shared-ui/componen
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/tooltip'
 import { useQuery } from '@tanstack/react-query'
 import { Check, Cloud, CloudOff, Download, Eye, History, Home, Link2, Loader2, Users, WifiOff } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import { WebsocketProvider } from 'y-websocket'
@@ -84,8 +84,7 @@ export const Doc = () => {
         return new IndexeddbPersistence(`doc-yjs-${pageId}`, doc)
     }, [pageId, doc])
 
-    const handleEditorReady = useCallback(
-        (editor: LcwDocEditor<any, any, any>) => {
+    const handleEditorReady = (editor: LcwDocEditor<any, any, any>) => {
             setEditorInstance(editor)
             setGlobalEditor(editor)
 
@@ -118,33 +117,29 @@ export const Doc = () => {
                         console.error('Failed to parse template:', err)
                     })
             }
-        },
-        [setGlobalEditor]
-    )
+        }
 
-    const handleTitleInput = useMemo(() => {
-        return debounce((e: React.FormEvent<HTMLDivElement>) => {
-            const currentPage = pageRef.current
-            if (!currentPage) {
-                return
-            }
-            const title = (e.target as HTMLDivElement).innerText
-            setSaveStatus('saving')
-            srv.updatePage({
-                pageId: currentPage.pageId,
-                title,
-            })
-                .then(() => {
-                    setSaveStatus('saved')
-                    setTimeout(() => setSaveStatus('idle'), 2000)
-                    queryClient.invalidateQueries({ queryKey: ['page', params?.id] })
-                })
-                .catch(() => {
-                    setSaveStatus('idle')
-                })
-            queryClient.invalidateQueries({ queryKey: ['pages'] })
+    const handleTitleInput = debounce((e: React.FormEvent<HTMLDivElement>) => {
+        const currentPage = pageRef.current
+        if (!currentPage) {
+            return
+        }
+        const title = (e.target as HTMLDivElement).innerText
+        setSaveStatus('saving')
+        srv.updatePage({
+            pageId: currentPage.pageId,
+            title,
         })
-    }, [params?.id])
+            .then(() => {
+                setSaveStatus('saved')
+                setTimeout(() => setSaveStatus('idle'), 2000)
+                queryClient.invalidateQueries({ queryKey: ['page', params?.id] })
+            })
+            .catch(() => {
+                setSaveStatus('idle')
+            })
+        queryClient.invalidateQueries({ queryKey: ['pages'] })
+    })
 
     useEffect(() => {
         if (titleRef.current && page?.title !== undefined) {

@@ -1,5 +1,5 @@
 import { Block, BlockSchema, Dictionary, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import type { IconType } from 'react-icons'
 import { RiDoubleQuotesR, RiH1, RiH2, RiH3, RiListCheck3, RiListOrdered, RiListUnordered, RiText } from 'react-icons/ri'
 
@@ -81,16 +81,11 @@ export const BlockTypeSelect = (props: { items?: BlockTypeSelectItem[] }) => {
 
     const [block, setBlock] = useState(editor.getTextCursorPosition().block)
 
-    const filteredItems: BlockTypeSelectItem[] = useMemo(() => {
-        return (props.items || blockTypeSelectItems(dict)).filter(item => item.type in editor.schema.blockSchema)
-    }, [editor, dict, props.items])
+    const filteredItems: BlockTypeSelectItem[] = (props.items || blockTypeSelectItems(dict)).filter(item => item.type in editor.schema.blockSchema)
 
-    const shouldShow: boolean = useMemo(
-        () => filteredItems.find(item => item.type === block.type) !== undefined,
-        [block.type, filteredItems]
-    )
+    const shouldShow: boolean = filteredItems.find(item => item.type === block.type) !== undefined
 
-    const fullItems: ComponentProps['FormattingToolbar']['Select']['items'] = useMemo(() => {
+    const fullItems: ComponentProps['FormattingToolbar']['Select']['items'] = (() => {
         const onClick = (item: BlockTypeSelectItem) => {
             editor.focus()
 
@@ -112,7 +107,7 @@ export const BlockTypeSelect = (props: { items?: BlockTypeSelectItem[] }) => {
                 isSelected: item.isSelected(block),
             }
         })
-    }, [block, filteredItems, editor, selectedBlocks])
+    })()
 
     useEditorContentOrSelectionChange(() => {
         setBlock(editor.getTextCursorPosition().block)

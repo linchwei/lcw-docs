@@ -1,5 +1,4 @@
 import { BlockSchema, checkBlockIsFileBlock, checkBlockIsFileBlockWithPlaceholder, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { useCallback, useMemo } from 'react'
 import { RiDownload2Fill } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -16,7 +15,7 @@ export const FileDownloadButton = () => {
 
     const selectedBlocks = useSelectedBlocks(editor)
 
-    const fileBlock = useMemo(() => {
+    const fileBlock = (() => {
         if (selectedBlocks.length !== 1) {
             return undefined
         }
@@ -28,14 +27,14 @@ export const FileDownloadButton = () => {
         }
 
         return undefined
-    }, [editor, selectedBlocks])
+    })()
 
-    const onClick = useCallback(() => {
+    const onClick = () => {
         if (fileBlock && fileBlock.props.url) {
             editor.focus()
             editor.resolveFileUrl(fileBlock.props.url).then(downloadUrl => window.open(sanitizeUrl(downloadUrl, window.location.href)))
         }
-    }, [editor, fileBlock])
+    }
 
     if (!fileBlock || checkBlockIsFileBlockWithPlaceholder(fileBlock, editor)) {
         return null

@@ -1,5 +1,5 @@
 import { BlockSchema, formatKeyboardShortcut, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { useCallback, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { RiIndentDecrease, RiIndentIncrease } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -22,14 +22,12 @@ export const NestBlockButton = () => {
         setCanNestBlock(editor.canNestBlock())
     }, editor)
 
-    const nestBlock = useCallback(() => {
+    const nestBlock = () => {
         editor.focus()
         editor.nestBlock()
-    }, [editor])
+    }
 
-    const show = useMemo(() => {
-        return !selectedBlocks.find(block => editor.schema.blockSchema[block.type].content !== 'inline')
-    }, [editor.schema.blockSchema, selectedBlocks])
+    const show = !selectedBlocks.find(block => editor.schema.blockSchema[block.type].content !== 'inline')
 
     if (!show || !editor.isEditable) {
         return null
@@ -63,14 +61,12 @@ export const UnnestBlockButton = () => {
         setCanUnnestBlock(editor.canUnnestBlock())
     }, editor)
 
-    const unnestBlock = useCallback(() => {
+    const unnestBlock = () => {
         editor.focus()
         editor.unnestBlock()
-    }, [editor])
+    }
 
-    const show = useMemo(() => {
-        return !selectedBlocks.find(block => editor.schema.blockSchema[block.type].content !== 'inline')
-    }, [editor.schema.blockSchema, selectedBlocks])
+    const show = !selectedBlocks.find(block => editor.schema.blockSchema[block.type].content !== 'inline')
 
     if (!show || !editor.isEditable) {
         return null

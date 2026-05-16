@@ -6,7 +6,6 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-import { useCallback, useMemo } from 'react'
 import { IconType } from 'react-icons'
 import { RiAlignCenter, RiAlignJustify, RiAlignLeft, RiAlignRight } from 'react-icons/ri'
 
@@ -32,7 +31,7 @@ export const TextAlignButton = (props: { textAlignment: TextAlignment }) => {
 
     const selectedBlocks = useSelectedBlocks(editor)
 
-    const textAlignment = useMemo(() => {
+    const textAlignment = (() => {
         const block = selectedBlocks[0]
 
         if (checkBlockHasDefaultProp('textAlignment', block, editor)) {
@@ -40,10 +39,9 @@ export const TextAlignButton = (props: { textAlignment: TextAlignment }) => {
         }
 
         return
-    }, [editor, selectedBlocks])
+    })()
 
-    const setTextAlignment = useCallback(
-        (textAlignment: TextAlignment) => {
+    const setTextAlignment = (textAlignment: TextAlignment) => {
             editor.focus()
 
             for (const block of selectedBlocks) {
@@ -53,13 +51,9 @@ export const TextAlignButton = (props: { textAlignment: TextAlignment }) => {
                     })
                 }
             }
-        },
-        [editor, selectedBlocks]
-    )
+        }
 
-    const show = useMemo(() => {
-        return !!selectedBlocks.find(block => 'textAlignment' in block.props)
-    }, [selectedBlocks])
+    const show = !!selectedBlocks.find(block => 'textAlignment' in block.props)
 
     if (!show || !editor.isEditable) {
         return null

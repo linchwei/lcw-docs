@@ -1,6 +1,5 @@
 import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 import { Handle, NodeProps, Position } from '@xyflow/react'
-import { memo, useMemo } from 'react'
 
 interface GraphNodeProps extends NodeProps {
     data: {
@@ -27,9 +26,9 @@ const stableColor = (str: string) => {
     return colors[Math.abs(hash) % colors.length]
 }
 
-export const GraphNode = memo((props: GraphNodeProps) => {
+export const GraphNode = (props: GraphNodeProps) => {
     const { data, selected } = props
-    const color = useMemo(() => stableColor(data.emoji || data.title || ''), [data.emoji, data.title])
+    const color = stableColor(data.emoji || data.title || '')
 
     return (
         <div className="w-full h-full cursor-pointer" title={data.title}>
@@ -51,4 +50,4 @@ export const GraphNode = memo((props: GraphNodeProps) => {
             <Handle type="source" position={Position.Left} className="invisible bg-transparent" style={{ left: '50%' }} />
         </div>
     )
-})
+}

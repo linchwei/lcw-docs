@@ -27,7 +27,7 @@ import {
     Trash2,
     X,
 } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -177,7 +177,7 @@ export function DocList() {
         setPendingDeleteTag(null)
     }
 
-    const handleDragEnter = useCallback((e: React.DragEvent) => {
+    const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
         dragCounterRef.current++
@@ -190,21 +190,21 @@ export function DocList() {
             }
         }
         if (hasMd) setIsDragging(true)
-    }, [])
+    }
 
-    const handleDragLeave = useCallback((e: React.DragEvent) => {
+    const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
         dragCounterRef.current--
         if (dragCounterRef.current === 0) setIsDragging(false)
-    }, [])
+    }
 
-    const handleDragOver = useCallback((e: React.DragEvent) => {
+    const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
-    }, [])
+    }
 
-    const handleDrop = useCallback((e: React.DragEvent) => {
+    const handleDrop = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
         dragCounterRef.current = 0
@@ -214,7 +214,7 @@ export function DocList() {
         if (file && file.name.endsWith('.md')) {
             setMdDialogOpen(true)
         }
-    }, [])
+    }
 
     const renderCardMenu = (pageId: string, isOwner: boolean) => (
         <DropdownMenu>

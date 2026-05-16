@@ -6,7 +6,7 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-import { ReactNode, useMemo } from 'react'
+import { ReactNode } from 'react'
 
 import { useComponentsContext } from '../../editor/ComponentsContext'
 import { AddBlockButton } from './DefaultButtons/AddBlockButton'
@@ -22,7 +22,7 @@ export const SideMenu = <
 ) => {
     const Components = useComponentsContext()!
 
-    const dataAttributes = useMemo(() => {
+    const dataAttributes = (() => {
         const attrs: Record<string, string> = {
             'data-block-type': props.block.type,
         }
@@ -40,7 +40,7 @@ export const SideMenu = <
         }
 
         return attrs
-    }, [props.block, props.editor.schema.blockSchema])
+    })()
 
     return (
         <Components.SideMenu.Root className={'bn-side-menu'} {...dataAttributes}>

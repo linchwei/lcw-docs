@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from 'react'
+import { ReactElement } from 'react'
 
 import { useComponentsContext } from '../../editor/ComponentsContext'
 import { useDictionary } from '../../i18n/dictionary'
@@ -17,7 +17,7 @@ export function SuggestionMenu<T extends DefaultReactSuggestionItem>(props: Sugg
             </Components.SuggestionMenu.Loader>
         ) : null
 
-    const renderedItems = useMemo<ReactElement[]>(() => {
+    const renderedItems: ReactElement[] = (() => {
         let currentGroup: string | undefined = undefined
         const renderedItems = []
 
@@ -45,7 +45,7 @@ export function SuggestionMenu<T extends DefaultReactSuggestionItem>(props: Sugg
         }
 
         return renderedItems
-    }, [Components, items, onItemClick, selectedIndex])
+    })()
 
     return (
         <Components.SuggestionMenu.Root id="bn-suggestion-menu" className="bn-suggestion-menu">

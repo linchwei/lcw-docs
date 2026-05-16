@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from 'react'
+import { ReactElement } from 'react'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
 import { useDictionary } from '../../../i18n/dictionary'
@@ -17,7 +17,7 @@ export function GridSuggestionMenu<T extends DefaultReactGridSuggestionItem>(pro
             </Components.GridSuggestionMenu.Loader>
         ) : null
 
-    const renderedItems = useMemo<ReactElement[]>(() => {
+    const renderedItems: ReactElement[] = (() => {
         const renderedItems = []
 
         for (let i = 0; i < items.length; i++) {
@@ -36,7 +36,7 @@ export function GridSuggestionMenu<T extends DefaultReactGridSuggestionItem>(pro
         }
 
         return renderedItems
-    }, [Components, items, onItemClick, selectedIndex])
+    })()
 
     return (
         <Components.GridSuggestionMenu.Root id="bn-grid-suggestion-menu" columns={columns} className="bn-grid-suggestion-menu">

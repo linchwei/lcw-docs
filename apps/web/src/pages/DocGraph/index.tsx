@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { applyEdgeChanges, applyNodeChanges, Background, Controls, Edge, EdgeChange, MiniMap, Node, NodeChange, ReactFlow } from '@xyflow/react'
 import * as d3 from 'd3-force'
 import { FileText, GitBranch, Loader } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import * as srv from '@/services'
@@ -35,35 +35,26 @@ export function DocGraph() {
         },
     })
 
-    const pagesKey = useMemo(() => {
-        return pages.map(p => `${p.pageId}:${(p.links || []).join(',')}`).join('|')
-    }, [pages])
+    const pagesKey = pages.map(p => `${p.pageId}:${(p.links || []).join(',')}`).join('|')
+    const edgeCount = pages.reduce((count, page) => count + (page.links || []).length, 0)
 
-    const edgeCount = useMemo(() => {
-        let count = 0
-        for (const page of pages) {
-            count += (page.links || []).length
-        }
-        return count
-    }, [pages])
-
-    const handleNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    const handleNodeClick = (_: React.MouseEvent, node: Node) => {
         const { id } = node
         setNodes(nds => nds.map(n => ({ ...n, selected: n.id === id })))
         setEdges(eds => eds.map(e => ({ ...e, selected: e.source === id || e.target === id })))
-    }, [])
+    }
 
-    const handleNodeDoubleClick = useCallback((_: React.MouseEvent, node: Node) => {
+    const handleNodeDoubleClick = (_: React.MouseEvent, node: Node) => {
         navigate(`/doc/${node.id}`)
-    }, [navigate])
+    }
 
-    const handlePaneClick = useCallback(() => {
+    const handlePaneClick = () => {
         setNodes(nds => nds.map(n => ({ ...n, selected: false })))
         setEdges(eds => eds.map(e => ({ ...e, selected: false })))
-    }, [])
+    }
 
-    const onNodesChange = useCallback((changes: NodeChange[]) => setNodes(nds => applyNodeChanges(changes, nds)), [setNodes])
-    const onEdgesChange = useCallback((changes: EdgeChange[]) => setEdges(eds => applyEdgeChanges(changes, eds)), [setEdges])
+    const onNodesChange = (changes: NodeChange[]) => setNodes(nds => applyNodeChanges(changes, nds))
+    const onEdgesChange = (changes: EdgeChange[]) => setEdges(eds => applyEdgeChanges(changes, eds))
 
     useEffect(() => {
         if (pagesRef.current === pagesKey) return

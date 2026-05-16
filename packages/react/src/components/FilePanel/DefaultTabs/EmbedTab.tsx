@@ -7,7 +7,7 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-import { ChangeEvent, KeyboardEvent, useCallback, useState } from 'react'
+import { ChangeEvent, KeyboardEvent, useState } from 'react'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
 import { useLcwDocEditor } from '../../../hooks/useLcwDocEditor'
@@ -30,12 +30,11 @@ export const EmbedTab = <
 
     const [currentURL, setCurrentURL] = useState<string>('')
 
-    const handleURLChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const handleURLChange = (event: ChangeEvent<HTMLInputElement>) => {
         setCurrentURL(event.currentTarget.value)
-    }, [])
+    }
 
-    const handleURLEnter = useCallback(
-        (event: KeyboardEvent) => {
+    const handleURLEnter = (event: KeyboardEvent) => {
             if (event.key === 'Enter') {
                 event.preventDefault()
                 editor.updateBlock(block, {
@@ -45,18 +44,16 @@ export const EmbedTab = <
                     } as any,
                 })
             }
-        },
-        [editor, block, currentURL]
-    )
+        }
 
-    const handleURLClick = useCallback(() => {
+    const handleURLClick = () => {
         editor.updateBlock(block, {
             props: {
                 name: filenameFromURL(currentURL),
                 url: currentURL,
             } as any,
         })
-    }, [editor, block, currentURL])
+    }
 
     return (
         <Components.FilePanel.TabPanel className={'bn-tab-panel'}>

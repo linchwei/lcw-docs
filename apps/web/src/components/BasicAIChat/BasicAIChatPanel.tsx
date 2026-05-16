@@ -1,6 +1,6 @@
 import { LcwDocEditor, PartialBlock } from '@lcw-doc/core'
 import { ArrowUp, Sparkles, X } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import TextareaAutosize from 'react-textarea-autosize'
 
@@ -42,7 +42,7 @@ export function BasicAIChatPanel(props: BasicAIChatPanelProps) {
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
     const abortRef = useRef<AbortController | null>(null)
 
-    const handleSend = useCallback(async () => {
+    const handleSend = async () => {
         if (!keyword.trim() || isGenerating) return
 
         setIsGenerating(true)
@@ -150,12 +150,12 @@ export function BasicAIChatPanel(props: BasicAIChatPanelProps) {
             }
             setIsGenerating(false)
         }
-    }, [keyword, isGenerating, chatHistory, props.onResponse, props.editor])
+    }
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = () => {
         abortRef.current?.abort()
         setIsGenerating(false)
-    }, [])
+    }
 
     const ref = useHotkeys(
         'Enter',

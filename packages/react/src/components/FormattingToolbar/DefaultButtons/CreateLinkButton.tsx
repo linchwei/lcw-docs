@@ -1,5 +1,5 @@
 import { BlockSchema, formatKeyboardShortcut, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
-import { useCallback, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { RiLink } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -40,15 +40,12 @@ export const CreateLinkButton = () => {
         setUrl(editor.getSelectedLinkUrl() || '')
     }, editor)
 
-    const update = useCallback(
-        (url: string, text: string) => {
+    const update = (url: string, text: string) => {
             editor.createLink(url, text)
             editor.focus()
-        },
-        [editor]
-    )
+        }
 
-    const show = useMemo(() => {
+    const show = (() => {
         if (!linkInSchema) {
             return false
         }
@@ -60,7 +57,7 @@ export const CreateLinkButton = () => {
         }
 
         return true
-    }, [linkInSchema, selectedBlocks])
+    })()
 
     if (!show || !('link' in editor.schema.inlineContentSchema) || !editor.isEditable) {
         return null

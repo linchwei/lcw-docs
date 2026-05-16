@@ -1,5 +1,5 @@
 import { BlockSchema, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { FC, useCallback, useEffect } from 'react'
+import { FC, useEffect } from 'react'
 
 import { useLcwDocContext } from '../../editor/LcwDocContext'
 import { useLcwDocEditor } from '../../hooks/useLcwDocEditor'
@@ -22,14 +22,11 @@ export function SuggestionMenuWrapper<Item>(props: {
 
     const { getItems, suggestionMenuComponent, query, clearQuery, closeMenu, onItemClick } = props
 
-    const onItemClickCloseMenu = useCallback(
-        (item: Item) => {
+    const onItemClickCloseMenu = (item: Item) => {
             closeMenu()
             clearQuery()
             onItemClick?.(item)
-        },
-        [onItemClick, closeMenu, clearQuery]
-    )
+        }
 
     const { items, usedQuery, loadingState } = useLoadSuggestionMenuItems(query, getItems)
 

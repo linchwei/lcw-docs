@@ -1,5 +1,5 @@
 import { BlockSchema, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
-import { useCallback, useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
 import { useEditorContentOrSelectionChange } from '../../../hooks/useEditorContentOrSelectionChange'
@@ -62,8 +62,7 @@ export const ColorStyleButton = () => {
         }
     }, editor)
 
-    const setTextColor = useCallback(
-        (color: string) => {
+    const setTextColor = (color: string) => {
             if (!textColorInSchema) {
                 throw Error('Tried to set text color, but style does not exist in editor schema.')
             }
@@ -74,12 +73,9 @@ export const ColorStyleButton = () => {
             setTimeout(() => {
                 editor.focus()
             })
-        },
-        [editor, textColorInSchema]
-    )
+        }
 
-    const setBackgroundColor = useCallback(
-        (color: string) => {
+    const setBackgroundColor = (color: string) => {
             if (!backgroundColorInSchema) {
                 throw Error('Tried to set background color, but style does not exist in editor schema.')
             }
@@ -90,11 +86,9 @@ export const ColorStyleButton = () => {
             setTimeout(() => {
                 editor.focus()
             })
-        },
-        [backgroundColorInSchema, editor]
-    )
+        }
 
-    const show = useMemo(() => {
+    const show = (() => {
         if (!textColorInSchema && !backgroundColorInSchema) {
             return false
         }
@@ -106,7 +100,7 @@ export const ColorStyleButton = () => {
         }
 
         return false
-    }, [backgroundColorInSchema, selectedBlocks, textColorInSchema])
+    })()
 
     if (!show || !editor.isEditable) {
         return null

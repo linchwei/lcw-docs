@@ -1,4 +1,4 @@
-import { ChangeEvent, KeyboardEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react'
 import { RiLink, RiText } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../editor/ComponentsContext'
@@ -19,21 +19,18 @@ export const EditLinkMenuItems = (props: Pick<LinkToolbarProps, 'url' | 'text' |
         setCurrentText(text)
     }, [text, url])
 
-    const handleEnter = useCallback(
-        (event: KeyboardEvent) => {
+    const handleEnter = (event: KeyboardEvent) => {
             if (event.key === 'Enter') {
                 event.preventDefault()
                 editLink(currentUrl, currentText)
             }
-        },
-        [editLink, currentUrl, currentText]
-    )
+        }
 
-    const handleUrlChange = useCallback((event: ChangeEvent<HTMLInputElement>) => setCurrentUrl(event.currentTarget.value), [])
+    const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => setCurrentUrl(event.currentTarget.value)
 
-    const handleTextChange = useCallback((event: ChangeEvent<HTMLInputElement>) => setCurrentText(event.currentTarget.value), [])
+    const handleTextChange = (event: ChangeEvent<HTMLInputElement>) => setCurrentText(event.currentTarget.value)
 
-    const handleSubmit = useCallback(() => editLink(currentUrl, currentText), [editLink, currentUrl, currentText])
+    const handleSubmit = () => editLink(currentUrl, currentText)
 
     return (
         <Components.Generic.Form.Root>

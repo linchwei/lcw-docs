@@ -8,7 +8,7 @@ import {
     PartialTableContent,
     StyleSchema,
 } from '@lcw-doc/core'
-import { MouseEvent as ReactMouseEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { MouseEvent as ReactMouseEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { RiAddFill } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -116,8 +116,7 @@ export const ExtendButton = <I extends InlineContentSchema = DefaultInlineConten
         | undefined
     >()
 
-    const mouseDownHandler = useCallback(
-        (event: ReactMouseEvent) => {
+    const mouseDownHandler = (event: ReactMouseEvent) => {
             props.onMouseDown()
             setEditingState({
                 originalContent: props.block.content,
@@ -130,11 +129,9 @@ export const ExtendButton = <I extends InlineContentSchema = DefaultInlineConten
             movedMouse.current = false
 
             event.preventDefault()
-        },
-        [props]
-    )
+        }
 
-    const onClickHandler = useCallback(() => {
+    const onClickHandler = () => {
         if (movedMouse.current) {
             return
         }
@@ -145,7 +142,7 @@ export const ExtendButton = <I extends InlineContentSchema = DefaultInlineConten
                     ? getContentWithAddedCols(props.block.content, 1)
                     : getContentWithAddedRows(props.block.content, 1, props.block.content.rows[0].cells.length),
         })
-    }, [props.block, props.orientation, props.editor])
+    }
 
     useEffect(() => {
         const callback = (event: MouseEvent) => {

@@ -1,5 +1,5 @@
 import { useDismiss, useFloating, UseFloatingOptions, useInteractions, useTransitionStyles } from '@floating-ui/react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 export function useUIElementPositioning(
     show: boolean,
@@ -30,19 +30,16 @@ export function useUIElementPositioning(
         })
     }, [referencePos, refs])
 
-    return useMemo(
-        () => ({
-            isMounted,
-            ref: refs.setFloating,
-            style: {
-                display: 'flex',
-                ...styles,
-                ...floatingStyles,
-                zIndex: zIndex,
-            },
-            getFloatingProps,
-            getReferenceProps,
-        }),
-        [floatingStyles, isMounted, refs.setFloating, styles, zIndex, getFloatingProps, getReferenceProps]
-    )
+    return {
+        isMounted,
+        ref: refs.setFloating,
+        style: {
+            display: 'flex',
+            ...styles,
+            ...floatingStyles,
+            zIndex: zIndex,
+        },
+        getFloatingProps,
+        getReferenceProps,
+    }
 }

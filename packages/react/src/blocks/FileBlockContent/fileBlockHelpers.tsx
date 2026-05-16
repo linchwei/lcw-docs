@@ -1,5 +1,5 @@
 import { FileBlockConfig } from '@lcw-doc/core'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { RiFile2Line } from 'react-icons/ri'
 
 import { useUploadLoading } from '../../hooks/useUploadLoading'
@@ -66,16 +66,16 @@ export const AddFileButton = (
 ) => {
     const dict = useDictionary()
 
-    const addFileButtonMouseDownHandler = useCallback((event: React.MouseEvent) => {
+    const addFileButtonMouseDownHandler = (event: React.MouseEvent) => {
         event.preventDefault()
-    }, [])
-    const addFileButtonClickHandler = useCallback(() => {
+    }
+    const addFileButtonClickHandler = () => {
         props.editor.dispatch(
             props.editor._tiptapEditor.state.tr.setMeta(props.editor.filePanel!.plugin, {
                 block: props.block,
             })
         )
-    }, [props.block, props.editor])
+    }
 
     return (
         <div className={'bn-add-file-button'} onMouseDown={addFileButtonMouseDownHandler} onClick={addFileButtonClickHandler}>
@@ -165,18 +165,17 @@ export const ResizeHandlesWrapper = (
         }
     }, [props, resizeParams])
 
-    const childWrapperMouseEnterHandler = useCallback(() => {
+    const childWrapperMouseEnterHandler = () => {
         if (props.editor.isEditable) {
             setChildHovered(true)
         }
-    }, [props.editor.isEditable])
+    }
 
-    const childWrapperMouseLeaveHandler = useCallback(() => {
+    const childWrapperMouseLeaveHandler = () => {
         setChildHovered(false)
-    }, [])
+    }
 
-    const leftResizeHandleMouseDownHandler = useCallback(
-        (event: React.MouseEvent) => {
+    const leftResizeHandleMouseDownHandler = (event: React.MouseEvent) => {
             event.preventDefault()
 
             setResizeParams({
@@ -184,11 +183,8 @@ export const ResizeHandlesWrapper = (
                 initialWidth: props.width,
                 initialClientX: event.clientX,
             })
-        },
-        [props.width]
-    )
-    const rightResizeHandleMouseDownHandler = useCallback(
-        (event: React.MouseEvent) => {
+        }
+    const rightResizeHandleMouseDownHandler = (event: React.MouseEvent) => {
             event.preventDefault()
 
             setResizeParams({
@@ -196,9 +192,7 @@ export const ResizeHandlesWrapper = (
                 initialWidth: props.width,
                 initialClientX: event.clientX,
             })
-        },
-        [props.width]
-    )
+        }
 
     return (
         <div

@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
 import { FileText, Loader2, Search } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import * as srv from '@/services'
@@ -42,13 +42,9 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         return () => clearTimeout(timer)
     }, [query])
 
-    const titleFiltered = useMemo(() => {
-        if (!pages) return []
-        if (!query.trim()) return pages
-        return pages.filter(page =>
-            page.title.toLowerCase().includes(query.toLowerCase())
-        )
-    }, [pages, query])
+    const titleFiltered = !pages ? [] : !query.trim() ? pages : pages.filter(page =>
+        page.title.toLowerCase().includes(query.toLowerCase())
+    )
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

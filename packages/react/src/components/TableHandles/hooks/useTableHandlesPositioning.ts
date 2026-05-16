@@ -1,5 +1,5 @@
 import { offset, useFloating, useTransitionStyles } from '@floating-ui/react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 function getBoundingClientRectRow(
     referencePosCell: DOMRect | null,
@@ -66,18 +66,15 @@ function useTableHandlePosition(
         })
     }, [draggingState, orientation, referencePosCell, referencePosTable, refs])
 
-    return useMemo(
-        () => ({
-            isMounted: isMounted,
-            ref: refs.setFloating,
-            style: {
-                display: 'flex',
-                ...styles,
-                ...floatingStyles,
-            },
-        }),
-        [floatingStyles, isMounted, refs.setFloating, styles]
-    )
+    return {
+        isMounted: isMounted,
+        ref: refs.setFloating,
+        style: {
+            display: 'flex',
+            ...styles,
+            ...floatingStyles,
+        },
+    }
 }
 
 export function useTableHandlesPositioning(
@@ -95,11 +92,8 @@ export function useTableHandlesPositioning(
     const rowHandle = useTableHandlePosition('row', show, referencePosCell, referencePosTable, draggingState)
     const colHandle = useTableHandlePosition('col', show, referencePosCell, referencePosTable, draggingState)
 
-    return useMemo(
-        () => ({
-            rowHandle,
-            colHandle,
-        }),
-        [colHandle, rowHandle]
-    )
+    return {
+        rowHandle,
+        colHandle,
+    }
 }

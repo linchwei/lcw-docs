@@ -1,6 +1,6 @@
 import { FloatingPortal } from '@floating-ui/react'
 import { BlockSchema, DefaultInlineContentSchema, DefaultStyleSchema, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { FC, useCallback, useMemo, useState } from 'react'
+import { FC, useState } from 'react'
 
 import { useLcwDocEditor } from '../../hooks/useLcwDocEditor'
 import { useUIPluginState } from '../../hooks/useUIPluginState'
@@ -36,28 +36,26 @@ export const TableHandlesController = <
 
     const { freezeHandles, unfreezeHandles } = callbacks
 
-    const onStartExtend = useCallback(() => {
+    const onStartExtend = () => {
         freezeHandles()
         setHideCol(true)
         setHideRow(true)
-    }, [freezeHandles])
+    }
 
-    const onEndExtend = useCallback(() => {
+    const onEndExtend = () => {
         unfreezeHandles()
         setHideCol(false)
         setHideRow(false)
-    }, [unfreezeHandles])
+    }
 
     const state = useUIPluginState(editor.tableHandles.onUpdate.bind(editor.tableHandles))
 
-    const draggingState = useMemo(() => {
-        return state?.draggingState
-            ? {
-                  draggedCellOrientation: state?.draggingState?.draggedCellOrientation,
-                  mousePos: state?.draggingState?.mousePos,
-              }
-            : undefined
-    }, [state?.draggingState, state?.draggingState?.draggedCellOrientation, state?.draggingState?.mousePos])
+    const draggingState = state?.draggingState
+        ? {
+              draggedCellOrientation: state?.draggingState?.draggedCellOrientation,
+              mousePos: state?.draggingState?.mousePos,
+          }
+        : undefined
 
     const { rowHandle, colHandle } = useTableHandlesPositioning(
         state?.show || false,

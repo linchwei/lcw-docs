@@ -1,6 +1,6 @@
 import { flip, offset, size } from '@floating-ui/react'
 import { BlockSchema, InlineContentSchema, StyleSchema, SuggestionMenuState } from '@lcw-doc/core'
-import { FC, useCallback, useMemo } from 'react'
+import { FC } from 'react'
 
 import { useLcwDocEditor } from '../../../hooks/useLcwDocEditor'
 import { useUIElementPositioning } from '../../../hooks/useUIElementPositioning'
@@ -36,30 +36,22 @@ export function GridSuggestionMenuController<
 
     const { triggerCharacter, gridSuggestionMenuComponent, columns, minQueryLength, onItemClick, getItems } = props
 
-    const onItemClickOrDefault = useMemo(() => {
-        return (
-            onItemClick ||
-            ((item: ItemType<GetItemsType>) => {
-                item.onItemClick(editor)
-            })
-        )
-    }, [editor, onItemClick])
+    const onItemClickOrDefault =
+        onItemClick ||
+        ((item: ItemType<GetItemsType>) => {
+            item.onItemClick(editor)
+        })
 
-    const getItemsOrDefault = useMemo(() => {
-        return getItems || ((async (query: string) => await getDefaultReactEmojiPickerItems(editor, query)) as any as typeof getItems)
-    }, [editor, getItems])!
+    const getItemsOrDefault = (getItems || ((async (query: string) => await getDefaultReactEmojiPickerItems(editor, query)) as any as typeof getItems))!
 
     const callbacks = {
         closeMenu: editor.suggestionMenus.closeMenu,
         clearQuery: editor.suggestionMenus.clearQuery,
     }
 
-    const cb = useCallback(
-        (callback: (state: SuggestionMenuState) => void) => {
+    const cb = (callback: (state: SuggestionMenuState) => void) => {
             return editor.suggestionMenus.onUpdate(triggerCharacter, callback)
-        },
-        [editor.suggestionMenus, triggerCharacter]
-    )
+        }
 
     const state = useUIPluginState(cb)
 

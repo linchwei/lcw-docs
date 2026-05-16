@@ -1,6 +1,6 @@
 import { LcwDocEditor } from '@lcw-doc/core'
 import { useEditorChange, useEditorSelectionChange } from '@lcw-doc/react'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 
 interface HeadingItem {
     id: string
@@ -71,11 +71,11 @@ export function useDocOutline(editor: LcwDocEditor) {
         getActiveHeadingId(editor, getHeadingsFromBlocks(editor))
     )
 
-    const updateOutline = useCallback(() => {
+    const updateOutline = () => {
         const newHeadings = getHeadingsFromBlocks(editor)
         setHeadings(newHeadings)
         setActiveHeadingId(getActiveHeadingId(editor, newHeadings))
-    }, [editor])
+    }
 
     useEditorChange(updateOutline, editor)
     useEditorSelectionChange(updateOutline, editor)

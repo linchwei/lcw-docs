@@ -1,5 +1,4 @@
 import { BlockSchema, checkBlockIsFileBlock, checkBlockIsFileBlockWithPlaceholder, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
-import { useCallback, useMemo } from 'react'
 import { RiDeleteBin7Line } from 'react-icons/ri'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'
@@ -15,7 +14,7 @@ export const FileDeleteButton = () => {
 
     const selectedBlocks = useSelectedBlocks(editor)
 
-    const fileBlock = useMemo(() => {
+    const fileBlock = (() => {
         if (selectedBlocks.length !== 1) {
             return undefined
         }
@@ -27,12 +26,12 @@ export const FileDeleteButton = () => {
         }
 
         return undefined
-    }, [editor, selectedBlocks])
+    })()
 
-    const onClick = useCallback(() => {
+    const onClick = () => {
         editor.focus()
         editor.removeBlocks([fileBlock!])
-    }, [editor, fileBlock])
+    }
 
     if (!fileBlock || checkBlockIsFileBlockWithPlaceholder(fileBlock, editor) || !editor.isEditable) {
         return null

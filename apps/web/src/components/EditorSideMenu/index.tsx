@@ -1,5 +1,5 @@
-import { Block } from '@lcw-doc/core'
-import { Clipboard, Copy, GripVertical, Plus, Scissors, Trash2 } from 'lucide-react'
+import { Block, LcwDocEditor } from '@lcw-doc/core'
+import { Copy, GripVertical, Plus, Scissors, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 const blockTypeMarks: Record<string, string | ((block: Block) => string)> = {
@@ -33,9 +33,9 @@ function isBlockEmpty(block: Block): boolean {
 }
 
 interface EditorSideMenuProps {
-    editor: any
+    editor: LcwDocEditor
     block: Block
-    blockDragStart: (event: DragEvent) => void
+    blockDragStart: (event: { dataTransfer: DataTransfer | null; clientY: number }) => void
     blockDragEnd: () => void
     freezeMenu: () => void
     unfreezeMenu: () => void
@@ -60,28 +60,33 @@ export function EditorSideMenu({ editor, block, blockDragStart, blockDragEnd, fr
 
     const handleCopy = useCallback(async () => {
         setMenuOpen(false)
+        const text = extractBlockText(block)
         try {
-            editor.setTextCursorPosition(block)
-            editor._tiptapEditor.chain().focus().selectNodeForward().run()
-            document.execCommand('copy')
-            editor.setTextCursorPosition(block, 'start')
-        } catch {
-            const text = extractBlockText(block)
             await navigator.clipboard.writeText(text)
+        } catch {
+            const textarea = document.createElement('textarea')
+            textarea.value = text
+            document.body.appendChild(textarea)
+            textarea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textarea)
         }
     }, [editor, block])
 
     const handleCut = useCallback(async () => {
         setMenuOpen(false)
+        const text = extractBlockText(block)
         try {
-            editor.setTextCursorPosition(block)
-            editor._tiptapEditor.chain().focus().selectNodeForward().run()
-            document.execCommand('cut')
-        } catch {
-            const text = extractBlockText(block)
             await navigator.clipboard.writeText(text)
-            editor.removeBlocks([block])
+        } catch {
+            const textarea = document.createElement('textarea')
+            textarea.value = text
+            document.body.appendChild(textarea)
+            textarea.select()
+            document.execCommand('copy')
+            document.body.removeChild(textarea)
         }
+        editor.removeBlocks([block])
     }, [editor, block])
 
     const handleDelete = useCallback(() => {

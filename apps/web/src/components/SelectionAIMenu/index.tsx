@@ -1,3 +1,4 @@
+import { LcwDocEditor } from '@lcw-doc/core'
 import { Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
@@ -5,7 +6,7 @@ import ReactDOM from 'react-dom'
 import { chatWithAI, ChatMessage } from '@/services'
 
 interface SelectionAIMenuProps {
-    editor: any
+    editor: LcwDocEditor
 }
 
 const aiActions = [

@@ -1,4 +1,4 @@
-import { LcwDocEditor, PartialBlock } from '@lcw-doc/core'
+import { BlockSchema, InlineContentSchema, LcwDocEditor, PartialBlock, StyleSchema } from '@lcw-doc/core'
 import { ArrowUp, Sparkles, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -6,8 +6,8 @@ import TextareaAutosize from 'react-textarea-autosize'
 
 import { chatWithAI, ChatMessage } from '@/services'
 
-interface BasicAIChatPanelProps {
-    editor?: LcwDocEditor
+interface BasicAIChatPanelProps<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema> {
+    editor?: LcwDocEditor<BSchema, ISchema, SSchema>
     onResponse?: (response: PartialBlock[]) => void
 }
 
@@ -35,7 +35,7 @@ function extractTextFromBlocks(blocks: PartialBlock[]): string {
 
 const SYSTEM_PROMPT = '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
 
-export function BasicAIChatPanel(props: BasicAIChatPanelProps) {
+export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema>(props: BasicAIChatPanelProps<BSchema, ISchema, SSchema>) {
     const [keyword, setKeyword] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
     const [streamContent, setStreamContent] = useState('')

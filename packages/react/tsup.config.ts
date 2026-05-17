@@ -37,7 +37,9 @@ export default defineConfig([
         ignoreWatch: ['**/*.md'],
         sourcemap: true,
         bundle: true,
-        dts: true,
+        dts: {
+            resolve: ['@lcw-doc/core'],
+        },
         clean: true,
         minify: true,
         outDir: 'build/esm',

@@ -138,22 +138,3 @@ body {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
-
-.search-match {
-    background-color: #ffe066;
-    border-radius: 2px;
-}
-
-.search-match-active {
-    background-color: #f59e0b;
-    color: #000;
-}
-
-.dark .search-match {
-    background-color: #854d0e;
-}
-
-.dark .search-match-active {
-    background-color: #f59e0b;
-    color: #000;
-}

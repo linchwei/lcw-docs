@@ -1,4 +1,4 @@
-import { LcwDocEditor } from '@lcw-doc/core'
+import { BlockSchema, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
 // import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 import PubSub from 'pubsub-js'
 import React, { useEffect, useState } from 'react'
@@ -8,11 +8,11 @@ import { useClickOutside } from '@/hooks/use-click-outside'
 
 import { BasicAIChatPanel } from './BasicAIChatPanel'
 
-interface BasicAIChatProps {
-    editor: LcwDocEditor
+interface BasicAIChatProps<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema> {
+    editor: LcwDocEditor<BSchema, ISchema, SSchema>
 }
 
-export function BasicAIChat(props: BasicAIChatProps) {
+export function BasicAIChat<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema>(props: BasicAIChatProps<BSchema, ISchema, SSchema>) {
     const { editor } = props
     const [currentAIPoweredParagraphBlockId, setCurrentAIPoweredParagraphBlockId] = useState<string | null>()
     const ref = useClickOutside(() => setCurrentAIPoweredParagraphBlockId(null))

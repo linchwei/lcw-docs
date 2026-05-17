@@ -1,10 +1,6 @@
 import { LcwDocEditor } from '@lcw-doc/core'
-import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
-import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { ArrowDown, ArrowUp, Replace, Search, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-const searchHighlightKey = new PluginKey('searchHighlight')
 
 interface SearchBarProps {
     editor: LcwDocEditor | null
@@ -13,9 +9,12 @@ interface SearchBarProps {
     replaceMode?: boolean
 }
 
-function findMatches(doc: any, searchText: string): { from: number; to: number }[] {
+function findMatchesInDoc(editor: LcwDocEditor, searchText: string): { from: number; to: number }[] {
+    const view = editor._tiptapEditor.view
+    const doc = view.state.doc
     const matches: { from: number; to: number }[] = []
     const searchLower = searchText.toLowerCase()
+
     doc.descendants((node: any, pos: number) => {
         if (!node.isText) return
         const text = node.text!.toLowerCase()
@@ -43,8 +42,8 @@ export function SearchBar({ editor, open, onClose, replaceMode: initialReplaceMo
     }, [open])
 
     useEffect(() => {
+        if (!open) return
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (!open) return
             if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
                 e.preventDefault()
                 searchInputRef.current?.focus()
@@ -54,7 +53,6 @@ export function SearchBar({ editor, open, onClose, replaceMode: initialReplaceMo
                 setReplaceMode(true)
             }
             if (e.key === 'Escape') {
-                clearDecorations()
                 onClose()
             }
             if (e.key === 'Enter') {
@@ -74,56 +72,12 @@ export function SearchBar({ editor, open, onClose, replaceMode: initialReplaceMo
         if (!editor || !searchText) {
             setMatchCount(0)
             setCurrentMatch(0)
-            clearDecorations()
             return
         }
-        const view = editor._tiptapEditor.view
-        const matches = findMatches(view.state.doc, searchText)
+        const matches = findMatchesInDoc(editor, searchText)
         setMatchCount(matches.length)
         setCurrentMatch(matches.length > 0 ? 1 : 0)
-        clearDecorations()
-        if (matches.length > 0) {
-            highlightMatches(matches)
-        }
     }, [editor, searchText])
-
-    const highlightMatches = useCallback((matches: { from: number; to: number }[]) => {
-        if (!editor) return
-        const view = editor._tiptapEditor.view
-        const activeIndex = Math.max(0, currentMatch - 1)
-
-        const decorations = matches.map((match, i) =>
-            Decoration.inline(match.from, match.to, {
-                class: i === activeIndex ? 'search-match search-match-active' : 'search-match',
-            })
-        )
-
-        const decSet = DecorationSet.create(view.state.doc, decorations)
-        const existingPlugin = searchHighlightKey.get(view.state)
-
-        if (!existingPlugin) {
-            const plugin = new Plugin({
-                key: searchHighlightKey,
-                props: {
-                    decorations: () => decSet,
-                },
-            })
-            view.updateState(view.state.reconfigure({ plugins: [...view.state.plugins, plugin] }))
-        } else {
-            const tr = view.state.tr.setMeta('searchHighlight', { decorations: decSet })
-            view.dispatch(tr)
-        }
-    }, [editor, currentMatch])
-
-    const clearDecorations = useCallback(() => {
-        if (!editor) return
-        const view = editor._tiptapEditor.view
-        const existingPlugin = searchHighlightKey.get(view.state)
-        if (existingPlugin) {
-            const plugins = view.state.plugins.filter((p: any) => p !== existingPlugin)
-            view.updateState(view.state.reconfigure({ plugins }))
-        }
-    }, [editor])
 
     useEffect(() => {
         const timer = setTimeout(performSearch, 200)
@@ -147,13 +101,11 @@ export function SearchBar({ editor, open, onClose, replaceMode: initialReplaceMo
     const scrollToMatch = useCallback((index: number) => {
         if (!editor || !searchText) return
         const view = editor._tiptapEditor.view
-        const matches = findMatches(view.state.doc, searchText)
+        const matches = findMatchesInDoc(editor, searchText)
         if (matches[index]) {
-            view.dispatch(
-                view.state.tr.setSelection(
-                    TextSelection.create(view.state.doc, matches[index].from, matches[index].to)
-                )
-            )
+            const { TextSelection } = view.state.selection.constructor as any
+            const sel = TextSelection.create(view.state.doc, matches[index].from, matches[index].to)
+            view.dispatch(view.state.tr.setSelection(sel))
             view.focus()
         }
     }, [editor, searchText])
@@ -185,7 +137,7 @@ export function SearchBar({ editor, open, onClose, replaceMode: initialReplaceMo
     const handleReplaceAll = useCallback(() => {
         if (!editor || !searchText || matchCount === 0) return
         const view = editor._tiptapEditor.view
-        const matches = findMatches(view.state.doc, searchText)
+        const matches = findMatchesInDoc(editor, searchText)
         if (matches.length === 0) return
 
         let tr = view.state.tr
@@ -240,7 +192,7 @@ export function SearchBar({ editor, open, onClose, replaceMode: initialReplaceMo
                 <Replace size={14} />
             </button>
             <button
-                onClick={() => { clearDecorations(); onClose() }}
+                onClick={onClose}
                 className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors"
                 title="关闭 (Esc)"
             >

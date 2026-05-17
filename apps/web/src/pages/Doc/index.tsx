@@ -22,6 +22,7 @@ import {
     Download,
     Edit3,
     Eye,
+    FileText,
     History,
     Home,
     Link2,
@@ -48,6 +49,7 @@ import { AboutDialog } from '@/components/LayoutAside/AboutDialog'
 import { SettingsDialog } from '@/components/LayoutAside/SettingsDialog'
 import { NotificationBell } from '@/components/NotificationBell'
 import { PageTags } from '@/components/PageTags'
+import { DocInfoPanel } from '@/components/DocInfoPanel'
 import { SearchBar } from '@/components/SearchBar'
 import { SharePopover } from '@/components/SharePopover'
 import { ShortcutPanel } from '@/components/ShortcutPanel'
@@ -84,7 +86,8 @@ export const Doc = () => {
     const [aboutOpen, setAboutOpen] = useState(false)
     const [searchBarOpen, setSearchBarOpen] = useState(false)
     const [shortcutPanelOpen, setShortcutPanelOpen] = useState(false)
-    const [mode, setMode] = useState<'edit' | 'read'>('edit')
+    const [docInfoOpen, setDocInfoOpen] = useState(false)
+    const [mode, setMode] = useState<'edit' | 'read' | 'review'>('edit')
     const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
         return localStorage.getItem('doc-outline-collapsed') === 'true'
     })
@@ -411,8 +414,8 @@ export const Doc = () => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 hover:bg-accent transition-colors">
-                                    {mode === 'edit' ? <Edit3 size={12} /> : <BookOpen size={12} />}
-                                    {mode === 'edit' ? '编辑' : '阅读'}
+                                    {mode === 'edit' ? <Edit3 size={12} /> : mode === 'review' ? <Eye size={12} /> : <BookOpen size={12} />}
+                                    {mode === 'edit' ? '编辑' : mode === 'review' ? '修订' : '阅读'}
                                     <ChevronDown size={12} className="text-muted-foreground" />
                                 </button>
                             </DropdownMenuTrigger>
@@ -420,6 +423,10 @@ export const Doc = () => {
                                 <DropdownMenuItem onClick={() => setMode('edit')}>
                                     <Edit3 className="mr-2 h-4 w-4" />
                                     编辑模式
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setMode('review')}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    修订模式
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setMode('read')}>
                                     <BookOpen className="mr-2 h-4 w-4" />
@@ -446,6 +453,19 @@ export const Doc = () => {
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={() => setDocInfoOpen(true)}
+                                    className="inline-flex items-center justify-center rounded-md h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                                >
+                                    <FileText size={14} />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>文档信息</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                     {remoteUsers && <AvatarList remoteUsers={remoteUsers} />}
                     <TooltipProvider>
                         <Tooltip>
@@ -708,7 +728,7 @@ export const Doc = () => {
                                                 doc={doc}
                                                 provider={provider}
                                                 onEditorReady={handleEditorReady}
-                                                editable={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')}
+                                                editable={(mode === 'edit' || mode === 'review') && (page?.role === 'editor' || page?.role === 'owner')}
                                             />
                                         )}
                                     </>
@@ -730,6 +750,7 @@ export const Doc = () => {
             <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} username={currentUser?.username} />
             <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
             <ShortcutPanel open={shortcutPanelOpen} onClose={() => setShortcutPanelOpen(false)} />
+            <DocInfoPanel editor={editorInstance} open={docInfoOpen} onClose={() => setDocInfoOpen(false)} />
         </SidebarInset>
     )
 }

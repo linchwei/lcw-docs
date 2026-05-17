@@ -12,7 +12,13 @@ import {
     locales,
     PartialBlock,
 } from '@lcw-doc/core'
-import { DefaultReactSuggestionItem, getDefaultReactSlashMenuItems, SideMenuController, SuggestionMenuController, useCreateLcwDoc } from '@lcw-doc/react'
+import {
+    DefaultReactSuggestionItem,
+    getDefaultReactSlashMenuItems,
+    SideMenuController,
+    SuggestionMenuController,
+    useCreateLcwDoc,
+} from '@lcw-doc/react'
 import { LcwDocView } from '@lcw-doc/shadcn'
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, Minus, Sparkles, Table as TableIcon, TextQuote } from 'lucide-react'
@@ -68,7 +74,7 @@ const schema = LcwDocSchema.create({
 })
 
 // Function which gets all users for the mentions menu.
-const getMentionMenuItems = async (editor: LcwDocEditor, pageId?: string): Promise<DefaultReactSuggestionItem[]> => {
+const getMentionMenuItems = async (editor: typeof schema.LcwDocEditor, pageId?: string): Promise<DefaultReactSuggestionItem[]> => {
     const items: DefaultReactSuggestionItem[] = []
     // 获取远程页面
     const res = await srv.fetchPageList()
@@ -82,7 +88,6 @@ const getMentionMenuItems = async (editor: LcwDocEditor, pageId?: string): Promi
                 onItemClick: () => {
                     editor.insertInlineContent([
                         {
-                            // @ts-expect-error mention type
                             type: 'mention',
                             props: {
                                 id: page.pageId,
@@ -239,11 +244,10 @@ export function DocEditor(props: DocEditorProps) {
 
     return (
         <LcwDocView editor={editor} editable={editable} theme={isDark ? 'dark' : 'light'} slashMenu={false}>
-            <SideMenuController sideMenu={EditorSideMenu as any} />
+            <SideMenuController sideMenu={EditorSideMenu} />
             <SuggestionMenuController
                 triggerCharacter="@"
                 getItems={async query => {
-                    // @ts-expect-error getItems type
                     const items = await getMentionMenuItems(editor, pageId)
                     return filterSuggestionItems(items, query)
                 }}
@@ -265,7 +269,6 @@ export function DocEditor(props: DocEditorProps) {
                     )
                 }
             />
-            {/* @ts-expect-error editor schema type fix */}
             <BasicAIChat editor={editor} />
             <SelectionAIMenu editor={editor} />
         </LcwDocView>

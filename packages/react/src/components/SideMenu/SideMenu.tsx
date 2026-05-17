@@ -46,8 +46,11 @@ export const SideMenu = <
         <Components.SideMenu.Root className={'bn-side-menu'} {...dataAttributes}>
             {props.children || (
                 <>
-                    <AddBlockButton {...props} />
-                    <DragHandleButton {...props} />
+                    {props.isBlockEmpty ? (
+                        <AddBlockButton {...props} />
+                    ) : (
+                        <DragHandleButton {...props} />
+                    )}
                 </>
             )}
         </Components.SideMenu.Root>

@@ -24,6 +24,7 @@ import { dragStart, getDraggableBlockFromElement, unsetDragImage } from './dragg
  */
 export type SideMenuState<BSchema extends BlockSchema, I extends InlineContentSchema, S extends StyleSchema> = UiElementPosition & {
     block: Block<BSchema, I, S>
+    isBlockEmpty: boolean
 }
 
 /**
@@ -151,6 +152,16 @@ export class SideMenuView<BSchema extends BlockSchema, I extends InlineContentSc
         if (this.editor.isEditable) {
             const editorBoundingBox = (this.pmView.dom.firstChild as HTMLElement).getBoundingClientRect()
             const blockContentBoundingBox = blockContent.getBoundingClientRect()
+            const blockData = this.editor.getBlock(this.hoveredBlock!.getAttribute('data-id')!)!
+
+            const isBlockEmpty =
+                !blockData.content ||
+                (Array.isArray(blockData.content) && blockData.content.length === 0) ||
+                (Array.isArray(blockData.content) &&
+                    blockData.content.length === 1 &&
+                    blockData.content[0].type === 'text' &&
+                    'text' in blockData.content[0] &&
+                    blockData.content[0].text === '')
 
             this.updateState({
                 show: true,
@@ -160,7 +171,8 @@ export class SideMenuView<BSchema extends BlockSchema, I extends InlineContentSc
                     blockContentBoundingBox.width,
                     blockContentBoundingBox.height
                 ),
-                block: this.editor.getBlock(this.hoveredBlock!.getAttribute('data-id')!)!,
+                block: blockData,
+                isBlockEmpty,
             })
         }
     }

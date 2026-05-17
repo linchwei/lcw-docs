@@ -1,54 +1,51 @@
 import { Block, LcwDocEditor } from '@lcw-doc/core'
-import { Copy, GripVertical, Plus, Scissors, Trash2 } from 'lucide-react'
+import { Copy, GripVertical, Plus, Scissors, Trash2, List, ListOrdered, Code } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const blockTypeMarks: Record<string, string | ((block: Block) => string)> = {
-    heading: (block: Block) => {
-        const level = (block.props as any).level || 1
-        return '#'.repeat(level)
-    },
-    bulletListItem: '-',
-    numberedListItem: '1.',
-    checkListItem: '[]',
-    codeBlock: '```',
-    blockquote: '>',
-}
-
-function getBlockMark(block: Block): string | null {
-    const mark = blockTypeMarks[block.type]
-    if (typeof mark === 'function') {
-        return mark(block)
+function getBlockTypeIcon(block: Block): React.ReactNode {
+    switch (block.type) {
+        case 'heading': {
+            const level = (block.props as any)?.level || 1
+            return <span className="text-[10px] font-bold text-blue-500">H{level}</span>
+        }
+        case 'bulletListItem':
+            return <List size={14} className="text-zinc-500" />
+        case 'numberedListItem':
+            return <ListOrdered size={14} className="text-zinc-500" />
+        case 'codeBlock':
+            return <Code size={14} className="text-zinc-500" />
+        case 'paragraph':
+            return <span className="text-[12px] font-bold text-blue-500">T</span>
+        default:
+            return <GripVertical size={16} />
     }
-    return mark || null
-}
-
-function isBlockEmpty(block: Block): boolean {
-    if (!block.content) return true
-    if (Array.isArray(block.content) && block.content.length === 0) return true
-    if (Array.isArray(block.content) && block.content.length === 1) {
-        const item = block.content[0]
-        if (item.type === 'text' && item.text === '') return true
-    }
-    return false
 }
 
 interface EditorSideMenuProps {
     editor: LcwDocEditor
     block: Block
+    isBlockEmpty: boolean
     blockDragStart: (event: { dataTransfer: DataTransfer | null; clientY: number }) => void
     blockDragEnd: () => void
     freezeMenu: () => void
     unfreezeMenu: () => void
 }
 
-export function EditorSideMenu({ editor, block, blockDragStart, blockDragEnd, freezeMenu, unfreezeMenu }: EditorSideMenuProps) {
-    const empty = isBlockEmpty(block)
-    const mark = getBlockMark(block)
+export function EditorSideMenu({
+    editor,
+    block,
+    isBlockEmpty,
+    blockDragStart,
+    blockDragEnd,
+    freezeMenu,
+    unfreezeMenu,
+}: EditorSideMenuProps) {
+    const blockIcon = getBlockTypeIcon(block)
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
 
     const handleAddClick = () => {
-        if (empty) {
+        if (isBlockEmpty) {
             editor.setTextCursorPosition(block)
             editor.openSuggestionMenu('/')
         } else {
@@ -121,7 +118,7 @@ export function EditorSideMenu({ editor, block, blockDragStart, blockDragEnd, fr
 
     return (
         <div className="flex items-center gap-0.5 bn-side-menu relative">
-            {empty ? (
+            {isBlockEmpty ? (
                 <button
                     onClick={handleAddClick}
                     className="flex items-center justify-center w-6 h-6 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
@@ -129,41 +126,30 @@ export function EditorSideMenu({ editor, block, blockDragStart, blockDragEnd, fr
                 >
                     <Plus size={16} />
                 </button>
-            ) : mark ? (
-                <button
-                    draggable={true}
-                    onDragStart={blockDragStart}
-                    onDragEnd={blockDragEnd}
-                    onMouseDown={freezeMenu}
-                    className="flex items-center justify-center min-w-[24px] h-6 px-1 rounded-md text-[11px] font-mono text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors cursor-grab select-none"
-                    title="拖拽移动"
-                >
-                    {mark}
-                </button>
             ) : (
-                <button
-                    draggable={true}
-                    onDragStart={blockDragStart}
-                    onDragEnd={blockDragEnd}
-                    onMouseDown={freezeMenu}
-                    className="flex items-center justify-center w-6 h-6 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors cursor-grab"
-                    title="拖拽移动"
-                >
-                    <GripVertical size={16} />
-                </button>
-            )}
-            {!empty && (
-                <button
-                    onClick={() => setMenuOpen(!menuOpen)}
-                    className="flex items-center justify-center w-5 h-6 rounded-md text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 transition-colors"
-                    title="更多操作"
-                >
-                    <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor">
-                        <circle cx="6" cy="3" r="1.5"/>
-                        <circle cx="6" cy="8" r="1.5"/>
-                        <circle cx="6" cy="13" r="1.5"/>
-                    </svg>
-                </button>
+                <>
+                    <button
+                        draggable={true}
+                        onDragStart={blockDragStart}
+                        onDragEnd={blockDragEnd}
+                        onMouseDown={freezeMenu}
+                        className="flex items-center justify-center w-6 h-6 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors cursor-grab"
+                        title="拖拽移动"
+                    >
+                        {blockIcon}
+                    </button>
+                    <button
+                        onClick={() => setMenuOpen(!menuOpen)}
+                        className="flex items-center justify-center w-5 h-6 rounded-md text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 transition-colors"
+                        title="更多操作"
+                    >
+                        <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor">
+                            <circle cx="6" cy="3" r="1.5" />
+                            <circle cx="6" cy="8" r="1.5" />
+                            <circle cx="6" cy="13" r="1.5" />
+                        </svg>
+                    </button>
+                </>
             )}
             {menuOpen && (
                 <div

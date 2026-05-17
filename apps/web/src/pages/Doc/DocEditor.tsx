@@ -243,7 +243,7 @@ export function DocEditor(props: DocEditorProps) {
     }, [editor, onEditorReady])
 
     return (
-        <LcwDocView editor={editor} editable={editable} theme={isDark ? 'dark' : 'light'} slashMenu={false}>
+        <LcwDocView editor={editor} editable={editable} theme={isDark ? 'dark' : 'light'} slashMenu={false} sideMenu={false}>
             <SideMenuController sideMenu={EditorSideMenu} />
             <SuggestionMenuController
                 triggerCharacter="@"

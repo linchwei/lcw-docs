@@ -14,10 +14,10 @@ export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlinePr
 
     if (collapsed) {
         return (
-            <div className="shrink-0 hidden lg:flex flex-col items-center pt-3 w-[40px] border-r border-zinc-100">
+            <div className="shrink-0 hidden lg:flex flex-col items-start pt-3 w-[220px] border-r border-zinc-100">
                 <button
                     onClick={onToggleCollapse}
-                    className="inline-flex items-center justify-center rounded-md h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                    className="inline-flex items-center justify-center rounded-md h-7 w-7 ml-3 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                     title="展开目录"
                 >
                     <List size={16} />
@@ -28,10 +28,10 @@ export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlinePr
 
     if (headings.length === 0) {
         return (
-            <div className="shrink-0 hidden lg:flex flex-col items-center pt-3 w-[40px] border-r border-zinc-100">
+            <div className="shrink-0 hidden lg:flex flex-col items-start pt-3 w-[220px] border-r border-zinc-100">
                 <button
                     onClick={onToggleCollapse}
-                    className="inline-flex items-center justify-center rounded-md h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                    className="inline-flex items-center justify-center rounded-md h-7 w-7 ml-3 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                     title="展开目录"
                 >
                     <List size={16} />
@@ -58,7 +58,7 @@ export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlinePr
     }
 
     return (
-        <div className="w-[200px] shrink-0 hidden lg:block border-r border-zinc-100">
+        <div className="w-[220px] shrink-0 hidden lg:block border-r border-zinc-100">
             <div className="sticky top-[52px] max-h-[calc(100vh-68px)] overflow-y-auto">
                 <div className="flex items-center justify-between px-3 pt-3 pb-2">
                     <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 uppercase tracking-wider">

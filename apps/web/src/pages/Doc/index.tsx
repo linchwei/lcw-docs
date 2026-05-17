@@ -1,22 +1,50 @@
 import '@lcw-doc/shadcn/style.css'
 
 import { LcwDocEditor } from '@lcw-doc/core'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@lcw-doc/shadcn-shared-ui/components/ui/dropdown-menu'
 import { Separator } from '@lcw-doc/shadcn-shared-ui/components/ui/separator'
 import { SidebarInset, SidebarTrigger, useSidebar } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/tooltip'
+import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
-import { BookOpen, Check, Cloud, CloudOff, Download, Edit3, Eye, History, Home, Link2, Loader2, Users, WifiOff } from 'lucide-react'
+import {
+    BookOpen,
+    Check,
+    ChevronDown,
+    Cloud,
+    CloudOff,
+    Download,
+    Edit3,
+    Eye,
+    History,
+    Home,
+    Link2,
+    Loader2,
+    LogOut,
+    MessageCircleQuestion,
+    Settings,
+    Users,
+    WifiOff,
+} from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import { WebsocketProvider } from 'y-websocket'
 import * as Y from 'yjs'
 
 import { BacklinksPanel } from '@/components/BacklinksPanel'
+import { CollaboratorPanel } from '@/components/CollaboratorPanel'
 import { CommentButton } from '@/components/CommentButton'
 import { CommentPanel } from '@/components/CommentPanel'
-import { CollaboratorPanel } from '@/components/CollaboratorPanel'
 import { ExportPanel } from '@/components/ExportPanel'
+import { AboutDialog } from '@/components/LayoutAside/AboutDialog'
+import { SettingsDialog } from '@/components/LayoutAside/SettingsDialog'
 import { NotificationBell } from '@/components/NotificationBell'
 import { PageTags } from '@/components/PageTags'
 import { SharePopover } from '@/components/SharePopover'
@@ -38,6 +66,8 @@ type LocalSyncStatus = 'syncing' | 'synced'
 
 export const Doc = () => {
     const params = useParams()
+    const navigate = useNavigate()
+    const { toast } = useToast()
     const { setEditor: setGlobalEditor } = useEditorContext()
     const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
     const [syncStatus, setSyncStatus] = useState<SyncStatus>('connecting')
@@ -47,9 +77,18 @@ export const Doc = () => {
     const [collaboratorPanelOpen, setCollaboratorPanelOpen] = useState(false)
     const [backlinksPanelOpen, setBacklinksPanelOpen] = useState(false)
     const [exportOpen, setExportOpen] = useState(false)
+    const [settingsOpen, setSettingsOpen] = useState(false)
+    const [aboutOpen, setAboutOpen] = useState(false)
     const [mode, setMode] = useState<'edit' | 'read'>('edit')
     const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
         return localStorage.getItem('doc-outline-collapsed') === 'true'
+    })
+    const { data: currentUser } = useQuery({
+        queryKey: ['currentUser'],
+        queryFn: async () => {
+            const res = await srv.currentUser()
+            return res.data
+        },
     })
     const { data: page, isLoading } = useQuery({
         queryKey: ['page', params?.id],
@@ -89,39 +128,45 @@ export const Doc = () => {
     }, [pageId, doc])
 
     const handleEditorReady = (editor: LcwDocEditor<any, any, any>) => {
-            setEditorInstance(editor)
-            setGlobalEditor(editor)
+        setEditorInstance(editor)
+        setGlobalEditor(editor)
 
-            const pendingMarkdown = sessionStorage.getItem('md-pending-markdown')
-            if (pendingMarkdown) {
-                sessionStorage.removeItem('md-pending-markdown')
-                editor
-                    .tryParseMarkdownToBlocks(pendingMarkdown)
-                    .then(blocks => {
-                        if (Array.isArray(blocks) && blocks.length > 0) {
-                            editor.replaceBlocks(editor.document, blocks)
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Failed to parse markdown:', err)
-                    })
-            }
-
-            const pendingTemplate = sessionStorage.getItem('template-pending-markdown')
-            if (pendingTemplate) {
-                sessionStorage.removeItem('template-pending-markdown')
-                editor
-                    .tryParseMarkdownToBlocks(pendingTemplate)
-                    .then(blocks => {
-                        if (Array.isArray(blocks) && blocks.length > 0) {
-                            editor.replaceBlocks(editor.document, blocks)
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Failed to parse template:', err)
-                    })
-            }
+        const pendingMarkdown = sessionStorage.getItem('md-pending-markdown')
+        if (pendingMarkdown) {
+            sessionStorage.removeItem('md-pending-markdown')
+            editor
+                .tryParseMarkdownToBlocks(pendingMarkdown)
+                .then(blocks => {
+                    if (Array.isArray(blocks) && blocks.length > 0) {
+                        editor.replaceBlocks(editor.document, blocks)
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to parse markdown:', err)
+                })
         }
+
+        const pendingTemplate = sessionStorage.getItem('template-pending-markdown')
+        if (pendingTemplate) {
+            sessionStorage.removeItem('template-pending-markdown')
+            editor
+                .tryParseMarkdownToBlocks(pendingTemplate)
+                .then(blocks => {
+                    if (Array.isArray(blocks) && blocks.length > 0) {
+                        editor.replaceBlocks(editor.document, blocks)
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to parse template:', err)
+                })
+        }
+    }
+
+    const handleLogout = () => {
+        toast({ title: '退出登录' })
+        localStorage.removeItem('token')
+        navigate(`/account/login?redirect=${window.location.pathname}`)
+    }
 
     const handleTitleInput = debounce((e: React.FormEvent<HTMLDivElement>) => {
         const currentPage = pageRef.current
@@ -145,6 +190,7 @@ export const Doc = () => {
         queryClient.invalidateQueries({ queryKey: ['pages'] })
     })
 
+    const [outlineHidden, setOutlineHidden] = useState(false)
     const { setOpen: setSidebarOpen } = useSidebar()
 
     useEffect(() => {
@@ -156,9 +202,33 @@ export const Doc = () => {
     }, [page?.role])
 
     useEffect(() => {
-        setSidebarOpen(false)
+        let timeoutId: ReturnType<typeof setTimeout>
+        const handleResize = () => {
+            clearTimeout(timeoutId)
+            timeoutId = setTimeout(() => {
+                const width = window.innerWidth
+                if (width < 1340) {
+                    setSidebarOpen(false)
+                }
+                if (width < 1100) {
+                    setOutlineCollapsed(true)
+                } else {
+                    const saved = localStorage.getItem('doc-outline-collapsed')
+                    setOutlineCollapsed(saved === 'true')
+                }
+                if (width < 940) {
+                    setOutlineHidden(true)
+                } else {
+                    setOutlineHidden(false)
+                }
+            }, 150)
+        }
+
+        handleResize()
+        window.addEventListener('resize', handleResize)
         return () => {
-            setSidebarOpen(true)
+            window.removeEventListener('resize', handleResize)
+            clearTimeout(timeoutId)
         }
     }, [setSidebarOpen])
 
@@ -278,30 +348,25 @@ export const Doc = () => {
                 </div>
                 <div className="flex flex-row items-center gap-4">
                     {(page?.role === 'editor' || page?.role === 'owner') && (
-                        <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-md p-0.5">
-                            <button
-                                onClick={() => setMode('edit')}
-                                className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-sm transition-colors ${
-                                    mode === 'edit'
-                                        ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground'
-                                }`}
-                            >
-                                <Edit3 size={12} />
-                                编辑
-                            </button>
-                            <button
-                                onClick={() => setMode('read')}
-                                className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-sm transition-colors ${
-                                    mode === 'read'
-                                        ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground'
-                                }`}
-                            >
-                                <BookOpen size={12} />
-                                阅读
-                            </button>
-                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 hover:bg-accent transition-colors">
+                                    {mode === 'edit' ? <Edit3 size={12} /> : <BookOpen size={12} />}
+                                    {mode === 'edit' ? '编辑' : '阅读'}
+                                    <ChevronDown size={12} className="text-muted-foreground" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-32 rounded-lg" align="end">
+                                <DropdownMenuItem onClick={() => setMode('edit')}>
+                                    <Edit3 className="mr-2 h-4 w-4" />
+                                    编辑模式
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setMode('read')}>
+                                    <BookOpen className="mr-2 h-4 w-4" />
+                                    阅读模式
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     )}
                     {remoteUsers && <AvatarList remoteUsers={remoteUsers} />}
                     <TooltipProvider>
@@ -377,11 +442,35 @@ export const Doc = () => {
                             <TooltipContent>反向链接</TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="inline-flex items-center justify-center rounded-full h-7 w-7 bg-[#6B45FF] text-white text-xs font-medium hover:opacity-90 transition-opacity ml-1">
+                                {currentUser?.username?.charAt(0).toUpperCase() || '?'}
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48 rounded-lg" align="end">
+                            {currentUser && <div className="px-2 py-1.5 text-sm font-medium">{currentUser.username}</div>}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
+                                <Settings className="mr-2 h-4 w-4" />
+                                设置
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setAboutOpen(true)}>
+                                <MessageCircleQuestion className="mr-2 h-4 w-4" />
+                                关于
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleLogout}>
+                                <LogOut className="mr-2 h-4 w-4" />
+                                退出登录
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </header>
             <div className="flex-1 overflow-hidden">
                 <div className="flex h-full">
-                    {editorInstance && (
+                    {editorInstance && !outlineHidden && (
                         <DocOutline
                             editor={editorInstance}
                             collapsed={outlineCollapsed}
@@ -389,8 +478,7 @@ export const Doc = () => {
                         />
                     )}
                     <div className="flex-1 min-w-0 overflow-auto">
-                        <div className="flex justify-center">
-                            <div className="max-w-[900px] w-full px-4 md:px-12 lg:px-24 pt-24">
+                        <div className="w-full max-w-[1200px] pl-6 pr-6 lg:pr-24 pt-24">
                                 {isLoading ? (
                                     <div className="flex items-center justify-center py-20">
                                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -399,12 +487,8 @@ export const Doc = () => {
                                 ) : (
                                     <>
                                         {page?.coverImage && (
-                                            <div className="relative -mx-4 md:-mx-12 lg:-mx-24 -mt-24 mb-6 group">
-                                                <img
-                                                    src={page.coverImage}
-                                                    alt="cover"
-                                                    className="w-full h-48 object-cover rounded-b-lg"
-                                                />
+                                            <div className="relative -mx-6 -mt-24 mb-6 group">
+                                                <img src={page.coverImage} alt="cover" className="w-full h-48 object-cover rounded-b-lg" />
                                                 <button
                                                     onClick={async () => {
                                                         await srv.updatePage({ pageId: page.pageId, coverImage: null })
@@ -444,7 +528,11 @@ export const Doc = () => {
                                                 ref={titleRef}
                                                 className="inline-block flex-1 outline-none text-[#37352f] empty:before:content-[attr(data-placeholder)] empty:before:text-[#c7c7c5]"
                                                 data-placeholder="无标题"
-                                                onInput={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner') ? handleTitleInput : undefined}
+                                                onInput={
+                                                    mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')
+                                                        ? handleTitleInput
+                                                        : undefined
+                                                }
                                             />
                                         </h1>
                                         {mode === 'read' && (page?.role === 'editor' || page?.role === 'owner') && (
@@ -479,16 +567,21 @@ export const Doc = () => {
                                     </>
                                 )}
                             </div>
-                        </div>
                     </div>
                     {commentPanelOpen && page?.pageId && <CommentPanel pageId={page.pageId} onClose={() => setCommentPanelOpen(false)} />}
                     {versionPanelOpen && page?.pageId && <VersionPanel pageId={page.pageId} onClose={() => setVersionPanelOpen(false)} />}
-                    {collaboratorPanelOpen && page?.pageId && <CollaboratorPanel pageId={page.pageId} onClose={() => setCollaboratorPanelOpen(false)} />}
-                    {backlinksPanelOpen && page?.pageId && <BacklinksPanel pageId={page.pageId} onClose={() => setBacklinksPanelOpen(false)} />}
+                    {collaboratorPanelOpen && page?.pageId && (
+                        <CollaboratorPanel pageId={page.pageId} onClose={() => setCollaboratorPanelOpen(false)} />
+                    )}
+                    {backlinksPanelOpen && page?.pageId && (
+                        <BacklinksPanel pageId={page.pageId} onClose={() => setBacklinksPanelOpen(false)} />
+                    )}
                 </div>
             </div>
             <StatusBar editor={editorInstance} />
             <ExportPanel open={exportOpen} onOpenChange={setExportOpen} editor={editorInstance} fileName={page?.title || 'document'} />
+            <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} username={currentUser?.username} />
+            <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
         </SidebarInset>
     )
 }

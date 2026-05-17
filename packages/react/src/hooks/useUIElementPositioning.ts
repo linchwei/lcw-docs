@@ -5,15 +5,20 @@ export function useUIElementPositioning(
     show: boolean,
     referencePos: DOMRect | null,
     zIndex: number,
-    options?: Partial<UseFloatingOptions>
+    options?: Partial<UseFloatingOptions> & { isDragging?: boolean }
 ) {
+    const isDragging = options?.isDragging ?? false
+
     const { refs, update, context, floatingStyles } = useFloating({
         open: show,
         ...options,
     })
 
     const { isMounted, styles } = useTransitionStyles(context)
-    const dismiss = useDismiss(context)
+    const dismiss = useDismiss(context, {
+        outsidePress: !isDragging,
+        escapeKey: !isDragging,
+    })
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss])
 
     useEffect(() => {

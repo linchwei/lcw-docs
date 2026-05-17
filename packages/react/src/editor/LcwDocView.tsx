@@ -48,7 +48,7 @@ function LcwDocViewComponent<BSchema extends BlockSchema, ISchema extends Inline
 
     const editorColorScheme = theme || prefersColorScheme
 
-    const [contentEditableProps, setContentEditableProps] = useState<Record<string, string>>({})
+    const [contentEditableProps, setContentEditableProps] = useState<Record<string, boolean | undefined>>({})
 
     useEffect(() => {
         if (editable === undefined) {
@@ -56,9 +56,9 @@ function LcwDocViewComponent<BSchema extends BlockSchema, ISchema extends Inline
             return
         }
         if (editable) {
-            setContentEditableProps({ contenteditable: 'true' })
+            setContentEditableProps({ contentEditable: true })
         } else {
-            setContentEditableProps({ contenteditable: 'false' })
+            setContentEditableProps({ contentEditable: false })
         }
     }, [editable])
 

@@ -6,7 +6,7 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-import { FC } from 'react'
+import { FC, useCallback, useState } from 'react'
 
 import { useLcwDocEditor } from '../../hooks/useLcwDocEditor'
 import { useUIElementPositioning } from '../../hooks/useUIElementPositioning'
@@ -22,10 +22,21 @@ export const SideMenuController = <
     sideMenu?: FC<SideMenuProps<BSchema, I, S>>
 }) => {
     const editor = useLcwDocEditor<BSchema, I, S>()
+    const [isDragging, setIsDragging] = useState(false)
+
+    const blockDragStart = useCallback((event: { dataTransfer: DataTransfer | null; clientY: number }) => {
+        setIsDragging(true)
+        editor.sideMenu.blockDragStart(event)
+    }, [editor])
+
+    const blockDragEnd = useCallback(() => {
+        editor.sideMenu.blockDragEnd()
+        setIsDragging(false)
+    }, [editor])
 
     const callbacks = {
-        blockDragStart: editor.sideMenu.blockDragStart,
-        blockDragEnd: editor.sideMenu.blockDragEnd,
+        blockDragStart,
+        blockDragEnd,
         freezeMenu: editor.sideMenu.freezeMenu,
         unfreezeMenu: editor.sideMenu.unfreezeMenu,
     }
@@ -33,6 +44,7 @@ export const SideMenuController = <
     const state = useUIPluginState(editor.sideMenu.onUpdate.bind(editor.sideMenu))
     const { isMounted, ref, style, getFloatingProps } = useUIElementPositioning(state?.show || false, state?.referencePos || null, 1000, {
         placement: 'left-start',
+        isDragging,
     })
 
     if (!isMounted || !state) {

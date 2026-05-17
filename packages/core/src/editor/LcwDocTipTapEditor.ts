@@ -218,5 +218,5 @@ export class LcwDocTipTapEditor extends TiptapEditor {
  * 因为我们使用自定义的扩展来处理这些功能。
  */
 ;(LcwDocTipTapEditor.prototype as any).createView = function () {
-    this.options.onPaste = this.options.onDrop = undefined
+    this.options.onPaste = this.options.onDrop = () => false
 }

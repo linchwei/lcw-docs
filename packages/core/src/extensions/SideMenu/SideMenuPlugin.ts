@@ -241,6 +241,10 @@ export class SideMenuView<BSchema extends BlockSchema, I extends InlineContentSc
      * 当菜单显示且编辑器获得焦点时，隐藏菜单
      */
     onKeyDown = () => {
+        if (this.menuFrozen) {
+            return
+        }
+
         if (this.state?.show && this.editor.isFocused()) {
             this.state.show = false
             this.emitUpdate(this.state)

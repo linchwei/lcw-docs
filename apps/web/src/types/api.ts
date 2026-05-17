@@ -44,6 +44,7 @@ export interface CreatePagePayload {
 export interface UpdatePagePayload {
     pageId: string
     title?: string
+    emoji?: string
     coverImage?: string | null
     folderId?: string | null
 }

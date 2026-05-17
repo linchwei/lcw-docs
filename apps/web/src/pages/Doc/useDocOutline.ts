@@ -1,6 +1,6 @@
 import { LcwDocEditor } from '@lcw-doc/core'
 import { useEditorChange, useEditorSelectionChange } from '@lcw-doc/react'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface HeadingItem {
     id: string
@@ -70,12 +70,51 @@ export function useDocOutline(editor: LcwDocEditor) {
     const [activeHeadingId, setActiveHeadingId] = useState<string | null>(() =>
         getActiveHeadingId(editor, getHeadingsFromBlocks(editor))
     )
+    const scrollContainerRef = useRef<HTMLElement | null>(null)
 
     const updateOutline = () => {
         const newHeadings = getHeadingsFromBlocks(editor)
         setHeadings(newHeadings)
         setActiveHeadingId(getActiveHeadingId(editor, newHeadings))
     }
+
+    const updateActiveHeadingByScroll = useCallback(() => {
+        if (!scrollContainerRef.current) return
+        const container = scrollContainerRef.current
+        const scrollTop = container.scrollTop
+        const containerRect = container.getBoundingClientRect()
+        const viewportTop = scrollTop + 80
+
+        let activeId: string | null = null
+        for (const heading of headings) {
+            const el = document.querySelector(`[data-id="${heading.id}"]`)
+            if (!el) continue
+            const rect = el.getBoundingClientRect()
+            const elementTop = rect.top - containerRect.top + scrollTop
+            if (elementTop <= viewportTop) {
+                activeId = heading.id
+            }
+        }
+        if (activeId) {
+            setActiveHeadingId(activeId)
+        }
+    }, [headings])
+
+    useEffect(() => {
+        const editorEl = document.querySelector('.bn-editor')
+        if (!editorEl) return
+        const scrollEl = editorEl.closest('.overflow-auto')
+        if (!scrollEl) return
+        scrollContainerRef.current = scrollEl as HTMLElement
+
+        const handleScroll = () => {
+            requestAnimationFrame(updateActiveHeadingByScroll)
+        }
+        scrollEl.addEventListener('scroll', handleScroll, { passive: true })
+        return () => {
+            scrollEl.removeEventListener('scroll', handleScroll)
+        }
+    }, [updateActiveHeadingByScroll])
 
     useEditorChange(updateOutline, editor)
     useEditorSelectionChange(updateOutline, editor)

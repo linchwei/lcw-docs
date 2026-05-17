@@ -27,6 +27,7 @@ import {
     Link2,
     Loader2,
     LogOut,
+    Maximize,
     MessageCircleQuestion,
     Settings,
     Users,
@@ -83,6 +84,9 @@ export const Doc = () => {
     const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
         return localStorage.getItem('doc-outline-collapsed') === 'true'
     })
+    const [pageWidth, setPageWidth] = useState<'default' | 'wide' | 'full'>(() => {
+        return (localStorage.getItem('lcwdoc-page-width') as 'default' | 'wide' | 'full') || 'default'
+    })
     const { data: currentUser } = useQuery({
         queryKey: ['currentUser'],
         queryFn: async () => {
@@ -126,6 +130,27 @@ export const Doc = () => {
     const indexeddbProvider = useMemo(() => {
         return new IndexeddbPersistence(`doc-yjs-${pageId}`, doc)
     }, [pageId, doc])
+
+    const [emojiPickerOpen, setEmojiPickerOpen] = useState(false)
+    const emojiPickerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (!emojiPickerOpen) return
+        const handleClickOutside = (e: MouseEvent) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+                setEmojiPickerOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [emojiPickerOpen])
+
+    const handleEmojiSelect = async (emoji: string) => {
+        setEmojiPickerOpen(false)
+        if (!page?.pageId) return
+        await srv.updatePage({ pageId: page.pageId, emoji })
+        queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
+    }
 
     const handleEditorReady = (editor: LcwDocEditor<any, any, any>) => {
         setEditorInstance(editor)
@@ -235,6 +260,10 @@ export const Doc = () => {
     useEffect(() => {
         localStorage.setItem('doc-outline-collapsed', String(outlineCollapsed))
     }, [outlineCollapsed])
+
+    useEffect(() => {
+        localStorage.setItem('lcwdoc-page-width', pageWidth)
+    }, [pageWidth])
 
     useEffect(() => {
         if (titleRef.current && page?.title !== undefined) {
@@ -368,6 +397,24 @@ export const Doc = () => {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     )}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="inline-flex items-center justify-center rounded-md h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                                <Maximize size={14} />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-36 rounded-lg" align="end">
+                            <DropdownMenuItem onClick={() => setPageWidth('default')} className={pageWidth === 'default' ? 'bg-accent' : ''}>
+                                默认宽度
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setPageWidth('wide')} className={pageWidth === 'wide' ? 'bg-accent' : ''}>
+                                较宽
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setPageWidth('full')} className={pageWidth === 'full' ? 'bg-accent' : ''}>
+                                全宽
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     {remoteUsers && <AvatarList remoteUsers={remoteUsers} />}
                     <TooltipProvider>
                         <Tooltip>
@@ -478,7 +525,7 @@ export const Doc = () => {
                         />
                     )}
                     <div className="flex-1 min-w-0 overflow-auto">
-                        <div className="w-full max-w-[1200px] pl-6 pr-6 lg:pr-24 pt-24">
+                        <div className={`w-full ${pageWidth === 'default' ? 'max-w-[820px]' : pageWidth === 'wide' ? 'max-w-[1100px]' : 'max-w-none'} pl-6 pr-6 lg:pr-24 pt-24`}>
                                 {isLoading ? (
                                     <div className="flex items-center justify-center py-20">
                                         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -489,15 +536,41 @@ export const Doc = () => {
                                         {page?.coverImage && (
                                             <div className="relative -mx-6 -mt-24 mb-6 group">
                                                 <img src={page.coverImage} alt="cover" className="w-full h-48 object-cover rounded-b-lg" />
-                                                <button
-                                                    onClick={async () => {
-                                                        await srv.updatePage({ pageId: page.pageId, coverImage: null })
-                                                        queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
-                                                    }}
-                                                    className="absolute top-2 right-2 h-7 px-3 text-xs bg-black/50 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                                                >
-                                                    移除封面
-                                                </button>
+                                                <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={async () => {
+                                                            const covers = [
+                                                                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1505144808419-1957a94ca61e?w=1200&h=400&fit=crop',
+                                                                'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1200&h=400&fit=crop',
+                                                            ]
+                                                            const cover = covers[Math.floor(Math.random() * covers.length)]
+                                                            await srv.updatePage({ pageId: page.pageId, coverImage: cover })
+                                                            queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
+                                                        }}
+                                                        className="h-7 px-3 text-xs bg-black/50 text-white rounded-md hover:bg-black/70 transition-colors"
+                                                    >
+                                                        更换封面
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            await srv.updatePage({ pageId: page.pageId, coverImage: null })
+                                                            queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
+                                                        }}
+                                                        className="h-7 px-3 text-xs bg-black/50 text-white rounded-md hover:bg-black/70 transition-colors"
+                                                    >
+                                                        移除
+                                                    </button>
+                                                </div>
                                             </div>
                                         )}
                                         {!page?.coverImage && (
@@ -522,6 +595,48 @@ export const Doc = () => {
                                                 </button>
                                             </div>
                                         )}
+                                        <div className="flex flex-row items-start gap-2 mb-1">
+                                            <div className="relative shrink-0" ref={emojiPickerRef}>
+                                                <button
+                                                    onClick={() => {
+                                                        if (mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')) {
+                                                            setEmojiPickerOpen(!emojiPickerOpen)
+                                                        }
+                                                    }}
+                                                    className="text-[40px] leading-none hover:bg-zinc-100 rounded-md p-1 transition-colors"
+                                                    title={page?.emoji ? '更换图标' : '添加图标'}
+                                                >
+                                                    {page?.emoji || '📄'}
+                                                </button>
+                                                {emojiPickerOpen && (
+                                                    <div className="absolute left-0 top-12 z-50 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 p-3 w-[280px]">
+                                                        <div className="grid grid-cols-8 gap-1">
+                                                            {['📄', '📝', '📋', '📌', '📎', '📁', '📂', '🗂️', '📊', '📈', '📉', '🗓️', '📆', '⏰', '🔔', '💬', '💡', '🎯', '🏆', '⭐', '🔥', '💎', '🚀', '🎨', '🎵', '📷', '🎬', '🎮', '🏠', '🏢', '🌍', '🌈', '☀️', '🌙', '⭐', '🍀', '🌸', '🌺', '🌻', '🌲', '🍎', '🍕', '☕', '🎂', '🎁', '❤️', '💙', '💚', '💜', '🧡', '💛', '🤍', '🖤', '✅', '❌', '⚡', '🔧', '🔨', '⚙️', '🔑', '🔒', '📖', '🎓', '💰'].map(e => (
+                                                                <button
+                                                                    key={e}
+                                                                    onClick={() => handleEmojiSelect(e)}
+                                                                    className="text-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded p-1 transition-colors"
+                                                                >
+                                                                    {e}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                        {page?.emoji && (
+                                                            <button
+                                                                onClick={async () => {
+                                                                    setEmojiPickerOpen(false)
+                                                                    await srv.updatePage({ pageId: page.pageId, emoji: '📄' })
+                                                                    queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
+                                                                }}
+                                                                className="mt-2 w-full text-xs text-zinc-400 hover:text-zinc-600 py-1 transition-colors"
+                                                            >
+                                                                重置图标
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                         <h1 className="flex flex-row font-serif text-[40px] font-bold leading-tight">
                                             <div
                                                 contentEditable={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')}

@@ -12,7 +12,7 @@ import {
     locales,
     PartialBlock,
 } from '@lcw-doc/core'
-import { DefaultReactSuggestionItem, getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateLcwDoc } from '@lcw-doc/react'
+import { DefaultReactSuggestionItem, getDefaultReactSlashMenuItems, SideMenuController, SuggestionMenuController, useCreateLcwDoc } from '@lcw-doc/react'
 import { LcwDocView } from '@lcw-doc/shadcn'
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, Minus, Sparkles, Table as TableIcon, TextQuote } from 'lucide-react'
@@ -28,6 +28,7 @@ import { Callout } from '@/blocks/callout'
 import { Divider } from '@/blocks/divider'
 import { Mention } from '@/blocks/mention'
 import { BasicAIChat } from '@/components/BasicAIChat'
+import { EditorSideMenu } from '@/components/EditorSideMenu'
 import { CustomInputRules } from '@/extensions/CustomInputRules'
 import { Highlight, Superscript, Subscript } from '@/extensions/HighlightSupSubMarks'
 import { LinkInputRule } from '@/extensions/LinkInputRule'
@@ -238,6 +239,7 @@ export function DocEditor(props: DocEditorProps) {
 
     return (
         <LcwDocView editor={editor} editable={editable} theme={isDark ? 'dark' : 'light'} slashMenu={false}>
+            <SideMenuController sideMenu={EditorSideMenu as any} />
             <SuggestionMenuController
                 triggerCharacter="@"
                 getItems={async query => {

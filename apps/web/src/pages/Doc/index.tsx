@@ -2,10 +2,10 @@ import '@lcw-doc/shadcn/style.css'
 
 import { LcwDocEditor } from '@lcw-doc/core'
 import { Separator } from '@lcw-doc/shadcn-shared-ui/components/ui/separator'
-import { SidebarInset, SidebarTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
+import { SidebarInset, SidebarTrigger, useSidebar } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/tooltip'
 import { useQuery } from '@tanstack/react-query'
-import { Check, Cloud, CloudOff, Download, Eye, History, Home, Link2, Loader2, Users, WifiOff } from 'lucide-react'
+import { BookOpen, Check, Cloud, CloudOff, Download, Edit3, Eye, History, Home, Link2, Loader2, Users, WifiOff } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { IndexeddbPersistence } from 'y-indexeddb'
@@ -47,6 +47,10 @@ export const Doc = () => {
     const [collaboratorPanelOpen, setCollaboratorPanelOpen] = useState(false)
     const [backlinksPanelOpen, setBacklinksPanelOpen] = useState(false)
     const [exportOpen, setExportOpen] = useState(false)
+    const [mode, setMode] = useState<'edit' | 'read'>('edit')
+    const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
+        return localStorage.getItem('doc-outline-collapsed') === 'true'
+    })
     const { data: page, isLoading } = useQuery({
         queryKey: ['page', params?.id],
         queryFn: async () => {
@@ -140,6 +144,27 @@ export const Doc = () => {
             })
         queryClient.invalidateQueries({ queryKey: ['pages'] })
     })
+
+    const { setOpen: setSidebarOpen } = useSidebar()
+
+    useEffect(() => {
+        if (page?.role) {
+            if (page.role !== 'editor' && page.role !== 'owner') {
+                setMode('read')
+            }
+        }
+    }, [page?.role])
+
+    useEffect(() => {
+        setSidebarOpen(false)
+        return () => {
+            setSidebarOpen(true)
+        }
+    }, [setSidebarOpen])
+
+    useEffect(() => {
+        localStorage.setItem('doc-outline-collapsed', String(outlineCollapsed))
+    }, [outlineCollapsed])
 
     useEffect(() => {
         if (titleRef.current && page?.title !== undefined) {
@@ -252,6 +277,32 @@ export const Doc = () => {
                     )}
                 </div>
                 <div className="flex flex-row items-center gap-4">
+                    {(page?.role === 'editor' || page?.role === 'owner') && (
+                        <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-md p-0.5">
+                            <button
+                                onClick={() => setMode('edit')}
+                                className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-sm transition-colors ${
+                                    mode === 'edit'
+                                        ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                            >
+                                <Edit3 size={12} />
+                                编辑
+                            </button>
+                            <button
+                                onClick={() => setMode('read')}
+                                className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded-sm transition-colors ${
+                                    mode === 'read'
+                                        ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                            >
+                                <BookOpen size={12} />
+                                阅读
+                            </button>
+                        </div>
+                    )}
                     {remoteUsers && <AvatarList remoteUsers={remoteUsers} />}
                     <TooltipProvider>
                         <Tooltip>
@@ -330,6 +381,13 @@ export const Doc = () => {
             </header>
             <div className="flex-1 overflow-hidden">
                 <div className="flex h-full">
+                    {editorInstance && (
+                        <DocOutline
+                            editor={editorInstance}
+                            collapsed={outlineCollapsed}
+                            onToggleCollapse={() => setOutlineCollapsed(!outlineCollapsed)}
+                        />
+                    )}
                     <div className="flex-1 min-w-0 overflow-auto">
                         <div className="flex justify-center">
                             <div className="max-w-[900px] w-full px-4 md:px-12 lg:px-24 pt-24">
@@ -382,13 +440,19 @@ export const Doc = () => {
                                         )}
                                         <h1 className="flex flex-row font-serif text-[40px] font-bold leading-tight">
                                             <div
-                                                contentEditable={page?.role === 'editor' || page?.role === 'owner'}
+                                                contentEditable={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')}
                                                 ref={titleRef}
                                                 className="inline-block flex-1 outline-none text-[#37352f] empty:before:content-[attr(data-placeholder)] empty:before:text-[#c7c7c5]"
                                                 data-placeholder="无标题"
-                                                onInput={page?.role === 'editor' || page?.role === 'owner' ? handleTitleInput : undefined}
+                                                onInput={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner') ? handleTitleInput : undefined}
                                             />
                                         </h1>
+                                        {mode === 'read' && (page?.role === 'editor' || page?.role === 'owner') && (
+                                            <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
+                                                <BookOpen size={14} className="text-zinc-500" />
+                                                <span className="text-xs text-zinc-500">阅读模式 - 你只能查看和复制此文档</span>
+                                            </div>
+                                        )}
                                         {page?.role === 'viewer' && (
                                             <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
                                                 <Eye size={14} className="text-zinc-500" />
@@ -409,13 +473,12 @@ export const Doc = () => {
                                                 doc={doc}
                                                 provider={provider}
                                                 onEditorReady={handleEditorReady}
-                                                editable={page?.role === 'editor' || page?.role === 'owner'}
+                                                editable={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')}
                                             />
                                         )}
                                     </>
                                 )}
                             </div>
-                            {editorInstance && <DocOutline editor={editorInstance} />}
                         </div>
                     </div>
                     {commentPanelOpen && page?.pageId && <CommentPanel pageId={page.pageId} onClose={() => setCommentPanelOpen(false)} />}

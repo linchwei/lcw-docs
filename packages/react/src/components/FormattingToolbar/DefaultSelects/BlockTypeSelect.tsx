@@ -9,6 +9,10 @@ import { useLcwDocEditor } from '../../../hooks/useLcwDocEditor'
 import { useSelectedBlocks } from '../../../hooks/useSelectedBlocks'
 import { useDictionary } from '../../../i18n/dictionary'
 
+const HeadingIcon = ({ level }: { level: number }) => (
+    <span style={{ fontWeight: 700, fontSize: '14px', lineHeight: 1 }}>H{level}</span>
+)
+
 export type BlockTypeSelectItem = {
     name: string
     type: string
@@ -44,6 +48,27 @@ export const blockTypeSelectItems = (dict: Dictionary): BlockTypeSelectItem[] =>
         props: { level: 3 },
         icon: RiH3,
         isSelected: block => block.type === 'heading' && 'level' in block.props && block.props.level === 3,
+    },
+    {
+        name: dict.slash_menu.heading_4.title,
+        type: 'heading',
+        props: { level: 4 },
+        icon: (() => { const H = () => <HeadingIcon level={4} />; return H as any })(),
+        isSelected: block => block.type === 'heading' && 'level' in block.props && block.props.level === 4,
+    },
+    {
+        name: dict.slash_menu.heading_5.title,
+        type: 'heading',
+        props: { level: 5 },
+        icon: (() => { const H = () => <HeadingIcon level={5} />; return H as any })(),
+        isSelected: block => block.type === 'heading' && 'level' in block.props && block.props.level === 5,
+    },
+    {
+        name: dict.slash_menu.heading_6.title,
+        type: 'heading',
+        props: { level: 6 },
+        icon: (() => { const H = () => <HeadingIcon level={6} />; return H as any })(),
+        isSelected: block => block.type === 'heading' && 'level' in block.props && block.props.level === 6,
     },
     {
         name: dict.slash_menu.bullet_list.title,

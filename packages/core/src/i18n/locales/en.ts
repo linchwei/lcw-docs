@@ -18,6 +18,24 @@ export const en = {
             aliases: ['h3', 'heading3', 'subheading'],
             group: 'Headings',
         },
+        heading_4: {
+            title: 'Heading 4',
+            subtext: 'Subsection heading',
+            aliases: ['h4', 'heading4'],
+            group: 'Headings',
+        },
+        heading_5: {
+            title: 'Heading 5',
+            subtext: 'Minor heading',
+            aliases: ['h5', 'heading5'],
+            group: 'Headings',
+        },
+        heading_6: {
+            title: 'Heading 6',
+            subtext: 'Least important heading',
+            aliases: ['h6', 'heading6'],
+            group: 'Headings',
+        },
         numbered_list: {
             title: 'Numbered List',
             subtext: 'List with ordered items',

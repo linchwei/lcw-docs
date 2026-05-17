@@ -1,6 +1,6 @@
 import { InputRule, isTextSelection } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'
-import { createHighlightPlugin } from 'prosemirror-highlight'
+import { createHighlightPlugin, withLineNumbers } from 'prosemirror-highlight'
 import { createParser } from 'prosemirror-highlight/refractor'
 import { refractor } from 'refractor'
 
@@ -115,8 +115,6 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
 
         return ({ editor, node, getPos, HTMLAttributes }) => {
             const pre = document.createElement('pre')
-            const select = document.createElement('select')
-            const selectWrapper = document.createElement('div')
             const { dom, contentDOM } = createDefaultBlockDOMOutputSpec(
                 this.name,
                 'code',
@@ -127,32 +125,66 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
                 this.options.domAttributes?.inlineContent || {}
             )
 
-            const handleLanguageChange = (event: Event) => {
-                const language = (event.target as HTMLSelectElement).value
+            const header = document.createElement('div')
+            header.className = 'bn-code-block-header'
 
-                editor.commands.command(({ tr }) => {
-                    tr.setNodeAttribute(getPos(), 'language', language)
-
-                    return true
-                })
-            }
-
+            const select = document.createElement('select')
+            select.className = 'bn-code-block-lang-select'
             supportedLanguages.forEach(({ id, name }) => {
                 const option = document.createElement('option')
-
                 option.value = id
                 option.text = name
                 select.appendChild(option)
             })
-
-            selectWrapper.contentEditable = 'false'
             select.value = node.attrs.language || this.options.defaultLanguage
+
+            const handleLanguageChange = (event: Event) => {
+                const language = (event.target as HTMLSelectElement).value
+                editor.commands.command(({ tr }) => {
+                    tr.setNodeAttribute(getPos(), 'language', language)
+                    return true
+                })
+            }
+            select.addEventListener('change', handleLanguageChange)
+
+            const actions = document.createElement('div')
+            actions.className = 'bn-code-block-actions'
+
+            const wrapBtn = document.createElement('button')
+            wrapBtn.className = 'bn-code-block-wrap-btn'
+            wrapBtn.textContent = '自动换行'
+            let isWrapped = false
+            const handleWrapToggle = () => {
+                isWrapped = !isWrapped
+                pre.style.whiteSpace = isWrapped ? 'pre-wrap' : 'pre'
+                wrapBtn.textContent = isWrapped ? '取消换行' : '自动换行'
+            }
+            wrapBtn.addEventListener('click', handleWrapToggle)
+
+            const copyBtn = document.createElement('button')
+            copyBtn.className = 'bn-code-block-copy-btn'
+            copyBtn.textContent = '复制'
+            const handleCopy = async () => {
+                const text = contentDOM.textContent || ''
+                try {
+                    await navigator.clipboard.writeText(text)
+                    copyBtn.textContent = '已复制'
+                    setTimeout(() => {
+                        copyBtn.textContent = '复制'
+                    }, 2000)
+                } catch {}
+            }
+            copyBtn.addEventListener('click', handleCopy)
+
+            actions.appendChild(wrapBtn)
+            actions.appendChild(copyBtn)
+            header.appendChild(select)
+            header.appendChild(actions)
+
             dom.removeChild(contentDOM)
-            dom.appendChild(selectWrapper)
+            dom.appendChild(header)
             dom.appendChild(pre)
             pre.appendChild(contentDOM)
-            selectWrapper.appendChild(select)
-            select.addEventListener('change', handleLanguageChange)
 
             return {
                 dom,
@@ -161,13 +193,13 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
                     if (newNode.type !== this.type) {
                         return false
                     }
-
                     select.value = newNode.attrs.language || this.options.defaultLanguage
-
                     return true
                 },
                 destroy: () => {
                     select.removeEventListener('change', handleLanguageChange)
+                    wrapBtn.removeEventListener('click', handleWrapToggle)
+                    copyBtn.removeEventListener('click', handleCopy)
                 },
             }
         }
@@ -188,8 +220,10 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
             }
         }
 
+        const parserWithLineNumbers = withLineNumbers(safeParser)
+
         const refractorPlugin = createHighlightPlugin({
-            parser: safeParser,
+            parser: parserWithLineNumbers,
             languageExtractor: node => node.attrs.language,
             nodeTypes: [this.name],
         })

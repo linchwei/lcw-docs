@@ -48,7 +48,9 @@ import { AboutDialog } from '@/components/LayoutAside/AboutDialog'
 import { SettingsDialog } from '@/components/LayoutAside/SettingsDialog'
 import { NotificationBell } from '@/components/NotificationBell'
 import { PageTags } from '@/components/PageTags'
+import { SearchBar } from '@/components/SearchBar'
 import { SharePopover } from '@/components/SharePopover'
+import { ShortcutPanel } from '@/components/ShortcutPanel'
 import { StatusBar } from '@/components/StatusBar'
 import { VersionPanel } from '@/components/VersionPanel'
 import { useEditorContext } from '@/context/EditorContext'
@@ -80,6 +82,8 @@ export const Doc = () => {
     const [exportOpen, setExportOpen] = useState(false)
     const [settingsOpen, setSettingsOpen] = useState(false)
     const [aboutOpen, setAboutOpen] = useState(false)
+    const [searchBarOpen, setSearchBarOpen] = useState(false)
+    const [shortcutPanelOpen, setShortcutPanelOpen] = useState(false)
     const [mode, setMode] = useState<'edit' | 'read'>('edit')
     const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
         return localStorage.getItem('doc-outline-collapsed') === 'true'
@@ -192,6 +196,33 @@ export const Doc = () => {
         localStorage.removeItem('token')
         navigate(`/account/login?redirect=${window.location.pathname}`)
     }
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+                e.preventDefault()
+                setSearchBarOpen(true)
+            }
+            if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'H') {
+                e.preventDefault()
+                setSearchBarOpen(true)
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+                e.preventDefault()
+                setShortcutPanelOpen(true)
+            }
+            if (e.key === 'e' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                const active = document.activeElement
+                const isEditor = active?.closest('.bn-editor')
+                const isInput = active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA' || (active as HTMLElement)?.isContentEditable
+                if (!isInput && !isEditor && page?.role === 'owner' || page?.role === 'editor') {
+                    setMode('edit')
+                }
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [page?.role])
 
     const handleTitleInput = debounce((e: React.FormEvent<HTMLDivElement>) => {
         const currentPage = pageRef.current
@@ -525,6 +556,7 @@ export const Doc = () => {
                         />
                     )}
                     <div className="flex-1 min-w-0 overflow-auto">
+                        <SearchBar editor={editorInstance} open={searchBarOpen} onClose={() => setSearchBarOpen(false)} />
                         <div className={`w-full ${pageWidth === 'default' ? 'max-w-[820px]' : pageWidth === 'wide' ? 'max-w-[1100px]' : 'max-w-none'} pl-6 pr-6 lg:pr-24 pt-24`}>
                                 {isLoading ? (
                                     <div className="flex items-center justify-center py-20">
@@ -697,6 +729,7 @@ export const Doc = () => {
             <ExportPanel open={exportOpen} onOpenChange={setExportOpen} editor={editorInstance} fileName={page?.title || 'document'} />
             <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} username={currentUser?.username} />
             <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
+            <ShortcutPanel open={shortcutPanelOpen} onClose={() => setShortcutPanelOpen(false)} />
         </SidebarInset>
     )
 }

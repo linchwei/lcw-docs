@@ -271,10 +271,18 @@ export class SideMenuView<BSchema extends BlockSchema, I extends InlineContentSc
             this.mousePos.y > editorOuterBoundingBox.top &&
             this.mousePos.y < editorOuterBoundingBox.bottom
 
+        if (!cursorWithinEditor) {
+            if (this.state?.show) {
+                this.state.show = false
+                this.emitUpdate(this.state)
+            }
+
+            return
+        }
+
         const editorWrapper = this.pmView.dom!.parentElement!
 
         if (
-            cursorWithinEditor &&
             event &&
             event.target &&
             !(editorWrapper === event.target || editorWrapper.contains(event.target as HTMLElement))

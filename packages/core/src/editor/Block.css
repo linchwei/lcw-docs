@@ -3,7 +3,7 @@ BASIC STYLES
 */
 
 .bn-block-outer {
-    line-height: 1.5;
+    line-height: 1.6;
     transition: margin 0.2s;
 }
 
@@ -11,17 +11,19 @@ BASIC STYLES
 .bn-block {
     display: flex;
     flex-direction: column;
-}
-
 .bn-block-content {
     display: flex;
-    padding: 3px 0;
     transition: font-size 0.2s;
     width: 100%;
-    /*
+}   /*
   because the content elements are display: block
   we use flex to position them next to list markers
   */
+}
+
+.bn-block-content > .bn-inline-content {
+    flex: 1;
+    min-width: 0;
 }
 
 .bn-block-content::before {
@@ -155,6 +157,7 @@ NESTED BLOCKS
 .bn-block-outer:not([data-prev-type]) > .bn-block > .bn-block-content[data-content-type='heading'] {
     font-size: var(--level);
     font-weight: bold;
+    line-height: 1.3;
 }
 
 /* LISTS */

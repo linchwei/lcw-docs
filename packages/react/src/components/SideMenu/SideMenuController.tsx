@@ -46,7 +46,7 @@ export const SideMenuController = <
 
     const state = useUIPluginState(editor.sideMenu.onUpdate.bind(editor.sideMenu))
     const { isMounted, ref, style, getFloatingProps } = useUIElementPositioning(state?.show || false, state?.referencePos || null, 1000, {
-        placement: 'left-start',
+        placement: 'left',
         isDragging,
     })
 

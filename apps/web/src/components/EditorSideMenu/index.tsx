@@ -83,6 +83,11 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
         editor.removeBlocks([block])
     }, [editor, block])
 
+    const handleHoverInsert = useCallback(() => {
+        editor.setTextCursorPosition(block)
+        editor.openSuggestionMenu('/')
+    }, [editor, block])
+
     const handleAddBelow = useCallback(() => {
         setMenuOpen(false)
         const insertedBlock = editor.insertBlocks([{ type: 'paragraph' }], block, 'after')[0]
@@ -125,6 +130,7 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
                         onDragStart={blockDragStart}
                         onDragEnd={blockDragEnd}
                         onMouseDown={freezeMenu}
+                        onMouseEnter={handleHoverInsert}
                         className="flex items-center justify-center w-6 h-6 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors cursor-grab"
                         title="拖拽移动"
                     >

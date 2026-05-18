@@ -168,6 +168,10 @@ export function createBlockSpec<T extends CustomBlockConfig, I extends InlineCon
             return ({ getPos }) => {
                 const editor = this.options.editor
                 const block = getBlockFromPos(getPos, editor, this.editor, blockConfig.type)
+                if (!block) {
+                    const div = document.createElement('div')
+                    return { dom: div }
+                }
                 const blockContentDOMAttributes = this.options.domAttributes?.blockContent || {}
 
                 const output = blockImplementation.render(block as any, editor)

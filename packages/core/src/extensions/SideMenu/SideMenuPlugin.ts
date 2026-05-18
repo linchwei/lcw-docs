@@ -163,13 +163,17 @@ export class SideMenuView<BSchema extends BlockSchema, I extends InlineContentSc
                     'text' in blockData.content[0] &&
                     blockData.content[0].text === '')
 
+            const computedStyle = window.getComputedStyle(blockContent)
+            const fontSize = parseFloat(computedStyle.fontSize)
+            const paddingTop = parseFloat(computedStyle.paddingTop)
+
             this.updateState({
                 show: true,
                 referencePos: new DOMRect(
                     editorBoundingBox.x,
-                    blockContentBoundingBox.y,
+                    blockContentBoundingBox.y + paddingTop,
                     blockContentBoundingBox.width,
-                    blockContentBoundingBox.height
+                    fontSize
                 ),
                 block: blockData,
                 isBlockEmpty,

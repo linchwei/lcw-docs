@@ -101,7 +101,10 @@ export function createReactBlockSpec<const T extends CustomBlockConfig, const I 
                 const nodeView = ReactNodeViewRenderer(
                     (props: NodeViewProps) => {
                         const editor = this.options.editor! as LcwDocEditor<any>
-                        const block = getBlockFromPos(props.getPos, editor, this.editor, blockConfig.type) as any
+                        const block = getBlockFromPos(props.getPos, editor, this.editor, blockConfig.type)
+                        if (!block) {
+                            return <div />
+                        }
                         const blockContentDOMAttributes = this.options.domAttributes?.blockContent || {}
                         const { nodeViewContentRef: ref } = useReactNodeView()
 

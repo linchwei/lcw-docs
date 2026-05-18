@@ -30,22 +30,27 @@ export function insertOrUpdateBlock<BSchema extends BlockSchema, I extends Inlin
 
     let newBlock: Block<BSchema, I, S>
 
-    if (
+    const isEmptyOrSlash =
         Array.isArray(currentBlock.content) &&
         ((currentBlock.content.length === 1 &&
             isStyledTextInlineContent(currentBlock.content[0]) &&
             currentBlock.content[0].type === 'text' &&
             currentBlock.content[0].text === '/') ||
             currentBlock.content.length === 0)
-    ) {
+
+    if (isEmptyOrSlash) {
         newBlock = editor.updateBlock(currentBlock, block)
 
         if (block.content) {
             editor.setTextCursorPosition(newBlock)
         }
     } else {
-        newBlock = editor.insertBlocks([block], currentBlock, 'after')[0]
-        editor.setTextCursorPosition(editor.getTextCursorPosition().nextBlock!)
+        try {
+            newBlock = editor.updateBlock(currentBlock, block)
+        } catch {
+            newBlock = editor.insertBlocks([block], currentBlock, 'after')[0]
+            editor.setTextCursorPosition(editor.getTextCursorPosition().nextBlock!)
+        }
     }
 
     setSelectionToNextContentEditableBlock(editor)
@@ -184,13 +189,9 @@ export function getDefaultSlashMenuItems<BSchema extends BlockSchema, I extends 
     if (checkDefaultBlockTypeInSchema('codeBlock', editor)) {
         items.push({
             onItemClick: () => {
-                const pos = editor._tiptapEditor.state.selection.from
-
                 insertOrUpdateBlock(editor, {
                     type: 'codeBlock',
                 })
-
-                editor._tiptapEditor.commands.setTextSelection(pos)
             },
             badge: formatKeyboardShortcut('Mod-Alt-c'),
             key: 'code_block',

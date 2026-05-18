@@ -172,7 +172,9 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
                     setTimeout(() => {
                         copyBtn.textContent = '复制'
                     }, 2000)
-                } catch {}
+                } catch {
+                    /* empty */
+                }
             }
             copyBtn.addEventListener('click', handleCopy)
 

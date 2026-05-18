@@ -24,7 +24,7 @@ export const Callout = createVueBlockSpec(
             setup(props) {
                 const showMenu = ref(false)
 
-                const config = CALLOUT_CONFIG[((props.block as any)?.props?.calloutType || 'info') as CalloutType]
+                const _config = CALLOUT_CONFIG[((props.block as any)?.props?.calloutType || 'info') as CalloutType]
 
                 function handleTypeChange(type: CalloutType) {
                     ;(props as any).editor.updateBlock((props as any).block.id, {
@@ -74,13 +74,12 @@ export const Callout = createVueBlockSpec(
                                               cursor: 'pointer',
                                               fontSize: '13px',
                                               color: '#37352f',
-                                              backgroundColor:
-                                                  type === calloutType ? '#f7f6f3' : 'transparent',
+                                              backgroundColor: type === calloutType ? '#f7f6f3' : 'transparent',
                                           },
                                       },
-                                      [h('span', { innerHTML: item.icon }), h('span', item.label)],
-                                  ),
-                              ),
+                                      [h('span', { innerHTML: item.icon }), h('span', item.label)]
+                                  )
+                              )
                           )
                         : null
 
@@ -111,14 +110,14 @@ export const Callout = createVueBlockSpec(
                                         userSelect: 'none',
                                     },
                                 },
-                                cfg.icon,
+                                cfg.icon
                             ),
                             h('div', { ref: props.contentRef, style: { flex: 1, outline: 'none' } }),
                             menuItems,
-                        ].filter(Boolean),
+                        ].filter(Boolean)
                     )
                 }
             },
         }),
-    },
+    }
 )

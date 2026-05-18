@@ -41,10 +41,8 @@ export function SuggestionMenuController<
             item.onItemClick(editor)
         })
 
-    const getItemsOrDefault = (
-        getItems ||
-        ((async (query: string) => filterSuggestionItems(getDefaultReactSlashMenuItems(editor), query)) as any as typeof getItems)
-    )!
+    const getItemsOrDefault = (getItems ||
+        ((async (query: string) => filterSuggestionItems(getDefaultReactSlashMenuItems(editor), query)) as any as typeof getItems))!
 
     const callbacks = {
         closeMenu: editor.suggestionMenus.closeMenu,
@@ -52,8 +50,8 @@ export function SuggestionMenuController<
     }
 
     const cb = (callback: (state: SuggestionMenuState) => void) => {
-            return editor.suggestionMenus.onUpdate(triggerCharacter, callback)
-        }
+        return editor.suggestionMenus.onUpdate(triggerCharacter, callback)
+    }
 
     const state = useUIPluginState(cb)
 

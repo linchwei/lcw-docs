@@ -1,18 +1,18 @@
 import { LcwDocEditor } from '@lcw-doc/core'
 import {
+    AlignmentType,
+    BorderStyle,
     Document,
     ExternalHyperlink,
     HeadingLevel,
     Packer,
     Paragraph,
-    TextRun,
-    AlignmentType,
-    Table,
-    TableRow,
-    TableCell,
-    WidthType,
-    BorderStyle,
     ShadingType,
+    Table,
+    TableCell,
+    TableRow,
+    TextRun,
+    WidthType,
 } from 'docx'
 import { saveAs } from 'file-saver'
 import html2pdf from 'html2pdf.js'

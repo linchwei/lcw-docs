@@ -1,11 +1,7 @@
 import { utilities as nestWinstonModuleUtilities } from 'nest-winston'
 import * as winston from 'winston'
 
-const logFormat = winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json(),
-)
+const logFormat = winston.format.combine(winston.format.timestamp(), winston.format.errors({ stack: true }), winston.format.json())
 
 const consoleFormat = winston.format.combine(
     winston.format.timestamp(),
@@ -13,7 +9,7 @@ const consoleFormat = winston.format.combine(
     nestWinstonModuleUtilities.format.nestLike('LCW-Docs', {
         colors: true,
         prettyPrint: true,
-    }),
+    })
 )
 
 export const winstonConfig: winston.LoggerOptions = {

@@ -1,4 +1,3 @@
-import { LcwDocEditor } from '@lcw-doc/core'
 import type {
     BlockSchema,
     DefaultBlockSchema,
@@ -8,6 +7,7 @@ import type {
     LcwDocEditorOptions,
     StyleSchema,
 } from '@lcw-doc/core'
+import { LcwDocEditor } from '@lcw-doc/core'
 
 export function useCreateLcwDoc<
     BSchema extends BlockSchema = DefaultBlockSchema,

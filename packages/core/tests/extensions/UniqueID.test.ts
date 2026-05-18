@@ -1,4 +1,5 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+
 import { UniqueID } from '../../src/extensions/UniqueID/UniqueID'
 
 const { mockV4 } = vi.hoisted(() => {
@@ -67,7 +68,7 @@ describe('UniqueID Extension', () => {
         })
 
         test('should accept custom filterTransaction function', () => {
-            const customFilter = vi.fn((_tr: any) => true)
+            const customFilter = vi.fn(() => true)
             const extension = UniqueID.configure({
                 types: ['paragraph'],
                 filterTransaction: customFilter as any,
@@ -150,7 +151,7 @@ describe('UniqueID Extension', () => {
 
     describe('addProseMirrorPlugins', () => {
         test('should have filterTransaction option for controlling transaction filtering', () => {
-            const customFilter = vi.fn((_tr: any) => false)
+            const customFilter = vi.fn(() => false)
             const extension = UniqueID.configure({
                 types: ['paragraph'],
                 filterTransaction: customFilter as any,

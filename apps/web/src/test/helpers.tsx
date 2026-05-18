@@ -1,8 +1,8 @@
-import React from 'react'
-import { render } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router-dom'
 import { SidebarProvider } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { render } from '@testing-library/react'
+import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
 
 function createTestQueryClient() {
     return new QueryClient({
@@ -26,9 +26,7 @@ export function renderWithProviders(
         return (
             <QueryClientProvider client={queryClient}>
                 <MemoryRouter initialEntries={[route]}>
-                    <SidebarProvider>
-                        {children}
-                    </SidebarProvider>
+                    <SidebarProvider>{children}</SidebarProvider>
                 </MemoryRouter>
             </QueryClientProvider>
         )

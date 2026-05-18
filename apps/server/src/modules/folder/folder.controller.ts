@@ -15,7 +15,13 @@ export class FolderController {
     constructor(private readonly folderService: FolderService) {}
 
     @ApiOperation({ summary: '获取文件夹列表', description: '返回当前用户的所有文件夹' })
-    @ApiResponse({ status: 200, description: '成功', schema: { properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } } } })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
     @Get()
     async list(@Request() req) {
         const data = await this.folderService.list({ userId: req.user.id })
@@ -23,8 +29,20 @@ export class FolderController {
     }
 
     @ApiOperation({ summary: '创建文件夹', description: '创建新文件夹，可指定父文件夹' })
-    @ApiBody({ schema: { type: 'object', required: ['name'], properties: { name: { type: 'string', description: '文件夹名称' }, parentId: { type: 'string', description: '父文件夹ID' } } } })
-    @ApiResponse({ status: 200, description: '成功', schema: { properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } } } })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: ['name'],
+            properties: { name: { type: 'string', description: '文件夹名称' }, parentId: { type: 'string', description: '父文件夹ID' } },
+        },
+    })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
     @Post()
     async create(@Body(new ZodValidationPipe(createFolderSchema)) body: CreateFolderDto, @Request() req) {
         const result = await this.folderService.create({
@@ -36,8 +54,25 @@ export class FolderController {
     }
 
     @ApiOperation({ summary: '更新文件夹', description: '更新文件夹名称、父文件夹或排序' })
-    @ApiBody({ schema: { type: 'object', required: ['folderId'], properties: { folderId: { type: 'string', description: '文件夹ID' }, name: { type: 'string', description: '文件夹名称' }, parentId: { type: 'string', description: '父文件夹ID', nullable: true }, sortOrder: { type: 'number', description: '排序顺序' } } } })
-    @ApiResponse({ status: 200, description: '成功', schema: { properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } } } })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: ['folderId'],
+            properties: {
+                folderId: { type: 'string', description: '文件夹ID' },
+                name: { type: 'string', description: '文件夹名称' },
+                parentId: { type: 'string', description: '父文件夹ID', nullable: true },
+                sortOrder: { type: 'number', description: '排序顺序' },
+            },
+        },
+    })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
     @Put()
     async update(@Body(new ZodValidationPipe(updateFolderSchema)) body: UpdateFolderDto, @Request() req) {
         const result = await this.folderService.update({
@@ -52,7 +87,13 @@ export class FolderController {
 
     @ApiOperation({ summary: '删除文件夹' })
     @ApiParam({ name: 'folderId', description: '文件夹 ID' })
-    @ApiResponse({ status: 200, description: '成功', schema: { properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } } } })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
     @Delete(':folderId')
     async delete(@Param('folderId') folderId: string, @Request() req) {
         const result = await this.folderService.delete({ folderId, userId: req.user.id })

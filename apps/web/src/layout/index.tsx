@@ -2,10 +2,10 @@ import { SidebarProvider } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
-import { EditorProvider } from '@/context/EditorContext'
-import { Aside } from '@/components/LayoutAside/Aside'
 import { GlobalAIChat } from '@/components/GlobalAIChat'
 import { KeyboardShortcutsDialog } from '@/components/KeyboardShortcutsDialog'
+import { Aside } from '@/components/LayoutAside/Aside'
+import { EditorProvider } from '@/context/EditorContext'
 
 export function Layout() {
     const [shortcutsOpen, setShortcutsOpen] = useState(false)

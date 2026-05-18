@@ -1,5 +1,5 @@
-import { ref, computed, watch, isRef, type Ref } from 'vue'
-import { useFloating, offset, flip, shift, autoUpdate, type UseFloatingOptions, type ReferenceElement } from '@floating-ui/vue'
+import { autoUpdate, flip, offset, type ReferenceElement, shift, useFloating, type UseFloatingOptions } from '@floating-ui/vue'
+import { computed, isRef, type Ref, ref, watch } from 'vue'
 
 export function useUIElementPositioning(
     show: Ref<boolean> | boolean,
@@ -21,21 +21,29 @@ export function useUIElementPositioning(
         ...options,
     })
 
-    watch(showRef, (val) => {
-        isMounted.value = val
-    }, { immediate: true })
+    watch(
+        showRef,
+        val => {
+            isMounted.value = val
+        },
+        { immediate: true }
+    )
 
-    watch(referencePosRef, (pos) => {
-        if (pos) {
-            referenceRef.value = {
-                getBoundingClientRect: () => pos,
-                contextElement: undefined,
-            } as ReferenceElement
-            update()
-        } else {
-            referenceRef.value = null
-        }
-    }, { immediate: true, deep: true })
+    watch(
+        referencePosRef,
+        pos => {
+            if (pos) {
+                referenceRef.value = {
+                    getBoundingClientRect: () => pos,
+                    contextElement: undefined,
+                } as ReferenceElement
+                update()
+            } else {
+                referenceRef.value = null
+            }
+        },
+        { immediate: true, deep: true }
+    )
 
     const style = computed(() => ({
         position: strategy.value,

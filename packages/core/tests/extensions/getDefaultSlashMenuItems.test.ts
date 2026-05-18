@@ -1,6 +1,11 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
-import { getDefaultSlashMenuItems, filterSuggestionItems, insertOrUpdateBlock } from '../../src/extensions/SuggestionMenu/getDefaultSlashMenuItems'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+
 import type { DefaultSuggestionItem } from '../../src/extensions/SuggestionMenu/DefaultSuggestionItem'
+import {
+    filterSuggestionItems,
+    getDefaultSlashMenuItems,
+    insertOrUpdateBlock,
+} from '../../src/extensions/SuggestionMenu/getDefaultSlashMenuItems'
 
 const { mockCheckDefaultBlockTypeInSchema } = vi.hoisted(() => ({
     mockCheckDefaultBlockTypeInSchema: vi.fn(),
@@ -14,12 +19,25 @@ const mockDictionary = {
     slash_menu: {
         heading: { title: 'Heading 1', subtext: 'Top-level heading', aliases: ['h', 'heading1', 'h1'], group: 'Headings' },
         heading_2: { title: 'Heading 2', subtext: 'Key section heading', aliases: ['h2', 'heading2', 'subheading'], group: 'Headings' },
-        heading_3: { title: 'Heading 3', subtext: 'Subsection and group heading', aliases: ['h3', 'heading3', 'subheading'], group: 'Headings' },
+        heading_3: {
+            title: 'Heading 3',
+            subtext: 'Subsection and group heading',
+            aliases: ['h3', 'heading3', 'subheading'],
+            group: 'Headings',
+        },
+        heading_4: { title: 'Heading 4', subtext: 'Deep subsection heading', aliases: ['h4', 'heading4'], group: 'Headings' },
+        heading_5: { title: 'Heading 5', subtext: 'Minor heading', aliases: ['h5', 'heading5'], group: 'Headings' },
+        heading_6: { title: 'Heading 6', subtext: 'Smallest heading', aliases: ['h6', 'heading6'], group: 'Headings' },
         numbered_list: { title: 'Numbered List', subtext: 'List with ordered items', aliases: ['ol', 'li', 'list'], group: 'Basic blocks' },
         bullet_list: { title: 'Bullet List', subtext: 'List with unordered items', aliases: ['ul', 'li', 'list'], group: 'Basic blocks' },
         check_list: { title: 'Check List', subtext: 'List with checkboxes', aliases: ['ul', 'li', 'list'], group: 'Basic blocks' },
         paragraph: { title: 'Paragraph', subtext: 'The body of your document', aliases: ['p', 'paragraph'], group: 'Basic blocks' },
-        code_block: { title: 'Code Block', subtext: 'Code block with syntax highlighting', aliases: ['code', 'pre'], group: 'Basic blocks' },
+        code_block: {
+            title: 'Code Block',
+            subtext: 'Code block with syntax highlighting',
+            aliases: ['code', 'pre'],
+            group: 'Basic blocks',
+        },
         table: { title: 'Table', subtext: 'Table with editable cells', aliases: ['table'], group: 'Advanced' },
         image: { title: 'Image', subtext: 'Resizable image with caption', aliases: ['image', 'img'], group: 'Media' },
         video: { title: 'Video', subtext: 'Resizable video with caption', aliases: ['video', 'mp4'], group: 'Media' },
@@ -90,15 +108,23 @@ describe('getDefaultSlashMenuItems', () => {
     describe('with all block types available', () => {
         test('should return all slash menu items', () => {
             setupBlockTypes([
-                'heading', 'numberedListItem', 'bulletListItem',
-                'checkListItem', 'paragraph', 'codeBlock',
-                'table', 'image', 'video', 'audio', 'file',
+                'heading',
+                'numberedListItem',
+                'bulletListItem',
+                'checkListItem',
+                'paragraph',
+                'codeBlock',
+                'table',
+                'image',
+                'video',
+                'audio',
+                'file',
             ])
             const editor = createMockEditor()
 
             const items = getDefaultSlashMenuItems(editor)
 
-            expect(items.length).toBe(14)
+            expect(items.length).toBe(17)
         })
 
         test('should include heading items with correct keys', () => {
@@ -156,9 +182,7 @@ describe('getDefaultSlashMenuItems', () => {
 
             const items = getDefaultSlashMenuItems(editor)
 
-            const headingKeys = items.filter(item =>
-                item.key === 'heading' || item.key === 'heading_2' || item.key === 'heading_3'
-            )
+            const headingKeys = items.filter(item => item.key === 'heading' || item.key === 'heading_2' || item.key === 'heading_3')
             expect(headingKeys.length).toBe(0)
         })
 
@@ -357,10 +381,7 @@ describe('getDefaultSlashMenuItems', () => {
                     type: 'table',
                     content: {
                         type: 'tableContent',
-                        rows: [
-                            { cells: ['', '', ''] },
-                            { cells: ['', '', ''] },
-                        ],
+                        rows: [{ cells: ['', '', ''] }, { cells: ['', '', ''] }],
                     },
                 })
             )
@@ -378,10 +399,7 @@ describe('getDefaultSlashMenuItems', () => {
 
             numberedListItem.onItemClick()
 
-            expect(editor.updateBlock).toHaveBeenCalledWith(
-                expect.anything(),
-                expect.objectContaining({ type: 'numberedListItem' })
-            )
+            expect(editor.updateBlock).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ type: 'numberedListItem' }))
         })
 
         test('bulletListItem onItemClick should insert bullet list', () => {
@@ -396,10 +414,7 @@ describe('getDefaultSlashMenuItems', () => {
 
             bulletListItem.onItemClick()
 
-            expect(editor.updateBlock).toHaveBeenCalledWith(
-                expect.anything(),
-                expect.objectContaining({ type: 'bulletListItem' })
-            )
+            expect(editor.updateBlock).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ type: 'bulletListItem' }))
         })
 
         test('checkListItem onItemClick should insert check list', () => {
@@ -414,10 +429,7 @@ describe('getDefaultSlashMenuItems', () => {
 
             checkListItem.onItemClick()
 
-            expect(editor.updateBlock).toHaveBeenCalledWith(
-                expect.anything(),
-                expect.objectContaining({ type: 'checkListItem' })
-            )
+            expect(editor.updateBlock).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ type: 'checkListItem' }))
         })
 
         test('codeBlock onItemClick should insert code block', () => {
@@ -432,10 +444,7 @@ describe('getDefaultSlashMenuItems', () => {
 
             codeBlockItem.onItemClick()
 
-            expect(editor.updateBlock).toHaveBeenCalledWith(
-                expect.anything(),
-                expect.objectContaining({ type: 'codeBlock' })
-            )
+            expect(editor.updateBlock).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ type: 'codeBlock' }))
         })
     })
 
@@ -601,9 +610,7 @@ describe('insertOrUpdateBlock', () => {
             block: { type: 'paragraph', content: undefined },
         })
 
-        expect(() => insertOrUpdateBlock(editor, { type: 'paragraph' })).toThrow(
-            "Slash Menu open in a block that doesn't contain content."
-        )
+        expect(() => insertOrUpdateBlock(editor, { type: 'paragraph' })).toThrow("Slash Menu open in a block that doesn't contain content.")
     })
 
     test('should call updateBlock when current block has only "/" text', () => {

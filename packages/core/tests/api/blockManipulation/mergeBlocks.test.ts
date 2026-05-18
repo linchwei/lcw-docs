@@ -1,7 +1,8 @@
-import { describe, test, expect, beforeEach } from 'vitest'
-import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
-import { mergeBlocksCommand, getPrevBlockPos } from '../../../src/api/blockManipulation/commands/mergeBlocks/mergeBlocks'
+import { beforeEach, describe, expect, test } from 'vitest'
+
+import { getPrevBlockPos, mergeBlocksCommand } from '../../../src/api/blockManipulation/commands/mergeBlocks/mergeBlocks'
 import { getNodeById } from '../../../src/api/nodeUtil'
+import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 
 describe('mergeBlocksCommand', () => {
     let editor: LcwDocEditor

@@ -1,9 +1,9 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
-import * as path from 'path'
 import * as fs from 'fs'
+import * as path from 'path'
+import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('API Boundary - Upload', () => {
     let app: INestApplication

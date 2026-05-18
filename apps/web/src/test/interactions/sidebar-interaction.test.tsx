@@ -1,19 +1,19 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { renderWithProviders, mockAuthenticatedUser, clearAuthenticatedUser } from '@/test/helpers'
+import { clearAuthenticatedUser, mockAuthenticatedUser, renderWithProviders } from '@/test/helpers'
 
 vi.mock('@/components/EmptyState', () => ({
     EmptyState: () => <div data-testid="empty-state">暂无文档</div>,
 }))
 
 vi.mock('@/components/MarkdownUploadDialog', () => ({
-    MarkdownUploadDialog: ({ open }: any) => open ? <div data-testid="markdown-upload-dialog">Upload</div> : null,
+    MarkdownUploadDialog: ({ open }: any) => (open ? <div data-testid="markdown-upload-dialog">Upload</div> : null),
 }))
 
 vi.mock('@/components/TemplateDialog', () => ({
-    TemplateDialog: ({ open }: any) => open ? <div data-testid="template-dialog">Template</div> : null,
+    TemplateDialog: ({ open }: any) => (open ? <div data-testid="template-dialog">Template</div> : null),
 }))
 
 vi.mock('@/utils/randomEmoji', () => ({

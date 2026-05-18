@@ -63,30 +63,30 @@ export const ColorStyleButton = () => {
     }, editor)
 
     const setTextColor = (color: string) => {
-            if (!textColorInSchema) {
-                throw Error('Tried to set text color, but style does not exist in editor schema.')
-            }
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            color === 'default' ? editor.removeStyles({ textColor: color }) : editor.addStyles({ textColor: color })
-
-            setTimeout(() => {
-                editor.focus()
-            })
+        if (!textColorInSchema) {
+            throw Error('Tried to set text color, but style does not exist in editor schema.')
         }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        color === 'default' ? editor.removeStyles({ textColor: color }) : editor.addStyles({ textColor: color })
+
+        setTimeout(() => {
+            editor.focus()
+        })
+    }
 
     const setBackgroundColor = (color: string) => {
-            if (!backgroundColorInSchema) {
-                throw Error('Tried to set background color, but style does not exist in editor schema.')
-            }
-
-            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            color === 'default' ? editor.removeStyles({ backgroundColor: color }) : editor.addStyles({ backgroundColor: color })
-
-            setTimeout(() => {
-                editor.focus()
-            })
+        if (!backgroundColorInSchema) {
+            throw Error('Tried to set background color, but style does not exist in editor schema.')
         }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        color === 'default' ? editor.removeStyles({ backgroundColor: color }) : editor.addStyles({ backgroundColor: color })
+
+        setTimeout(() => {
+            editor.focus()
+        })
+    }
 
     const show = (() => {
         if (!textColorInSchema && !backgroundColorInSchema) {

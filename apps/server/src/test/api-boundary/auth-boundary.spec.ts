@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('API Boundary - Auth', () => {
     let app: INestApplication
@@ -19,9 +19,7 @@ describe('API Boundary - Auth', () => {
 
     describe('API-AUTH-001: token 有效期验证', () => {
         it('should access currentUser with valid token', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/currentUser')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/currentUser').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
             expect(res.body.data).toHaveProperty('username', 'testboundaryauth')
         })
@@ -29,13 +27,9 @@ describe('API Boundary - Auth', () => {
 
     describe('API-AUTH-002: 登出后 token 是否失效', () => {
         it('should still access currentUser after logout (JWT stateless)', async () => {
-            await request(app.getHttpServer())
-                .post('/api/auth/logout')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            await request(app.getHttpServer()).post('/api/auth/logout').set('Authorization', `Bearer ${testUser.token}`)
 
-            const res = await request(app.getHttpServer())
-                .get('/api/currentUser')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/currentUser').set('Authorization', `Bearer ${testUser.token}`)
 
             if (res.status === 200) {
                 expect(res.body.data).toHaveProperty('username')
@@ -47,9 +41,7 @@ describe('API Boundary - Auth', () => {
 
     describe('API-AUTH-003: 注册用户名边界 - 恰好3字符', () => {
         it('should register with 3-character username', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({ username: 'abc', password: '123456' })
+            const res = await request(app.getHttpServer()).post('/api/user/register').send({ username: 'abc', password: '123456' })
             expect([201, 400]).toContain(res.status)
         })
     })
@@ -65,9 +57,7 @@ describe('API Boundary - Auth', () => {
 
     describe('API-AUTH-005: 注册密码边界 - 恰好6字符', () => {
         it('should register with 6-character password', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({ username: 'testpwd6char', password: '123456' })
+            const res = await request(app.getHttpServer()).post('/api/user/register').send({ username: 'testpwd6char', password: '123456' })
             expect([201, 400]).toContain(res.status)
         })
     })
@@ -83,9 +73,7 @@ describe('API Boundary - Auth', () => {
 
     describe('API-AUTH-007: 登录 - 用户名含空格', () => {
         it('should handle username with spaces', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/auth/login')
-                .send({ username: 'test user', password: 'xxx' })
+            const res = await request(app.getHttpServer()).post('/api/auth/login').send({ username: 'test user', password: 'xxx' })
             expect([400, 401]).toContain(res.status)
         })
     })
@@ -93,13 +81,9 @@ describe('API Boundary - Auth', () => {
     describe('API-AUTH-008: 登录 - 密码含特殊字符', () => {
         it('should handle password with special characters', async () => {
             const specialPwd = 'p@ss!w0rd#'
-            await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({ username: 'testspecpwd', password: specialPwd })
+            await request(app.getHttpServer()).post('/api/user/register').send({ username: 'testspecpwd', password: specialPwd })
 
-            const res = await request(app.getHttpServer())
-                .post('/api/auth/login')
-                .send({ username: 'testspecpwd', password: specialPwd })
+            const res = await request(app.getHttpServer()).post('/api/auth/login').send({ username: 'testspecpwd', password: specialPwd })
             expect([201, 400]).toContain(res.status)
         })
     })

@@ -102,8 +102,7 @@ export function createInlineContentSpec<T extends CustomInlineContentConfig, S e
                     editor.schema.inlineContentSchema,
                     editor.schema.styleSchema
                 ) as any as InlineContentFromConfig<T, S>,
-                () => {
-                },
+                () => {},
                 editor
             )
 

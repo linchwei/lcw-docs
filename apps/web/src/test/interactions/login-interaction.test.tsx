@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { renderWithProviders, clearAuthenticatedUser } from '@/test/helpers'
+import { clearAuthenticatedUser, renderWithProviders } from '@/test/helpers'
 
 vi.mock('@/services', () => ({
     login: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('@/components/PasswordInput', () => ({
                 data-testid="password-input"
                 type="password"
                 value={value || ''}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={e => onChange(e.target.value)}
                 placeholder={placeholder}
             />
             <button
@@ -40,8 +40,8 @@ vi.mock('@lcw-doc/shadcn-shared-ui/hooks/use-toast', () => ({
     useToast: () => ({ toast: vi.fn() }),
 }))
 
-import { login, register } from '@/services'
 import { Login } from '@/pages/Account/Login'
+import { login, register } from '@/services'
 
 const mockedLogin = login as ReturnType<typeof vi.fn>
 const mockedRegister = register as ReturnType<typeof vi.fn>
@@ -54,7 +54,9 @@ describe('Login Interaction Tests', () => {
 
     it('UI-INT-001: should disable submit button during login', async () => {
         const user = userEvent.setup()
-        mockedLogin.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve({ data: { access_token: 'token' }, success: true }), 2000)))
+        mockedLogin.mockImplementation(
+            () => new Promise(resolve => setTimeout(() => resolve({ data: { access_token: 'token' }, success: true }), 2000))
+        )
 
         renderWithProviders(<Login />)
 

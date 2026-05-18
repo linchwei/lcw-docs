@@ -1,9 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { server } from '../test/mocks/server'
-import { http, HttpResponse } from 'msw'
-import { mockAuthenticatedUser, clearAuthenticatedUser } from '../test/helpers'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { login, currentUser, register, logout } from './user'
+import { clearAuthenticatedUser, mockAuthenticatedUser } from '../test/helpers'
+import { currentUser, login, logout, register } from './user'
 
 describe('user service', () => {
     beforeEach(() => {

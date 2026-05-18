@@ -1,9 +1,5 @@
 import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@lcw-doc/shadcn-shared-ui/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/popover'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bell, Check, MessageCircle, Share2, Trash2, UserPlus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -151,31 +147,21 @@ export function NotificationBell() {
                                     onClick={() => handleClick(notification)}
                                 >
                                     <div className="flex items-start gap-2">
-                                        <div className="mt-0.5 shrink-0">
-                                            {getTypeIcon(notification.type)}
-                                        </div>
+                                        <div className="mt-0.5 shrink-0">{getTypeIcon(notification.type)}</div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm">
-                                                <span className="font-medium">
-                                                    {notification.fromUser?.username || '用户'}
-                                                </span>
-                                                <span className="text-zinc-500 ml-1">
-                                                    {getTypeLabel(notification.type)}
-                                                </span>
+                                                <span className="font-medium">{notification.fromUser?.username || '用户'}</span>
+                                                <span className="text-zinc-500 ml-1">{getTypeLabel(notification.type)}</span>
                                             </p>
                                             {notification.content && (
-                                                <p className="text-xs text-zinc-500 mt-0.5 truncate">
-                                                    {notification.content}
-                                                </p>
+                                                <p className="text-xs text-zinc-500 mt-0.5 truncate">{notification.content}</p>
                                             )}
                                             <span className="text-[10px] text-zinc-400 mt-1 block">
                                                 {formatTime(notification.createdAt)}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0">
-                                            {!notification.read && (
-                                                <div className="h-2 w-2 rounded-full bg-blue-500" />
-                                            )}
+                                            {!notification.read && <div className="h-2 w-2 rounded-full bg-blue-500" />}
                                             <Button
                                                 variant="ghost"
                                                 size="sm"

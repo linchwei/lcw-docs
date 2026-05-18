@@ -1,6 +1,7 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 import { DocPage } from './page-objects/doc.page'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
 
 test.describe('评论功能 E2E 测试', () => {
     let token: string
@@ -40,7 +41,9 @@ test.describe('评论功能 E2E 测试', () => {
             await page.getByRole('button', { name: '发表评论' }).click()
             await page.waitForTimeout(2000)
 
-            await expect(page.getByText('E2E test comment')).toBeVisible({ timeout: 5000 }).catch(() => {})
+            await expect(page.getByText('E2E test comment'))
+                .toBeVisible({ timeout: 5000 })
+                .catch(() => {})
         }
     })
 
@@ -54,7 +57,10 @@ test.describe('评论功能 E2E 测试', () => {
             await page.getByRole('button', { name: '发表评论' }).click()
             await page.waitForTimeout(2000)
 
-            const replyButton = page.locator('button').filter({ has: page.locator('svg.lucide-message-square') }).first()
+            const replyButton = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-message-square') })
+                .first()
             if (await replyButton.isVisible().catch(() => false)) {
                 await replyButton.click()
 
@@ -78,12 +84,17 @@ test.describe('评论功能 E2E 测试', () => {
             await page.getByRole('button', { name: '发表评论' }).click()
             await page.waitForTimeout(2000)
 
-            const resolveButton = page.locator('button').filter({ has: page.locator('svg.lucide-check') }).first()
+            const resolveButton = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-check') })
+                .first()
             if (await resolveButton.isVisible().catch(() => false)) {
                 await resolveButton.click()
                 await page.waitForTimeout(1000)
 
-                await expect(page.getByText('已解决')).toBeVisible({ timeout: 5000 }).catch(() => {})
+                await expect(page.getByText('已解决'))
+                    .toBeVisible({ timeout: 5000 })
+                    .catch(() => {})
             }
         }
     })
@@ -98,7 +109,10 @@ test.describe('评论功能 E2E 测试', () => {
             await page.getByRole('button', { name: '发表评论' }).click()
             await page.waitForTimeout(2000)
 
-            const deleteButton = page.locator('button').filter({ has: page.locator('svg.lucide-trash-2') }).first()
+            const deleteButton = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-trash-2') })
+                .first()
             if (await deleteButton.isVisible().catch(() => false)) {
                 await deleteButton.click()
                 await page.waitForTimeout(1000)

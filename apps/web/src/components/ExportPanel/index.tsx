@@ -4,7 +4,7 @@ import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
 import { AlignLeft, Code, File, FileDown, FileText, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 
-import { ExportFormat, exportDocument, isLargeDocument } from '@/utils/exportDocument'
+import { exportDocument, ExportFormat, isLargeDocument } from '@/utils/exportDocument'
 
 const exportFormats: { key: ExportFormat; label: string; ext: string; icon: typeof FileText; desc: string }[] = [
     { key: 'markdown', label: 'Markdown', ext: '.md', icon: FileText, desc: '原始 Markdown 源码，保留所有语法标记' },
@@ -62,8 +62,7 @@ export function ExportPanel({ open, onOpenChange, editor, fileName }: ExportPane
                                 <Icon size={20} className="text-muted-foreground shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium">
-                                        {fmt.label}{' '}
-                                        <span className="text-muted-foreground font-normal">{fmt.ext}</span>
+                                        {fmt.label} <span className="text-muted-foreground font-normal">{fmt.ext}</span>
                                     </div>
                                     <div className="text-xs text-muted-foreground">{fmt.desc}</div>
                                 </div>

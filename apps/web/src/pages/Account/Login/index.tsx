@@ -6,11 +6,10 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
+import { PasswordInput } from '@/components/PasswordInput'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import * as srv from '@/services'
 import { CreateUserPayload } from '@/types/api'
-
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { PasswordInput } from '@/components/PasswordInput'
 
 import styles from './Login.module.css'
 

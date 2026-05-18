@@ -1,14 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import {
-    closeTestApp,
-    createTestApp,
-    createTestUser,
-    cleanupAll,
-    generateExpiredToken,
-    generateInvalidToken,
-} from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser, generateExpiredToken, generateInvalidToken } from '../../test/helpers'
 
 describe('Security - Authentication & Authorization', () => {
     let app: INestApplication
@@ -31,9 +24,7 @@ describe('Security - Authentication & Authorization', () => {
         })
 
         it('should return 401 for POST /api/page without token', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/page')
-                .send({ emoji: '📄', title: 'Test' })
+            const res = await request(app.getHttpServer()).post('/api/page').send({ emoji: '📄', title: 'Test' })
             expect(res.status).toBe(401)
         })
 
@@ -51,9 +42,7 @@ describe('Security - Authentication & Authorization', () => {
     describe('SEC-002: Expired token', () => {
         it('should return 401 with expired token', async () => {
             const expiredToken = generateExpiredToken(app)
-            const res = await request(app.getHttpServer())
-                .get('/api/page')
-                .set('Authorization', `Bearer ${expiredToken}`)
+            const res = await request(app.getHttpServer()).get('/api/page').set('Authorization', `Bearer ${expiredToken}`)
             expect(res.status).toBe(401)
         })
     })
@@ -61,9 +50,7 @@ describe('Security - Authentication & Authorization', () => {
     describe('SEC-003: Invalid token format', () => {
         it('should return 401 with invalid token', async () => {
             const invalidToken = generateInvalidToken()
-            const res = await request(app.getHttpServer())
-                .get('/api/page')
-                .set('Authorization', `Bearer ${invalidToken}`)
+            const res = await request(app.getHttpServer()).get('/api/page').set('Authorization', `Bearer ${invalidToken}`)
             expect(res.status).toBe(401)
         })
     })
@@ -74,9 +61,7 @@ describe('Security - Authentication & Authorization', () => {
             if (parts.length === 3) {
                 parts[1] = Buffer.from(JSON.stringify({ username: 'hacker', sub: 99999 })).toString('base64url')
                 const tamperedToken = parts.join('.')
-                const res = await request(app.getHttpServer())
-                    .get('/api/page')
-                    .set('Authorization', `Bearer ${tamperedToken}`)
+                const res = await request(app.getHttpServer()).get('/api/page').set('Authorization', `Bearer ${tamperedToken}`)
                 expect(res.status).toBe(401)
             }
         })
@@ -138,17 +123,13 @@ describe('Security - Authentication & Authorization', () => {
 
     describe('SEC-026: Sensitive info not leaked', () => {
         it('should not include password in currentUser response', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/currentUser')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/currentUser').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
             expect(res.body.data).not.toHaveProperty('password')
         })
 
         it('should not include password in me response', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/me')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/me').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
             expect(res.body).not.toHaveProperty('password')
         })

@@ -1,9 +1,10 @@
-import { describe, test, expect, beforeEach } from 'vitest'
 import { createChainableState } from '@tiptap/core'
-import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
+import { beforeEach, describe, expect, test } from 'vitest'
+
 import { splitBlockCommand } from '../../../src/api/blockManipulation/commands/splitBlock/splitBlock'
-import { getNodeById } from '../../../src/api/nodeUtil'
 import { getBlockInfo } from '../../../src/api/getBlockInfoFromPos'
+import { getNodeById } from '../../../src/api/nodeUtil'
+import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 
 function applySplit(editor: LcwDocEditor, blockId: string, offset: number, keepType?: boolean, keepProps?: boolean) {
     const ttEditor = editor._tiptapEditor
@@ -13,7 +14,11 @@ function applySplit(editor: LcwDocEditor, blockId: string, offset: number, keepT
     const blockInfo = getBlockInfo({ node, posBeforeNode })
     const posInBlock = blockInfo.blockContent.beforePos + 1 + offset
 
-    splitBlockCommand(posInBlock, keepType, keepProps)({
+    splitBlockCommand(
+        posInBlock,
+        keepType,
+        keepProps
+    )({
         state: chainableState,
         dispatch: () => {},
     })

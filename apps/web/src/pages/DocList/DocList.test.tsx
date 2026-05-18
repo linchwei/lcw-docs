@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { renderWithProviders, mockAuthenticatedUser, clearAuthenticatedUser } from '@/test/helpers'
+import { clearAuthenticatedUser, mockAuthenticatedUser, renderWithProviders } from '@/test/helpers'
 import { server } from '@/test/mocks/server'
 
 vi.mock('@/components/EmptyState', () => ({
@@ -10,11 +10,11 @@ vi.mock('@/components/EmptyState', () => ({
 }))
 
 vi.mock('@/components/MarkdownUploadDialog', () => ({
-    MarkdownUploadDialog: ({ open }: any) => open ? <div>Upload Dialog</div> : null,
+    MarkdownUploadDialog: ({ open }: any) => (open ? <div>Upload Dialog</div> : null),
 }))
 
 vi.mock('@/components/TemplateDialog', () => ({
-    TemplateDialog: ({ open }: any) => open ? <div>Template Dialog</div> : null,
+    TemplateDialog: ({ open }: any) => (open ? <div>Template Dialog</div> : null),
 }))
 
 vi.mock('@/utils/randomEmoji', () => ({

@@ -11,10 +11,7 @@ const HighlightMarkImpl = Mark.create({
     },
 
     parseHTML() {
-        return [
-            { tag: 'mark' },
-            { tag: 'span[data-style-type="highlight"]' },
-        ]
+        return [{ tag: 'mark' }, { tag: 'span[data-style-type="highlight"]' }]
     },
 
     renderHTML({ HTMLAttributes }) {
@@ -46,10 +43,7 @@ const SuperscriptMarkImpl = Mark.create({
     name: 'superscript',
 
     parseHTML() {
-        return [
-            { tag: 'sup' },
-            { tag: 'span[data-style-type="superscript"]' },
-        ]
+        return [{ tag: 'sup' }, { tag: 'span[data-style-type="superscript"]' }]
     },
 
     renderHTML({ HTMLAttributes }) {
@@ -59,7 +53,7 @@ const SuperscriptMarkImpl = Mark.create({
     addInputRules() {
         return [
             markInputRule({
-                find: /(\^(?!\s+\^)((?:[^\^]+))\^(?!\s+\^))$/,
+                find: /(\^(?!\s+\^)((?:[^^]+))\^(?!\s+\^))$/,
                 type: this.type,
             }),
         ]
@@ -68,7 +62,7 @@ const SuperscriptMarkImpl = Mark.create({
     addPasteRules() {
         return [
             markPasteRule({
-                find: /(\^(?!\s+\^)((?:[^\^]+))\^(?!\s+\^))/g,
+                find: /(\^(?!\s+\^)((?:[^^]+))\^(?!\s+\^))/g,
                 type: this.type,
             }),
         ]
@@ -81,10 +75,7 @@ const SubscriptMarkImpl = Mark.create({
     name: 'subscript',
 
     parseHTML() {
-        return [
-            { tag: 'sub' },
-            { tag: 'span[data-style-type="subscript"]' },
-        ]
+        return [{ tag: 'sub' }, { tag: 'span[data-style-type="subscript"]' }]
     },
 
     renderHTML({ HTMLAttributes }) {

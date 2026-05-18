@@ -176,23 +176,23 @@ export const ResizeHandlesWrapper = (
     }
 
     const leftResizeHandleMouseDownHandler = (event: React.MouseEvent) => {
-            event.preventDefault()
+        event.preventDefault()
 
-            setResizeParams({
-                handleUsed: 'left',
-                initialWidth: props.width,
-                initialClientX: event.clientX,
-            })
-        }
+        setResizeParams({
+            handleUsed: 'left',
+            initialWidth: props.width,
+            initialClientX: event.clientX,
+        })
+    }
     const rightResizeHandleMouseDownHandler = (event: React.MouseEvent) => {
-            event.preventDefault()
+        event.preventDefault()
 
-            setResizeParams({
-                handleUsed: 'right',
-                initialWidth: props.width,
-                initialClientX: event.clientX,
-            })
-        }
+        setResizeParams({
+            handleUsed: 'right',
+            initialWidth: props.width,
+            initialClientX: event.clientX,
+        })
+    }
 
     return (
         <div

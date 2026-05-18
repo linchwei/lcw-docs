@@ -61,10 +61,7 @@ export class NotificationService {
     }
 
     async markAllRead(params: { userId: number }) {
-        await this.notificationRepository.update(
-            { toUserId: params.userId, read: false },
-            { read: true }
-        )
+        await this.notificationRepository.update({ toUserId: params.userId, read: false }, { read: true })
         return { success: true }
     }
 

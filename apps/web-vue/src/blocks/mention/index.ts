@@ -1,4 +1,5 @@
 import { createVueInlineContentSpec } from '@lcw-doc/vue'
+
 import MentionContent from './MentionContent.vue'
 
 export const Mention = createVueInlineContentSpec(
@@ -13,5 +14,5 @@ export const Mention = createVueInlineContentSpec(
     },
     {
         render: MentionContent,
-    },
+    }
 )

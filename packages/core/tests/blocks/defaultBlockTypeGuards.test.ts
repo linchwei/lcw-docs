@@ -1,17 +1,17 @@
 import { describe, expect, test } from 'vitest'
 
 import { defaultBlockSchema, defaultInlineContentSchema } from '../../src/blocks/defaultBlocks'
-import { defaultProps } from '../../src/blocks/defaultProps'
 import {
-    checkDefaultBlockTypeInSchema,
-    checkDefaultInlineContentTypeInSchema,
+    checkBlockHasDefaultProp,
     checkBlockIsDefaultType,
     checkBlockIsFileBlock,
-    checkBlockIsFileBlockWithPreview,
     checkBlockIsFileBlockWithPlaceholder,
+    checkBlockIsFileBlockWithPreview,
     checkBlockTypeHasDefaultProp,
-    checkBlockHasDefaultProp,
+    checkDefaultBlockTypeInSchema,
+    checkDefaultInlineContentTypeInSchema,
 } from '../../src/blocks/defaultBlockTypeGuards'
+import { defaultProps } from '../../src/blocks/defaultProps'
 
 function createMockEditor(blockSchema: any, inlineContentSchema: any, styleSchema: any = {}) {
     return {

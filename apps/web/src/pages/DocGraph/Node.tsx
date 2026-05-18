@@ -37,9 +37,7 @@ export const GraphNode = (props: GraphNodeProps) => {
                 <div
                     className={cn(
                         'flex items-center justify-center text-xl size-[40px] mb-1.5 rounded-full transition-all duration-200',
-                        selected
-                            ? 'border-2 border-blue-400 scale-125 shadow-md shadow-blue-100'
-                            : 'hover:scale-110 hover:shadow-sm'
+                        selected ? 'border-2 border-blue-400 scale-125 shadow-md shadow-blue-100' : 'hover:scale-110 hover:shadow-sm'
                     )}
                     style={{ backgroundColor: color }}
                 >

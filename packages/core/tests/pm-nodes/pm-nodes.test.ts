@@ -1,8 +1,9 @@
-import { describe, test, expect } from 'vitest'
-import { Doc } from '../../src/pm-nodes/Doc'
+import { Schema } from '@tiptap/pm/model'
+import { describe, expect, test } from 'vitest'
+
 import { BlockContainer } from '../../src/pm-nodes/BlockContainer'
 import { BlockGroup } from '../../src/pm-nodes/BlockGroup'
-import { Schema } from '@tiptap/pm/model'
+import { Doc } from '../../src/pm-nodes/Doc'
 
 const createMockSchema = () => {
     return new Schema({
@@ -38,9 +39,7 @@ describe('pm-nodes', () => {
 
         test('Doc 节点可以包含 blockGroup 子节点', () => {
             const schema = createMockSchema()
-            const docNode = schema.nodes.doc.create(null, [
-                schema.nodes.blockGroup.create(),
-            ])
+            const docNode = schema.nodes.doc.create(null, [schema.nodes.blockGroup.create()])
             expect(docNode.type.name).toBe('doc')
             expect(docNode.childCount).toBe(1)
             expect(docNode.firstChild?.type.name).toBe('blockGroup')
@@ -66,17 +65,13 @@ describe('pm-nodes', () => {
 
         test('BlockContainer 可以包含子节点', () => {
             const schema = createMockSchema()
-            const blockContainer = schema.nodes.blockContainer.create(null, [
-                schema.nodes.blockContent.create(),
-            ])
+            const blockContainer = schema.nodes.blockContainer.create(null, [schema.nodes.blockContent.create()])
             expect(blockContainer.childCount).toBe(1)
         })
 
         test('BlockContainer 可以作为 blockGroup 的子节点', () => {
             const schema = createMockSchema()
-            const blockGroup = schema.nodes.blockGroup.create(null, [
-                schema.nodes.blockContainer.create(),
-            ])
+            const blockGroup = schema.nodes.blockGroup.create(null, [schema.nodes.blockContainer.create()])
             expect(blockGroup.childCount).toBe(1)
             expect(blockGroup.firstChild?.type.name).toBe('blockContainer')
         })
@@ -115,11 +110,7 @@ describe('pm-nodes', () => {
         test('完整的文档结构：doc > blockGroup > blockContainer > blockContent', () => {
             const schema = createMockSchema()
             const doc = schema.nodes.doc.create(null, [
-                schema.nodes.blockGroup.create(null, [
-                    schema.nodes.blockContainer.create(null, [
-                        schema.nodes.blockContent.create(),
-                    ]),
-                ]),
+                schema.nodes.blockGroup.create(null, [schema.nodes.blockContainer.create(null, [schema.nodes.blockContent.create()])]),
             ])
 
             expect(doc.type.name).toBe('doc')

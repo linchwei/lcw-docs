@@ -1,8 +1,8 @@
 import { createReactBlockSpec } from '@lcw-doc/react'
-import { AlertTriangle, Check, Loader2, RotateCcw, Send, Sparkles, X } from 'lucide-react'
+import { AlertTriangle, Check, RotateCcw, Send, Sparkles, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 
-import { chatWithAI, ChatMessage } from '@/services'
+import { ChatMessage, chatWithAI } from '@/services'
 
 export const AI = createReactBlockSpec(
     {
@@ -18,19 +18,17 @@ export const AI = createReactBlockSpec(
             const blockId = props.block.id
             const status = props.block.props.status || 'idle'
 
-            return (
-                <AIBlockContent
-                    editor={props.editor}
-                    blockId={blockId}
-                    status={status}
-                    prompt={props.block.props.prompt || ''}
-                />
-            )
+            return <AIBlockContent editor={props.editor} blockId={blockId} status={status} prompt={props.block.props.prompt || ''} />
         },
     }
 )
 
-function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
+function AIBlockContent({
+    editor,
+    blockId,
+    status,
+    prompt: initialPrompt,
+}: {
     editor: any
     blockId: string
     status: string
@@ -53,7 +51,10 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
 
         try {
             const messages: ChatMessage[] = [
-                { role: 'system', content: '你是一个专业的文档编辑助手。请根据用户的要求处理文本内容，直接输出处理结果，不要添加多余的解释。' },
+                {
+                    role: 'system',
+                    content: '你是一个专业的文档编辑助手。请根据用户的要求处理文本内容，直接输出处理结果，不要添加多余的解释。',
+                },
                 { role: 'user', content: promptText },
             ]
 
@@ -122,10 +123,15 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
             const blocks = await editor.tryParseMarkdownToBlocks(content)
             editor.replaceBlocks([blockId], blocks)
         } catch {
-            editor.replaceBlocks([blockId], [{
-                type: 'paragraph',
-                content: content ? [{ type: 'text', text: content, styles: {} }] : undefined,
-            }])
+            editor.replaceBlocks(
+                [blockId],
+                [
+                    {
+                        type: 'paragraph',
+                        content: content ? [{ type: 'text', text: content, styles: {} }] : undefined,
+                    },
+                ]
+            )
         }
     }
 
@@ -157,12 +163,14 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
     }
 
     return (
-        <div style={{
-            border: '1px solid #e9e9e7',
-            borderRadius: '8px',
-            backgroundColor: '#f7f6f3',
-            overflow: 'hidden',
-        }}>
+        <div
+            style={{
+                border: '1px solid #e9e9e7',
+                borderRadius: '8px',
+                backgroundColor: '#f7f6f3',
+                overflow: 'hidden',
+            }}
+        >
             {status === 'idle' && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px' }}>
                     <Sparkles size={18} color="#6B45FF" style={{ flexShrink: 0 }} />
@@ -208,15 +216,17 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
                 <div style={{ padding: '12px' }}>
                     <div style={{ fontSize: '14px', color: '#37352f', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
                         {streamContent}
-                        <span style={{
-                            display: 'inline-block',
-                            width: '2px',
-                            height: '16px',
-                            backgroundColor: '#6B45FF',
-                            marginLeft: '2px',
-                            verticalAlign: 'text-bottom',
-                            animation: 'blink 1s infinite',
-                        }} />
+                        <span
+                            style={{
+                                display: 'inline-block',
+                                width: '2px',
+                                height: '16px',
+                                backgroundColor: '#6B45FF',
+                                marginLeft: '2px',
+                                verticalAlign: 'text-bottom',
+                                animation: 'blink 1s infinite',
+                            }}
+                        />
                     </div>
                     <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'flex-end' }}>
                         <button
@@ -242,16 +252,16 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
 
             {status === 'done' && (
                 <div style={{ padding: '12px' }}>
-                    <div style={{ fontSize: '14px', color: '#37352f', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                        {streamContent}
-                    </div>
-                    <div style={{
-                        marginTop: '8px',
-                        paddingTop: '8px',
-                        borderTop: '1px solid #e9e9e7',
-                        display: 'flex',
-                        gap: '6px',
-                    }}>
+                    <div style={{ fontSize: '14px', color: '#37352f', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{streamContent}</div>
+                    <div
+                        style={{
+                            marginTop: '8px',
+                            paddingTop: '8px',
+                            borderTop: '1px solid #e9e9e7',
+                            display: 'flex',
+                            gap: '6px',
+                        }}
+                    >
                         <button
                             onClick={handleAccept}
                             style={{
@@ -309,13 +319,15 @@ function AIBlockContent({ editor, blockId, status, prompt: initialPrompt }: {
 
             {status === 'error' && (
                 <div style={{ padding: '12px' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#eb5757',
-                        fontSize: '14px',
-                    }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            color: '#eb5757',
+                            fontSize: '14px',
+                        }}
+                    >
                         <AlertTriangle size={16} />
                         <span>{error || 'AI 生成失败'}</span>
                     </div>

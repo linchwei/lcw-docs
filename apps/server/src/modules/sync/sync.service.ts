@@ -1,8 +1,8 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import * as Y from 'yjs'
-import { PostgresqlPersistence } from 'y-postgresql'
 import { Repository } from 'typeorm'
+import { PostgresqlPersistence } from 'y-postgresql'
+import * as Y from 'yjs'
 
 import { CollaboratorEntity } from '../../entities/collaborator.entity'
 import { PageEntity } from '../../entities/page.entity'
@@ -49,7 +49,7 @@ export class SyncService {
         await this.checkAccess({ pageId: params.pageId, userId: params.userId })
 
         const docName = `doc-yjs-${params.pageId}`
-        const currentDoc = docs.get(docName) || await this.yjsPostgresqlAdapter.getYDoc(docName)
+        const currentDoc = docs.get(docName) || (await this.yjsPostgresqlAdapter.getYDoc(docName))
 
         let stateVector: Uint8Array | null = null
         if (params.since) {
@@ -60,9 +60,7 @@ export class SyncService {
             }
         }
 
-        const update = stateVector
-            ? Y.encodeStateAsUpdate(currentDoc, stateVector)
-            : Y.encodeStateAsUpdate(currentDoc)
+        const update = stateVector ? Y.encodeStateAsUpdate(currentDoc, stateVector) : Y.encodeStateAsUpdate(currentDoc)
 
         const currentStateVector = Y.encodeStateVector(currentDoc)
 
@@ -89,7 +87,7 @@ export class SyncService {
             await this.yjsPostgresqlAdapter.storeUpdate(docName, fullUpdate)
         }
 
-        const doc = docs.get(docName) || await this.yjsPostgresqlAdapter.getYDoc(docName)
+        const doc = docs.get(docName) || (await this.yjsPostgresqlAdapter.getYDoc(docName))
         const currentStateVector = Y.encodeStateVector(doc)
 
         return {
@@ -101,7 +99,7 @@ export class SyncService {
         await this.checkAccess({ pageId: params.pageId, userId: params.userId })
 
         const docName = `doc-yjs-${params.pageId}`
-        const doc = docs.get(docName) || await this.yjsPostgresqlAdapter.getYDoc(docName)
+        const doc = docs.get(docName) || (await this.yjsPostgresqlAdapter.getYDoc(docName))
 
         const snapshot = doc.getXmlFragment(`document-store-${params.pageId}`).toJSON()
         const stateUpdate = Buffer.from(Y.encodeStateAsUpdate(doc)).toString('base64')

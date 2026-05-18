@@ -35,16 +35,16 @@ export const EmbedTab = <
     }
 
     const handleURLEnter = (event: KeyboardEvent) => {
-            if (event.key === 'Enter') {
-                event.preventDefault()
-                editor.updateBlock(block, {
-                    props: {
-                        name: filenameFromURL(currentURL),
-                        url: currentURL,
-                    } as any,
-                })
-            }
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            editor.updateBlock(block, {
+                props: {
+                    name: filenameFromURL(currentURL),
+                    url: currentURL,
+                } as any,
+            })
         }
+    }
 
     const handleURLClick = () => {
         editor.updateBlock(block, {

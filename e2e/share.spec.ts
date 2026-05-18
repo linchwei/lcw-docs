@@ -1,12 +1,13 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 import { DocPage } from './page-objects/doc.page'
 import { SharePage } from './page-objects/share.page'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
 
 test.describe('分享功能 E2E 测试', () => {
     let token: string
     let username: string
-    let docUrl: string
+    let _docUrl: string
 
     test.beforeAll(async () => {
         username = generateUniqueUsername('share')
@@ -24,7 +25,7 @@ test.describe('分享功能 E2E 测试', () => {
         if (await newDocButton.isVisible()) {
             await newDocButton.click()
             await page.waitForURL('**/doc/**', { timeout: 10000 })
-            docUrl = page.url()
+            _docUrl = page.url()
         }
     })
 
@@ -54,9 +55,10 @@ test.describe('分享功能 E2E 测试', () => {
             await createButton.click()
             await page.waitForTimeout(1000)
 
-            const copyButton = page.getByRole('button', { name: /复制|copy/i }).or(
-                page.locator('button').filter({ has: page.locator('svg.lucide-copy, svg.lucide-check') })
-            ).first()
+            const copyButton = page
+                .getByRole('button', { name: /复制|copy/i })
+                .or(page.locator('button').filter({ has: page.locator('svg.lucide-copy, svg.lucide-check') }))
+                .first()
 
             if (await copyButton.isVisible().catch(() => false)) {
                 await copyButton.click()
@@ -206,7 +208,10 @@ test.describe('分享功能 E2E 测试', () => {
             await createButton.click()
             await page.waitForTimeout(1000)
 
-            const deleteButton = page.locator('button').filter({ has: page.locator('svg.lucide-trash-2') }).first()
+            const deleteButton = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-trash-2') })
+                .first()
             if (await deleteButton.isVisible().catch(() => false)) {
                 await deleteButton.click()
                 await page.waitForTimeout(1000)

@@ -1,3 +1,4 @@
+import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -8,7 +9,6 @@ import {
     DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@lcw-doc/shadcn-shared-ui/components/ui/dropdown-menu'
-import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 import { SidebarInset, SidebarTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNowStrict } from 'date-fns'
@@ -34,8 +34,8 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { EmptyState } from '@/components/EmptyState'
 import { MarkdownUploadDialog } from '@/components/MarkdownUploadDialog'
 import { TemplateDialog } from '@/components/TemplateDialog'
-import * as srv from '@/services'
 import { Template } from '@/data/templates'
+import * as srv from '@/services'
 import { Tag as TagType } from '@/types/api'
 import { randomEmoji } from '@/utils/randomEmoji'
 
@@ -60,8 +60,8 @@ export function DocList() {
     const [templateOpen, setTemplateOpen] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
     const dragCounterRef = useRef(0)
-    const [coverPickerPageId, setCoverPickerPageId] = useState<string | null>(null)
-    const [tagPickerPageId, setTagPickerPageId] = useState<string | null>(null)
+    const [_coverPickerPageId, setCoverPickerPageId] = useState<string | null>(null)
+    const [_tagPickerPageId, setTagPickerPageId] = useState<string | null>(null)
     const [deleteTagDialogOpen, setDeleteTagDialogOpen] = useState(false)
     const [pendingDeleteTag, setPendingDeleteTag] = useState<{ tagId: string; tagName: string } | null>(null)
     const [newTagName, setNewTagName] = useState('')
@@ -290,7 +290,10 @@ export function DocList() {
                         {allTags.length > 0 && (
                             <div className="max-h-32 overflow-y-auto mb-1">
                                 {allTags.map(tag => (
-                                    <div key={tag.tagId} className="w-full flex items-center gap-1 px-2 py-1.5 text-xs hover:bg-accent rounded group">
+                                    <div
+                                        key={tag.tagId}
+                                        className="w-full flex items-center gap-1 px-2 py-1.5 text-xs hover:bg-accent rounded group"
+                                    >
                                         <button
                                             className="flex-1 text-left flex items-center gap-2"
                                             onClick={e => {
@@ -476,8 +479,8 @@ export function DocList() {
 function PageCard({
     page,
     index,
-    allTags,
-    onRemoveTag,
+    allTags: _allTags,
+    onRemoveTag: _onRemoveTag,
     menu,
     pageTags,
 }: {
@@ -525,8 +528,8 @@ function PageCard({
 function SharedPageCard({
     page,
     index,
-    allTags,
-    onRemoveTag,
+    allTags: _allTags,
+    onRemoveTag: _onRemoveTag,
     menu,
     pageTags,
 }: {

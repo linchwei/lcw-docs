@@ -1,11 +1,12 @@
-import { test, expect } from '@playwright/test'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 
 test.describe('权限边界 E2E 测试', () => {
-    let ownerToken: string
+    let _ownerToken: string
     let viewerToken: string
     let commenterToken: string
-    let editorToken: string
+    let _editorToken: string
     let ownerUsername: string
     let viewerUsername: string
     let commenterUsername: string
@@ -22,10 +23,10 @@ test.describe('权限边界 E2E 测试', () => {
         await apiRegister(commenterUsername, 'testpass123')
         await apiRegister(editorUsername, 'testpass123')
 
-        ownerToken = await apiLogin(ownerUsername, 'testpass123')
+        _ownerToken = await apiLogin(ownerUsername, 'testpass123')
         viewerToken = await apiLogin(viewerUsername, 'testpass123')
         commenterToken = await apiLogin(commenterUsername, 'testpass123')
-        editorToken = await apiLogin(editorUsername, 'testpass123')
+        _editorToken = await apiLogin(editorUsername, 'testpass123')
     })
 
     test('E2E-078: 查看者尝试编辑文档应显示只读模式', async ({ page }) => {
@@ -79,7 +80,12 @@ test.describe('权限边界 E2E 测试', () => {
         await page.waitForURL('**/doc**', { timeout: 10000 })
 
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             await page.waitForTimeout(500)
 

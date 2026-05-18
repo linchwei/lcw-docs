@@ -47,13 +47,20 @@ export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlinePr
 
     const getIndentClass = (level: number) => {
         switch (level) {
-            case 1: return ''
-            case 2: return 'pl-4'
-            case 3: return 'pl-8'
-            case 4: return 'pl-12'
-            case 5: return 'pl-16'
-            case 6: return 'pl-20'
-            default: return ''
+            case 1:
+                return ''
+            case 2:
+                return 'pl-4'
+            case 3:
+                return 'pl-8'
+            case 4:
+                return 'pl-12'
+            case 5:
+                return 'pl-16'
+            case 6:
+                return 'pl-20'
+            default:
+                return ''
         }
     }
 
@@ -88,10 +95,7 @@ export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlinePr
                                             transition-colors duration-150 truncate
                                             ${heading.level === 1 ? 'font-medium' : ''}
                                             ${getIndentClass(heading.level)}
-                                            ${isActive
-                                                ? 'text-blue-600 bg-blue-50'
-                                                : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                                            }
+                                            ${isActive ? 'text-blue-600 bg-blue-50' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'}
                                         `}
                                         title={heading.text}
                                     >

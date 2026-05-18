@@ -6,7 +6,7 @@ import { cn } from '../lib/utils'
 import { useShadCNComponentsContext } from '../ShadCNComponentsContext'
 
 export const Panel = forwardRef<HTMLDivElement, ComponentProps['FilePanel']['Root']>((props, ref) => {
-    const { className, tabs, defaultOpenTab, openTab, setOpenTab, loading, ...rest } = props
+    const { className, tabs, defaultOpenTab, openTab, setOpenTab, loading: _loading, ...rest } = props
 
     assertEmpty(rest)
 

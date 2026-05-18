@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@lcw-doc/shadcn-shared-ui/components/ui/dialog'
+import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 import {
+    BarChart3,
     BookOpen,
     Brain,
     Download,
+    Eye,
     FileText,
     GitFork,
     LayoutTemplate,
@@ -10,20 +13,10 @@ import {
     Search,
     Share2,
     Sidebar,
-    Type,
     Upload,
     Users,
-    BarChart3,
-    Eye,
 } from 'lucide-react'
-
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@lcw-doc/shadcn-shared-ui/components/ui/dialog'
-import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
+import { useState } from 'react'
 
 interface AboutDialogProps {
     open: boolean
@@ -61,9 +54,7 @@ const featureCategories = [
     },
     {
         name: 'AI 能力',
-        features: [
-            { icon: Brain, name: 'AI 助手', desc: '全局 AI 对话、行内 AI、选区 AI 操作（续写、改写、翻译、总结）' },
-        ],
+        features: [{ icon: Brain, name: 'AI 助手', desc: '全局 AI 对话、行内 AI、选区 AI 操作（续写、改写、翻译、总结）' }],
     },
     {
         name: '导航与管理',
@@ -76,82 +67,106 @@ const featureCategories = [
 ]
 
 const shortcutGroups = [
-    { category: '通用', items: [
-        { keys: ['⌘', 'K'], description: '搜索文档' },
-        { keys: ['⌘', 'B'], description: '切换侧边栏' },
-        { keys: ['⌘', '/'], description: '快捷键帮助' },
-    ]},
-    { category: '编辑', items: [
-        { keys: ['⌘', 'Z'], description: '撤销' },
-        { keys: ['⌘', '⇧', 'Z'], description: '重做' },
-        { keys: ['⌘', 'B'], description: '加粗' },
-        { keys: ['⌘', 'I'], description: '斜体' },
-        { keys: ['⌘', 'U'], description: '下划线' },
-        { keys: ['⌘', 'K'], description: '插入链接' },
-    ]},
-    { category: 'Markdown 快捷格式', items: [
-        { keys: ['#', 'Space'], description: '一级标题' },
-        { keys: ['##', 'Space'], description: '二级标题' },
-        { keys: ['###', 'Space'], description: '三级标题' },
-        { keys: ['####', 'Space'], description: '四级标题' },
-        { keys: ['#####', 'Space'], description: '五级标题' },
-        { keys: ['######', 'Space'], description: '六级标题' },
-        { keys: ['**text**'], description: '粗体' },
-        { keys: ['*text*'], description: '斜体' },
-        { keys: ['~~text~~'], description: '删除线' },
-        { keys: ['`text`'], description: '行内代码' },
-        { keys: ['==text=='], description: '高亮标记' },
-        { keys: ['^text^'], description: '上标' },
-        { keys: ['~text~'], description: '下标' },
-        { keys: ['[text](url)'], description: '超链接' },
-        { keys: ['![alt](url)'], description: '图片' },
-    ]},
-    { category: '块级快捷格式', items: [
-        { keys: ['-', 'Space'], description: '无序列表' },
-        { keys: ['1.', 'Space'], description: '有序列表' },
-        { keys: ['[]', 'Space'], description: '任务列表' },
-        { keys: ['>', 'Space'], description: '引用块' },
-        { keys: ['---', 'Space'], description: '分割线' },
-        { keys: ['```', 'Space'], description: '代码块' },
-        { keys: ['| 表头 | 表头 |'], description: '表格' },
-        { keys: ['/'], description: '插入块菜单' },
-        { keys: ['@'], description: '引用文档' },
-    ]},
+    {
+        category: '通用',
+        items: [
+            { keys: ['⌘', 'K'], description: '搜索文档' },
+            { keys: ['⌘', 'B'], description: '切换侧边栏' },
+            { keys: ['⌘', '/'], description: '快捷键帮助' },
+        ],
+    },
+    {
+        category: '编辑',
+        items: [
+            { keys: ['⌘', 'Z'], description: '撤销' },
+            { keys: ['⌘', '⇧', 'Z'], description: '重做' },
+            { keys: ['⌘', 'B'], description: '加粗' },
+            { keys: ['⌘', 'I'], description: '斜体' },
+            { keys: ['⌘', 'U'], description: '下划线' },
+            { keys: ['⌘', 'K'], description: '插入链接' },
+        ],
+    },
+    {
+        category: 'Markdown 快捷格式',
+        items: [
+            { keys: ['#', 'Space'], description: '一级标题' },
+            { keys: ['##', 'Space'], description: '二级标题' },
+            { keys: ['###', 'Space'], description: '三级标题' },
+            { keys: ['####', 'Space'], description: '四级标题' },
+            { keys: ['#####', 'Space'], description: '五级标题' },
+            { keys: ['######', 'Space'], description: '六级标题' },
+            { keys: ['**text**'], description: '粗体' },
+            { keys: ['*text*'], description: '斜体' },
+            { keys: ['~~text~~'], description: '删除线' },
+            { keys: ['`text`'], description: '行内代码' },
+            { keys: ['==text=='], description: '高亮标记' },
+            { keys: ['^text^'], description: '上标' },
+            { keys: ['~text~'], description: '下标' },
+            { keys: ['[text](url)'], description: '超链接' },
+            { keys: ['![alt](url)'], description: '图片' },
+        ],
+    },
+    {
+        category: '块级快捷格式',
+        items: [
+            { keys: ['-', 'Space'], description: '无序列表' },
+            { keys: ['1.', 'Space'], description: '有序列表' },
+            { keys: ['[]', 'Space'], description: '任务列表' },
+            { keys: ['>', 'Space'], description: '引用块' },
+            { keys: ['---', 'Space'], description: '分割线' },
+            { keys: ['```', 'Space'], description: '代码块' },
+            { keys: ['| 表头 | 表头 |'], description: '表格' },
+            { keys: ['/'], description: '插入块菜单' },
+            { keys: ['@'], description: '引用文档' },
+        ],
+    },
 ]
 
 const markdownSyntax = [
-    { category: '标题', items: [
-        { syntax: '# 标题', effect: '一级标题' },
-        { syntax: '## 标题', effect: '二级标题' },
-        { syntax: '### 标题', effect: '三级标题' },
-        { syntax: '#### 标题', effect: '四级标题' },
-        { syntax: '##### 标题', effect: '五级标题' },
-        { syntax: '###### 标题', effect: '六级标题' },
-    ]},
-    { category: '文本格式', items: [
-        { syntax: '**粗体**', effect: '粗体文字' },
-        { syntax: '*斜体*', effect: '斜体文字' },
-        { syntax: '~~删除线~~', effect: '删除线文字' },
-        { syntax: '`行内代码`', effect: '行内代码样式' },
-        { syntax: '==高亮==', effect: '高亮标记文字' },
-        { syntax: '^上标^', effect: '上标文字' },
-        { syntax: '~下标~', effect: '下标文字' },
-    ]},
-    { category: '块级元素', items: [
-        { syntax: '- 列表项', effect: '无序列表' },
-        { syntax: '1. 列表项', effect: '有序列表' },
-        { syntax: '[] 待办项', effect: '任务列表' },
-        { syntax: '> 引用', effect: '引用块' },
-        { syntax: '---', effect: '分割线' },
-        { syntax: '```代码```', effect: '代码块' },
-    ]},
-    { category: '插入元素', items: [
-        { syntax: '[文字](链接)', effect: '超链接' },
-        { syntax: '![描述](图片URL)', effect: '图片' },
-        { syntax: '| 表头 | 表头 |', effect: '表格（回车自动生成）' },
-        { syntax: '/', effect: '打开插入块菜单' },
-        { syntax: '@', effect: '引用其他文档' },
-    ]},
+    {
+        category: '标题',
+        items: [
+            { syntax: '# 标题', effect: '一级标题' },
+            { syntax: '## 标题', effect: '二级标题' },
+            { syntax: '### 标题', effect: '三级标题' },
+            { syntax: '#### 标题', effect: '四级标题' },
+            { syntax: '##### 标题', effect: '五级标题' },
+            { syntax: '###### 标题', effect: '六级标题' },
+        ],
+    },
+    {
+        category: '文本格式',
+        items: [
+            { syntax: '**粗体**', effect: '粗体文字' },
+            { syntax: '*斜体*', effect: '斜体文字' },
+            { syntax: '~~删除线~~', effect: '删除线文字' },
+            { syntax: '`行内代码`', effect: '行内代码样式' },
+            { syntax: '==高亮==', effect: '高亮标记文字' },
+            { syntax: '^上标^', effect: '上标文字' },
+            { syntax: '~下标~', effect: '下标文字' },
+        ],
+    },
+    {
+        category: '块级元素',
+        items: [
+            { syntax: '- 列表项', effect: '无序列表' },
+            { syntax: '1. 列表项', effect: '有序列表' },
+            { syntax: '[] 待办项', effect: '任务列表' },
+            { syntax: '> 引用', effect: '引用块' },
+            { syntax: '---', effect: '分割线' },
+            { syntax: '```代码```', effect: '代码块' },
+        ],
+    },
+    {
+        category: '插入元素',
+        items: [
+            { syntax: '[文字](链接)', effect: '超链接' },
+            { syntax: '![描述](图片URL)', effect: '图片' },
+            { syntax: '| 表头 | 表头 |', effect: '表格（回车自动生成）' },
+            { syntax: '/', effect: '打开插入块菜单' },
+            { syntax: '@', effect: '引用其他文档' },
+        ],
+    },
 ]
 
 const coreFeatures = [
@@ -177,9 +192,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
                             onClick={() => setActiveTab(tab.id)}
                             className={cn(
                                 'px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-                                activeTab === tab.id
-                                    ? 'bg-foreground text-background'
-                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                activeTab === tab.id ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-muted/80'
                             )}
                         >
                             {tab.label}
@@ -199,7 +212,10 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
                             {coreFeatures.map(f => {
                                 const Icon = f.icon
                                 return (
-                                    <div key={f.title} className="flex items-start gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                                    <div
+                                        key={f.title}
+                                        className="flex items-start gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700"
+                                    >
                                         <div className="w-8 h-8 rounded-md bg-foreground/5 flex items-center justify-center shrink-0">
                                             <Icon size={16} className="text-foreground/70" />
                                         </div>
@@ -256,7 +272,9 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
                                                         <kbd className="pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded border border-border bg-muted px-2 font-mono text-[11px] font-medium text-muted-foreground">
                                                             {key}
                                                         </kbd>
-                                                        {i < item.keys.length - 1 && <span className="text-muted-foreground text-xs mx-0.5">+</span>}
+                                                        {i < item.keys.length - 1 && (
+                                                            <span className="text-muted-foreground text-xs mx-0.5">+</span>
+                                                        )}
                                                     </span>
                                                 ))}
                                             </div>

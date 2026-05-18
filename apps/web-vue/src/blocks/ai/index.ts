@@ -1,6 +1,7 @@
-import { chatWithAI, type ChatMessage } from '@/services'
 import { createVueBlockSpec } from '@lcw-doc/vue'
 import { defineComponent, h, ref } from 'vue'
+
+import { type ChatMessage, chatWithAI } from '@/services'
 
 export const AI = createVueBlockSpec(
     {
@@ -40,8 +41,7 @@ export const AI = createVueBlockSpec(
                         const messages: ChatMessage[] = [
                             {
                                 role: 'system',
-                                content:
-                                    '你是一个专业的文档编辑助手。请根据用户的要求处理文本内容，直接输出处理结果，不要添加多余的解释。',
+                                content: '你是一个专业的文档编辑助手。请根据用户的要求处理文本内容，直接输出处理结果，不要添加多余的解释。',
                             },
                             { role: 'user', content: promptText },
                         ]
@@ -72,13 +72,8 @@ export const AI = createVueBlockSpec(
                                     if (dataStr === '[DONE]') continue
                                     try {
                                         const data = JSON.parse(dataStr)
-                                        if (
-                                            data.base_resp?.status_code &&
-                                            data.base_resp.status_code !== 0
-                                        ) {
-                                            throw new Error(
-                                                data.base_resp.status_msg || 'AI 服务错误',
-                                            )
+                                        if (data.base_resp?.status_code && data.base_resp.status_code !== 0) {
+                                            throw new Error(data.base_resp.status_msg || 'AI 服务错误')
                                         }
                                         const content = data.choices?.[0]?.delta?.content
                                         if (content) {
@@ -127,14 +122,15 @@ export const AI = createVueBlockSpec(
                         const blocks = await editor.tryParseMarkdownToBlocks(content)
                         editor.replaceBlocks([(props as any).block.id], blocks)
                     } catch {
-                        editor.replaceBlocks([(props as any).block.id], [
-                            {
-                                type: 'paragraph',
-                                content: content
-                                    ? [{ type: 'text', text: content, styles: {} }]
-                                    : undefined,
-                            },
-                        ])
+                        editor.replaceBlocks(
+                            [(props as any).block.id],
+                            [
+                                {
+                                    type: 'paragraph',
+                                    content: content ? [{ type: 'text', text: content, styles: {} }] : undefined,
+                                },
+                            ]
+                        )
                     }
                 }
 
@@ -189,28 +185,21 @@ export const AI = createVueBlockSpec(
                                 overflow: 'hidden',
                             },
                         },
-                        renderAIState(
-                            status,
+                        renderAIState(status, inputValue, streamContent, error, blockPrompt, {
+                            handleGenerate,
+                            handleStop,
+                            handleAccept,
+                            handleDiscard,
+                            handleRegenerate,
+                            handleRetry,
+                            handleKeyDown,
                             inputValue,
-                            streamContent,
-                            error,
-                            blockPrompt,
-                            {
-                                handleGenerate,
-                                handleStop,
-                                handleAccept,
-                                handleDiscard,
-                                handleRegenerate,
-                                handleRetry,
-                                handleKeyDown,
-                                inputValue,
-                            },
-                        ),
+                        })
                     )
                 }
             },
         }),
-    },
+    }
 )
 
 function renderAIState(
@@ -219,66 +208,61 @@ function renderAIState(
     streamContent: { value: string },
     error: { value: string },
     blockPrompt: string,
-    handlers: Record<string, any>,
+    handlers: Record<string, any>
 ) {
-    const { handleGenerate, handleStop, handleAccept, handleDiscard, handleRegenerate, handleRetry, handleKeyDown } =
-        handlers
+    const { handleGenerate, handleStop, handleAccept, handleDiscard, handleRegenerate, handleRetry, handleKeyDown } = handlers
 
     if (status === 'idle') {
-        return h(
-            'div',
-            { style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px' } },
-            [
-                h(
-                    'span',
-                    {
-                        style: {
-                            display: 'flex',
-                            alignItems: 'center',
-                            flexShrink: 0,
-                            color: '#6B45FF',
-                        },
-                    },
-                    '✨',
-                ),
-                h('input', {
-                    type: 'text',
-                    value: inputValue.value,
-                    onInput: (e: any) => (inputValue.value = e.target.value),
-                    onKeydown: handleKeyDown,
-                    placeholder: '输入提示，AI 将为你生成内容...',
+        return h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px' } }, [
+            h(
+                'span',
+                {
                     style: {
-                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        flexShrink: 0,
+                        color: '#6B45FF',
+                    },
+                },
+                '✨'
+            ),
+            h('input', {
+                type: 'text',
+                value: inputValue.value,
+                onInput: (e: any) => (inputValue.value = e.target.value),
+                onKeydown: handleKeyDown,
+                placeholder: '输入提示，AI 将为你生成内容...',
+                style: {
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    backgroundColor: 'transparent',
+                    fontSize: '14px',
+                    color: '#37352f',
+                },
+            }),
+            h(
+                'button',
+                {
+                    onClick: () => handleGenerate(inputValue.value),
+                    disabled: !inputValue.value.trim(),
+                    style: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
                         border: 'none',
-                        outline: 'none',
-                        backgroundColor: 'transparent',
-                        fontSize: '14px',
-                        color: '#37352f',
+                        backgroundColor: inputValue.value.trim() ? '#6B45FF' : '#ebebea',
+                        color: inputValue.value.trim() ? '#fff' : '#9b9a97',
+                        cursor: inputValue.value.trim() ? 'pointer' : 'default',
+                        transition: 'all 0.15s',
                     },
-                }),
-                h(
-                    'button',
-                    {
-                        onClick: () => handleGenerate(inputValue.value),
-                        disabled: !inputValue.value.trim(),
-                        style: {
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '28px',
-                            height: '28px',
-                            borderRadius: '6px',
-                            border: 'none',
-                            backgroundColor: inputValue.value.trim() ? '#6B45FF' : '#ebebea',
-                            color: inputValue.value.trim() ? '#fff' : '#9b9a97',
-                            cursor: inputValue.value.trim() ? 'pointer' : 'default',
-                            transition: 'all 0.15s',
-                        },
-                    },
-                    '→',
-                ),
-            ],
-        )
+                },
+                '→'
+            ),
+        ])
     }
 
     if (status === 'generating') {
@@ -305,33 +289,29 @@ function renderAIState(
                             verticalAlign: 'text-bottom',
                         },
                     }),
-                ],
+                ]
             ),
-            h(
-                'div',
-                { style: { marginTop: '8px', display: 'flex', justifyContent: 'flex-end' } },
-                [
-                    h(
-                        'button',
-                        {
-                            onClick: handleStop,
-                            style: {
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '4px 10px',
-                                borderRadius: '4px',
-                                border: '1px solid #e9e9e7',
-                                backgroundColor: '#fff',
-                                color: '#787774',
-                                fontSize: '12px',
-                                cursor: 'pointer',
-                            },
+            h('div', { style: { marginTop: '8px', display: 'flex', justifyContent: 'flex-end' } }, [
+                h(
+                    'button',
+                    {
+                        onClick: handleStop,
+                        style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            border: '1px solid #e9e9e7',
+                            backgroundColor: '#fff',
+                            color: '#787774',
+                            fontSize: '12px',
+                            cursor: 'pointer',
                         },
-                        '✕ 停止',
-                    ),
-                ],
-            ),
+                    },
+                    '✕ 停止'
+                ),
+            ]),
         ])
     }
 
@@ -347,7 +327,7 @@ function renderAIState(
                         whiteSpace: 'pre-wrap',
                     },
                 },
-                streamContent.value,
+                streamContent.value
             ),
             h(
                 'div',
@@ -378,7 +358,7 @@ function renderAIState(
                                 cursor: 'pointer',
                             },
                         },
-                        '✓ 接受',
+                        '✓ 接受'
                     ),
                     h(
                         'button',
@@ -397,7 +377,7 @@ function renderAIState(
                                 cursor: 'pointer',
                             },
                         },
-                        '↻ 重新生成',
+                        '↻ 重新生成'
                     ),
                     h(
                         'button',
@@ -416,9 +396,9 @@ function renderAIState(
                                 cursor: 'pointer',
                             },
                         },
-                        '✕ 丢弃',
+                        '✕ 丢弃'
                     ),
-                ],
+                ]
             ),
         ])
     }
@@ -436,52 +416,48 @@ function renderAIState(
                         fontSize: '14px',
                     },
                 },
-                ['⚠', h('span', error.value || 'AI 生成失败')],
+                ['⚠', h('span', error.value || 'AI 生成失败')]
             ),
-            h(
-                'div',
-                { style: { marginTop: '8px', display: 'flex', gap: '6px' } },
-                [
-                    h(
-                        'button',
-                        {
-                            onClick: handleRetry,
-                            style: {
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '4px 10px',
-                                borderRadius: '4px',
-                                border: '1px solid #e9e9e7',
-                                backgroundColor: '#fff',
-                                color: '#37352f',
-                                fontSize: '12px',
-                                cursor: 'pointer',
-                            },
+            h('div', { style: { marginTop: '8px', display: 'flex', gap: '6px' } }, [
+                h(
+                    'button',
+                    {
+                        onClick: handleRetry,
+                        style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            border: '1px solid #e9e9e7',
+                            backgroundColor: '#fff',
+                            color: '#37352f',
+                            fontSize: '12px',
+                            cursor: 'pointer',
                         },
-                        '↻ 重试',
-                    ),
-                    h(
-                        'button',
-                        {
-                            onClick: handleDiscard,
-                            style: {
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '4px 10px',
-                                borderRadius: '4px',
-                                border: '1px solid #e9e9e7',
-                                backgroundColor: '#fff',
-                                color: '#eb5757',
-                                fontSize: '12px',
-                                cursor: 'pointer',
-                            },
+                    },
+                    '↻ 重试'
+                ),
+                h(
+                    'button',
+                    {
+                        onClick: handleDiscard,
+                        style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 10px',
+                            borderRadius: '4px',
+                            border: '1px solid #e9e9e7',
+                            backgroundColor: '#fff',
+                            color: '#eb5757',
+                            fontSize: '12px',
+                            cursor: 'pointer',
                         },
-                        '✕ 丢弃',
-                    ),
-                ],
-            ),
+                    },
+                    '✕ 丢弃'
+                ),
+            ]),
         ])
     }
 

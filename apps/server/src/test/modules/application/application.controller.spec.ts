@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('ApplicationController', () => {
     let app: INestApplication
@@ -30,9 +30,7 @@ describe('ApplicationController', () => {
     })
 
     it('AP-003: should return application list', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/application')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).get('/api/application').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty('data')
     })

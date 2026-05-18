@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen, waitFor, render } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { MemoryRouter } from 'react-router-dom'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React from 'react'
+import { MemoryRouter } from 'react-router-dom'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { mockAuthenticatedUser } from '@/test/helpers'
 
@@ -42,7 +42,7 @@ function renderWithClient(ui: React.ReactElement) {
     return render(
         <QueryClientProvider client={queryClient}>
             <MemoryRouter>{ui}</MemoryRouter>
-        </QueryClientProvider>,
+        </QueryClientProvider>
     )
 }
 

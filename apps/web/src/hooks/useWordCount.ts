@@ -1,7 +1,7 @@
 import { LcwDocEditor } from '@lcw-doc/core'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { WordCountResult, calculateSelectionWordCount, calculateWordCount } from '@/utils/wordCount'
+import { calculateSelectionWordCount, calculateWordCount, WordCountResult } from '@/utils/wordCount'
 
 export interface WordCountState {
     charsWithSpaces: number

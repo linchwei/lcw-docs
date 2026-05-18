@@ -50,9 +50,9 @@ export class CommentService {
             order: { createdAt: 'ASC' },
         })
 
-        const topLevelComments = comments.filter((c) => c.parentId === null)
-        const result = topLevelComments.map((parent) => {
-            const replies = comments.filter((c) => c.parentId === parent.commentId)
+        const topLevelComments = comments.filter(c => c.parentId === null)
+        const result = topLevelComments.map(parent => {
+            const replies = comments.filter(c => c.parentId === parent.commentId)
             return { ...parent, replies }
         })
 

@@ -1,3 +1,5 @@
+import { ReactNode } from 'react'
+
 import { FilePanelController } from '../components/FilePanel/FilePanelController'
 import { FormattingToolbarController } from '../components/FormattingToolbar/FormattingToolbarController'
 import { LinkToolbarController } from '../components/LinkToolbar/LinkToolbarController'
@@ -6,8 +8,6 @@ import { GridSuggestionMenuController } from '../components/SuggestionMenu/GridS
 import { SuggestionMenuController } from '../components/SuggestionMenu/SuggestionMenuController'
 import { TableHandlesController } from '../components/TableHandles/TableHandlesController'
 import { useLcwDocEditor } from '../hooks/useLcwDocEditor'
-
-import { ReactNode } from 'react'
 
 export type LcwDocDefaultUIProps = {
     formattingToolbar?: boolean

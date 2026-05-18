@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('API Boundary - Page', () => {
     let app: INestApplication
@@ -126,14 +126,9 @@ describe('API Boundary - Page', () => {
             if (delRes.status !== 201 || !delRes.body.data) return
 
             const pageId = delRes.body.data.pageId
-            await request(app.getHttpServer())
-                .delete('/api/page')
-                .set('Authorization', `Bearer ${testUser.token}`)
-                .send({ pageId })
+            await request(app.getHttpServer()).delete('/api/page').set('Authorization', `Bearer ${testUser.token}`).send({ pageId })
 
-            const listRes = await request(app.getHttpServer())
-                .get('/api/page')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const listRes = await request(app.getHttpServer()).get('/api/page').set('Authorization', `Bearer ${testUser.token}`)
 
             expect(listRes.status).toBe(200)
             const pages = listRes.body.data?.pages || listRes.body.data || []
@@ -151,14 +146,9 @@ describe('API Boundary - Page', () => {
             if (delRes.status !== 201 || !delRes.body.data) return
 
             const pageId = delRes.body.data.pageId
-            await request(app.getHttpServer())
-                .delete('/api/page')
-                .set('Authorization', `Bearer ${testUser.token}`)
-                .send({ pageId })
+            await request(app.getHttpServer()).delete('/api/page').set('Authorization', `Bearer ${testUser.token}`).send({ pageId })
 
-            const trashRes = await request(app.getHttpServer())
-                .get('/api/page/trash')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const trashRes = await request(app.getHttpServer()).get('/api/page/trash').set('Authorization', `Bearer ${testUser.token}`)
 
             expect(trashRes.status).toBe(200)
         })

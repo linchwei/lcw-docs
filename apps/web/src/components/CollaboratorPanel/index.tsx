@@ -38,10 +38,10 @@ export function CollaboratorPanel({ pageId, onClose }: CollaboratorPanelProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['collaborators', pageId] })
             setUsername('')
-            toast({ title: '协作者已添加' })
+            toast('协作者已添加')
         },
         onError: (err: any) => {
-            toast({ title: err.response?.data?.message || '添加失败' })
+            toast(err.response?.data?.message || '添加失败')
         },
     })
 
@@ -49,7 +49,7 @@ export function CollaboratorPanel({ pageId, onClose }: CollaboratorPanelProps) {
         mutationFn: srv.removeCollaborator,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['collaborators', pageId] })
-            toast({ title: '协作者已移除' })
+            toast('协作者已移除')
         },
     })
 
@@ -58,7 +58,7 @@ export function CollaboratorPanel({ pageId, onClose }: CollaboratorPanelProps) {
             srv.updateCollaborator(collaboratorId, { role }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['collaborators', pageId] })
-            toast({ title: '权限已更新' })
+            toast('权限已更新')
         },
     })
 
@@ -87,9 +87,7 @@ export function CollaboratorPanel({ pageId, onClose }: CollaboratorPanelProps) {
                 <div className="flex items-center gap-2">
                     <User size={18} />
                     <span className="font-medium">协作者</span>
-                    {collaborators.length > 0 && (
-                        <span className="text-xs text-zinc-500">({collaborators.length})</span>
-                    )}
+                    {collaborators.length > 0 && <span className="text-xs text-zinc-500">({collaborators.length})</span>}
                 </div>
                 {onClose && (
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
@@ -129,16 +127,8 @@ export function CollaboratorPanel({ pageId, onClose }: CollaboratorPanelProps) {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <Button
-                    className="w-full h-8 text-sm"
-                    onClick={handleAdd}
-                    disabled={!username.trim() || addMutation.isPending}
-                >
-                    {addMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                        <Plus size={14} className="mr-2" />
-                    )}
+                <Button className="w-full h-8 text-sm" onClick={handleAdd} disabled={!username.trim() || addMutation.isPending}>
+                    {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus size={14} className="mr-2" />}
                     邀请协作者
                 </Button>
             </div>
@@ -156,10 +146,7 @@ export function CollaboratorPanel({ pageId, onClose }: CollaboratorPanelProps) {
                     </div>
                 ) : (
                     collaborators.map(collaborator => (
-                        <div
-                            key={collaborator.userId}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-50"
-                        >
+                        <div key={collaborator.userId} className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-50">
                             <div className="h-8 w-8 rounded-full bg-zinc-200 flex items-center justify-center text-sm font-medium text-zinc-600 shrink-0">
                                 {collaborator.username.charAt(0).toUpperCase()}
                             </div>
@@ -219,9 +206,7 @@ export function CollaboratorPanel({ pageId, onClose }: CollaboratorPanelProps) {
                                         )}
                                         <DropdownMenuItem
                                             className="text-red-600"
-                                            onClick={() =>
-                                                removeMutation.mutate(collaborator.collaboratorId!)
-                                            }
+                                            onClick={() => removeMutation.mutate(collaborator.collaboratorId!)}
                                         >
                                             <Trash2 size={14} className="mr-2" />
                                             移除

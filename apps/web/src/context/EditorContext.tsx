@@ -1,5 +1,5 @@
 import { LcwDocEditor } from '@lcw-doc/core'
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, ReactNode, useContext, useState } from 'react'
 
 interface EditorContextType {
     editor: LcwDocEditor<any, any, any> | null
@@ -14,11 +14,7 @@ const EditorContext = createContext<EditorContextType>({
 export function EditorProvider({ children }: { children: ReactNode }) {
     const [editor, setEditor] = useState<LcwDocEditor<any, any, any> | null>(null)
 
-    return (
-        <EditorContext.Provider value={{ editor, setEditor }}>
-            {children}
-        </EditorContext.Provider>
-    )
+    return <EditorContext.Provider value={{ editor, setEditor }}>{children}</EditorContext.Provider>
 }
 
 export function useEditorContext() {

@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-    defaultBlockSpecs,
-    defaultBlockSchema,
-    defaultStyleSpecs,
-    defaultStyleSchema,
-    defaultInlineContentSpecs,
-    defaultInlineContentSchema,
     customizeCodeBlock,
+    defaultBlockSchema,
+    defaultBlockSpecs,
+    defaultInlineContentSchema,
+    defaultInlineContentSpecs,
+    defaultStyleSchema,
+    defaultStyleSpecs,
 } from '../../src/blocks/defaultBlocks'
 
 describe('defaultBlocks', () => {

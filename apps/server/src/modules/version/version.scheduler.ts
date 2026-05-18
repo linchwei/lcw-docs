@@ -1,10 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
-import * as Y from 'yjs'
 import { nanoid } from 'nanoid'
-import { PostgresqlPersistence } from 'y-postgresql'
 import { Repository } from 'typeorm'
+import { PostgresqlPersistence } from 'y-postgresql'
+import * as Y from 'yjs'
 
 import { PageEntity } from '../../entities/page.entity'
 import { VersionEntity } from '../../entities/version.entity'

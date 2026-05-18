@@ -1,6 +1,7 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 import { DocPage } from './page-objects/doc.page'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
 
 test.describe('版本管理 E2E 测试', () => {
     let token: string
@@ -67,7 +68,9 @@ test.describe('版本管理 E2E 测试', () => {
             const compareButton = page.getByRole('button', { name: '对比' })
             if (await compareButton.isVisible().catch(() => false)) {
                 await compareButton.click()
-                await expect(page.getByText('版本差异')).toBeVisible({ timeout: 5000 }).catch(() => {})
+                await expect(page.getByText('版本差异'))
+                    .toBeVisible({ timeout: 5000 })
+                    .catch(() => {})
             }
         }
     })
@@ -77,13 +80,20 @@ test.describe('版本管理 E2E 测试', () => {
         await docPage.openVersionPanel()
 
         const versionItems = page.locator('.version-item, [data-testid="version-item"]')
-        if (await versionItems.first().isVisible().catch(() => false)) {
+        if (
+            await versionItems
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await versionItems.first().click()
 
             const restoreButton = page.getByRole('button', { name: '恢复到此版本' })
             if (await restoreButton.isVisible().catch(() => false)) {
                 await restoreButton.click()
-                await expect(page.getByText(/确认恢复|确定要恢复/)).toBeVisible({ timeout: 5000 }).catch(() => {})
+                await expect(page.getByText(/确认恢复|确定要恢复/))
+                    .toBeVisible({ timeout: 5000 })
+                    .catch(() => {})
             }
         }
     })
@@ -93,7 +103,12 @@ test.describe('版本管理 E2E 测试', () => {
         await docPage.openVersionPanel()
 
         const versionItems = page.locator('.version-item, [data-testid="version-item"]')
-        if (await versionItems.first().isVisible().catch(() => false)) {
+        if (
+            await versionItems
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await versionItems.first().click()
 
             const restoreButton = page.getByRole('button', { name: '恢复到此版本' })
@@ -113,7 +128,10 @@ test.describe('版本管理 E2E 测试', () => {
         const docPage = new DocPage(page)
         await docPage.openVersionPanel()
 
-        const deleteButton = page.locator('button').filter({ has: page.locator('svg.lucide-trash-2') }).first()
+        const deleteButton = page
+            .locator('button')
+            .filter({ has: page.locator('svg.lucide-trash-2') })
+            .first()
         if (await deleteButton.isVisible().catch(() => false)) {
             await deleteButton.click()
             await page.waitForTimeout(1000)

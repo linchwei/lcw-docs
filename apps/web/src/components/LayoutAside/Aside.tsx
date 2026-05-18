@@ -46,6 +46,8 @@ import { NavLink, useMatch, useNavigate } from 'react-router-dom'
 import { TemplateDialog } from '@/components/TemplateDialog'
 import { Template } from '@/data/templates'
 import * as srv from '@/services'
+import { Folder } from '@/types/api'
+import { Page } from '@/types/page'
 import { queryClient } from '@/utils/query-client'
 import { randomEmoji } from '@/utils/randomEmoji'
 
@@ -217,7 +219,7 @@ export function Aside() {
                         <SidebarGroup>
                             <SidebarGroupLabel className="text-[#9b9a97] text-xs uppercase tracking-wider">最近编辑</SidebarGroupLabel>
                             <SidebarMenu>
-                                {recentPages.slice(0, 5).map(item => (
+                                {recentPages.slice(0, 5).map((item: Page) => (
                                     <SidebarMenuItem key={item.pageId}>
                                         <SidebarMenuButton
                                             asChild
@@ -297,7 +299,7 @@ export function Aside() {
                             </div>
                         </SidebarGroupLabel>
                         <SidebarMenu>
-                            {folderList.map(folder => {
+                            {folderList.map((folder: Folder) => {
                                 const folderPages = normalPages.filter(p => p.folderId === folder.folderId)
                                 return (
                                     <Collapsible key={folder.folderId}>
@@ -457,7 +459,7 @@ export function Aside() {
                             </SidebarGroupLabel>
                             <CollapsibleContent>
                                 <SidebarMenu>
-                                    {trashPages?.map(item => (
+                                    {trashPages?.map((item: Page) => (
                                         <SidebarMenuItem key={item.pageId}>
                                             <SidebarMenuButton className="opacity-60">
                                                 <span className="text-base leading-none">{item.emoji}</span>

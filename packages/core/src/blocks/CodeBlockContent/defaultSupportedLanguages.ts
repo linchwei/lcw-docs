@@ -3,11 +3,11 @@ import docker from 'refractor/docker'
 import git from 'refractor/git'
 import graphql from 'refractor/graphql'
 import haskell from 'refractor/haskell'
+import jsx from 'refractor/jsx'
 import latex from 'refractor/latex'
+import scala from 'refractor/scala'
 import toml from 'refractor/toml'
 import tsx from 'refractor/tsx'
-import jsx from 'refractor/jsx'
-import scala from 'refractor/scala'
 
 refractor.register(docker)
 refractor.register(git)

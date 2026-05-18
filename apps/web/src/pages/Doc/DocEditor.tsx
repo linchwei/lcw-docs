@@ -35,10 +35,10 @@ import { Divider } from '@/blocks/divider'
 import { Mention } from '@/blocks/mention'
 import { BasicAIChat } from '@/components/BasicAIChat'
 import { EditorSideMenu } from '@/components/EditorSideMenu'
-import { CustomInputRules } from '@/extensions/CustomInputRules'
-import { Highlight, Superscript, Subscript } from '@/extensions/HighlightSupSubMarks'
-import { LinkInputRule } from '@/extensions/LinkInputRule'
 import { SelectionAIMenu } from '@/components/SelectionAIMenu'
+import { CustomInputRules } from '@/extensions/CustomInputRules'
+import { Highlight, Subscript, Superscript } from '@/extensions/HighlightSupSubMarks'
+import { LinkInputRule } from '@/extensions/LinkInputRule'
 import * as srv from '@/services'
 import { User } from '@/types/api'
 
@@ -179,13 +179,6 @@ export function DocEditor(props: DocEditorProps) {
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
         return () => observer.disconnect()
     }, [])
-
-    const undoManager = useMemo(() => {
-        const fragment = doc.getXmlFragment(`document-store-${pageId}`)
-        return new Y.UndoManager(fragment, {
-            trackedOrigins: new Set([doc.clientID]),
-        })
-    }, [doc, pageId])
 
     const { data: currentUser } = useQuery<User>({
         queryKey: ['currentUser'],

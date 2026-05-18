@@ -19,7 +19,7 @@ export class AiService {
         const response = await fetch('https://api.deepseek.com/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                Authorization: `Bearer ${apiKey}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({

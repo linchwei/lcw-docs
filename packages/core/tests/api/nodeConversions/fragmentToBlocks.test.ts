@@ -1,8 +1,8 @@
-import { describe, test, expect, beforeEach } from 'vitest'
 import { Fragment } from '@tiptap/pm/model'
+import { beforeEach, describe, expect, test } from 'vitest'
 
-import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 import { fragmentToBlocks } from '../../../src/api/nodeConversions/fragmentToBlocks'
+import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 
 describe('fragmentToBlocks', () => {
     describe('基本转换', () => {

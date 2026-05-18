@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 
 test.describe('文档组织与检索 E2E 测试', () => {
     let token: string
@@ -35,7 +36,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
         }
 
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             await page.waitForTimeout(500)
 
@@ -57,7 +63,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
         }
 
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             await page.waitForTimeout(500)
 
@@ -89,7 +100,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
         }
 
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             await page.waitForTimeout(500)
 
@@ -151,7 +167,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
         }
 
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             const favoriteOption = page.getByText('收藏')
             if (await favoriteOption.isVisible().catch(() => false)) {
@@ -162,7 +183,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
 
     test('E2E-054: 取消收藏', async ({ page }) => {
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             const unfavoriteOption = page.getByText('取消收藏').or(page.getByText('收藏'))
             if (await unfavoriteOption.isVisible().catch(() => false)) {
@@ -181,7 +207,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
         }
 
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-vertical') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             const deleteOption = page.getByText('删除')
             if (await deleteOption.isVisible().catch(() => false)) {
@@ -206,7 +237,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
             await page.waitForTimeout(1000)
 
             const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') })
-            if (await moreButtons.first().isVisible().catch(() => false)) {
+            if (
+                await moreButtons
+                    .first()
+                    .isVisible()
+                    .catch(() => false)
+            ) {
                 await moreButtons.first().click()
                 const restoreOption = page.getByText('恢复')
                 if (await restoreOption.isVisible().catch(() => false)) {
@@ -224,7 +260,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
             await page.waitForTimeout(1000)
 
             const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') })
-            if (await moreButtons.first().isVisible().catch(() => false)) {
+            if (
+                await moreButtons
+                    .first()
+                    .isVisible()
+                    .catch(() => false)
+            ) {
                 await moreButtons.first().click()
                 const permanentDeleteOption = page.getByText('永久删除')
                 if (await permanentDeleteOption.isVisible().catch(() => false)) {

@@ -22,33 +22,21 @@ import { Component, computed, defineComponent, h } from 'vue'
 
 import { renderToDOMSpec } from './@util/VueRenderUtil'
 
-export type VueCustomBlockRenderProps<
-    T extends CustomBlockConfig,
-    I extends InlineContentSchema,
-    S extends StyleSchema,
-> = {
+export type VueCustomBlockRenderProps<T extends CustomBlockConfig, I extends InlineContentSchema, S extends StyleSchema> = {
     block: BlockFromConfig<T, I, S>
     editor: LcwDocEditor<BlockSchemaWithBlock<T['type'], T>, I, S>
     contentRef: (node: HTMLElement | null) => void
 }
 
-export type VueCustomBlockImplementation<
-    T extends CustomBlockConfig,
-    I extends InlineContentSchema,
-    S extends StyleSchema,
-> = {
+export type VueCustomBlockImplementation<T extends CustomBlockConfig, I extends InlineContentSchema, S extends StyleSchema> = {
     render: Component
     toExternalHTML?: Component
     parse?: (el: HTMLElement) => PartialBlockFromConfig<T, I, S>['props'] | undefined
 }
 
-export function createVueBlockSpec<
-    const T extends CustomBlockConfig,
-    const I extends InlineContentSchema,
-    const S extends StyleSchema,
->(
+export function createVueBlockSpec<const T extends CustomBlockConfig, const I extends InlineContentSchema, const S extends StyleSchema>(
     blockConfig: T,
-    blockImplementation: VueCustomBlockImplementation<T, I, S>,
+    blockImplementation: VueCustomBlockImplementation<T, I, S>
 ) {
     const UserRenderComponent = blockImplementation.render
 
@@ -77,7 +65,7 @@ export function createVueBlockSpec<
                 {},
                 blockConfig.propSchema,
                 blockConfig.isFileBlock,
-                HTMLAttributes,
+                HTMLAttributes
             )
         },
 
@@ -112,10 +100,7 @@ export function createVueBlockSpec<
 
                         const dataAttrs: Record<string, any> = {}
                         Object.entries(b.props)
-                            .filter(
-                                ([prop, value]) =>
-                                    !inheritedProps.includes(prop) && value !== blockConfig.propSchema[prop].default,
-                            )
+                            .filter(([prop, value]) => !inheritedProps.includes(prop) && value !== blockConfig.propSchema[prop].default)
                             .forEach(([prop, value]) => {
                                 dataAttrs[camelToDataKebab(prop)] = value
                             })
@@ -138,7 +123,7 @@ export function createVueBlockSpec<
                                         editor: (b as any).editor || props.extension?.options?.editor,
                                         contentRef,
                                     }),
-                            },
+                            }
                         )
                     }
                 },
@@ -179,9 +164,9 @@ export function createVueBlockSpec<
                                     editor: editor as any,
                                     contentRef: refCB,
                                 }),
-                        },
+                        }
                     ),
-                editor,
+                editor
             )
             output.contentDOM?.setAttribute('data-editable', '')
             return output
@@ -205,9 +190,9 @@ export function createVueBlockSpec<
                                     editor: editor as any,
                                     contentRef: refCB,
                                 }),
-                        },
+                        }
                     ),
-                editor,
+                editor
             )
             output.contentDOM?.setAttribute('data-editable', '')
             return output

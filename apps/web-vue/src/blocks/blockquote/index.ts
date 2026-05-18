@@ -27,9 +27,9 @@ export const Blockquote = createVueBlockSpec(
                                 fontStyle: 'italic',
                             },
                         },
-                        [h('div', { ref: props.contentRef })],
+                        [h('div', { ref: props.contentRef })]
                     )
             },
         }),
-    },
+    }
 )

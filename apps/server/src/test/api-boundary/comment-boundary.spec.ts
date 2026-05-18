@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('API Boundary - Comment', () => {
     let app: INestApplication
@@ -70,9 +70,7 @@ describe('API Boundary - Comment', () => {
             const commentId = cmtRes.body.data.commentId || cmtRes.body.data.id
             if (!commentId) return
 
-            await request(app.getHttpServer())
-                .put(`/api/comment/${commentId}/resolve`)
-                .set('Authorization', `Bearer ${testUser.token}`)
+            await request(app.getHttpServer()).put(`/api/comment/${commentId}/resolve`).set('Authorization', `Bearer ${testUser.token}`)
 
             const res = await request(app.getHttpServer())
                 .put(`/api/comment/${commentId}/resolve`)

@@ -8,7 +8,7 @@
         "allowSyntheticDefaultImports": true,
         "target": "ES2021",
         "sourceMap": true,
-        "incremental": true,
+        "incremental": false,
         "skipLibCheck": true,
         "strictNullChecks": false,
         "noImplicitAny": false,

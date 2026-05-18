@@ -5,8 +5,8 @@
  * 复制了 ProseMirror 的 doPaste 函数，使其能在 JSDOM 环境中工作。
  */
 import { Slice } from '@tiptap/pm/model'
-import { EditorView } from '@tiptap/pm/view'
 import * as pmView from '@tiptap/pm/view'
+import { EditorView } from '@tiptap/pm/view'
 
 /**
  * 从切片中获取单个节点

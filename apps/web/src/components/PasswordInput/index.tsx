@@ -1,4 +1,5 @@
-import { useState, useRef, forwardRef } from 'react'
+import { forwardRef, useRef, useState } from 'react'
+
 import styles from './PasswordInput.module.css'
 
 interface PasswordInputProps {
@@ -20,7 +21,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         const handleToggleVisibility = () => {
             setIsPeeking(true)
             setIsVisible(!isVisible)
-            
+
             // Reset peeking animation after it completes
             setTimeout(() => {
                 setIsPeeking(false)
@@ -38,17 +39,14 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         }
 
         return (
-            <div 
-                ref={containerRef}
-                className={`${styles.container} ${isFocused ? styles.focused : ''}`}
-            >
+            <div ref={containerRef} className={`${styles.container} ${isFocused ? styles.focused : ''}`}>
                 <div className={styles.inputWrapper}>
                     <input
                         ref={ref}
                         type={isVisible ? 'text' : 'password'}
                         value={value}
                         name={name}
-                        onChange={(e) => onChange?.(e.target.value)}
+                        onChange={e => onChange?.(e.target.value)}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         placeholder={placeholder}

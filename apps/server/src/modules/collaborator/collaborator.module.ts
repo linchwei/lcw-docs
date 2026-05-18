@@ -9,10 +9,7 @@ import { CollaboratorController } from './collaborator.controller'
 import { CollaboratorService } from './collaborator.service'
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([CollaboratorEntity, PageEntity, UserEntity]),
-        NotificationModule,
-    ],
+    imports: [TypeOrmModule.forFeature([CollaboratorEntity, PageEntity, UserEntity]), NotificationModule],
     controllers: [CollaboratorController],
     providers: [CollaboratorService],
     exports: [CollaboratorService],

@@ -41,9 +41,9 @@ export const CreateLinkButton = () => {
     }, editor)
 
     const update = (url: string, text: string) => {
-            editor.createLink(url, text)
-            editor.focus()
-        }
+        editor.createLink(url, text)
+        editor.focus()
+    }
 
     const show = (() => {
         if (!linkInSchema) {

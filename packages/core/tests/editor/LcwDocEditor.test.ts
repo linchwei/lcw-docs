@@ -1,10 +1,11 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest'
-import { LcwDocEditor } from '../../src/editor/LcwDocEditor'
-import { LcwDocSchema } from '../../src/editor/LcwDocSchema'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+
 import { insertBlocks } from '../../src/api/blockManipulation/commands/insertBlocks/insertBlocks'
 import { removeBlocks } from '../../src/api/blockManipulation/commands/removeBlocks/removeBlocks'
-import { updateBlock } from '../../src/api/blockManipulation/commands/updateBlock/updateBlock'
 import { replaceBlocks } from '../../src/api/blockManipulation/commands/replaceBlocks/replaceBlocks'
+import { updateBlock } from '../../src/api/blockManipulation/commands/updateBlock/updateBlock'
+import { LcwDocEditor } from '../../src/editor/LcwDocEditor'
+import { LcwDocSchema } from '../../src/editor/LcwDocSchema'
 
 vi.mock('../../src/api/blockManipulation/commands/insertBlocks/insertBlocks')
 vi.mock('../../src/api/blockManipulation/commands/removeBlocks/removeBlocks')

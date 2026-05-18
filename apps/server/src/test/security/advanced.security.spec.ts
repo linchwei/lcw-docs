@@ -1,10 +1,10 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
-import * as path from 'path'
-import * as fs from 'fs'
 import { JwtService } from '@nestjs/jwt'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('Advanced Security Tests', () => {
     let app: INestApplication
@@ -41,8 +41,7 @@ describe('Advanced Security Tests', () => {
             const shareId = shareRes.body.data.shareId
             let rateLimited = false
             for (let i = 0; i < 20; i++) {
-                const res = await request(app.getHttpServer())
-                    .get(`/api/share/${shareId}/info?password=wrong${i}`)
+                const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/info?password=wrong${i}`)
                 if (res.status === 429) {
                     rateLimited = true
                     break
@@ -56,6 +55,7 @@ describe('Advanced Security Tests', () => {
         it('should reject WebSocket connection without token', async () => {
             const wsUrl = 'ws://localhost:8082/api/ws'
             try {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
                 const WebSocket = require('ws')
                 const ws = new WebSocket(wsUrl)
                 await new Promise<void>((resolve, reject) => {
@@ -77,9 +77,10 @@ describe('Advanced Security Tests', () => {
         it('should reject WebSocket connection with fake shareId', async () => {
             const wsUrl = 'ws://localhost:8082/api/ws?shareId=fake-share-id'
             try {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
                 const WebSocket = require('ws')
                 const ws = new WebSocket(wsUrl)
-                await new Promise<void>((resolve) => {
+                await new Promise<void>(resolve => {
                     ws.on('open', () => {
                         ws.close()
                     })
@@ -109,8 +110,7 @@ describe('Advanced Security Tests', () => {
             if (res.status === 200 || res.status === 201) {
                 const fileUrl = res.body.data?.url || res.body.data?.path
                 if (fileUrl) {
-                    const contentRes = await request(app.getHttpServer())
-                        .get(fileUrl)
+                    const contentRes = await request(app.getHttpServer()).get(fileUrl)
                     const hasScript = contentRes.text?.includes('<script>')
                     expect(hasScript).toBeFalsy()
                 }
@@ -126,8 +126,7 @@ describe('Advanced Security Tests', () => {
         it('should have rate limiting on share link enumeration', async () => {
             let rateLimited = false
             for (let i = 0; i < 30; i++) {
-                const res = await request(app.getHttpServer())
-                    .get(`/api/share/share${i}/info`)
+                const res = await request(app.getHttpServer()).get(`/api/share/share${i}/info`)
                 if (res.status === 429) {
                     rateLimited = true
                     break
@@ -149,7 +148,7 @@ describe('Advanced Security Tests', () => {
     describe('SEC-037: 并发编辑冲突', () => {
         it('should handle concurrent page updates without data loss', async () => {
             if (!createdPageId) return
-            const updates = Array.from({ length: 5 }, (_, i) =>
+            const updates = Array.from({ length: 5 }, (__, i) =>
                 request(app.getHttpServer())
                     .put('/api/page')
                     .set('Authorization', `Bearer ${testUser.token}`)

@@ -1,5 +1,5 @@
-import { render, h, type VNode } from 'vue'
 import { LcwDocEditor } from '@lcw-doc/core'
+import { render, type VNode } from 'vue'
 
 /**
  * Vue 版本的 renderToDOMSpec
@@ -7,10 +7,7 @@ import { LcwDocEditor } from '@lcw-doc/core'
  * 将 Vue VNode 同步渲染到临时 DIV 中，提取 DOM 结构后返回。
  * Vue 的 render() 函数本身就是同步的，无需 flushSync 模式。
  */
-export function renderToDOMSpec(
-    fc: (refCB: (ref: HTMLElement | null) => void) => VNode,
-    editor?: LcwDocEditor<any, any, any>
-) {
+export function renderToDOMSpec(fc: (refCB: (ref: HTMLElement | null) => void) => VNode, editor?: LcwDocEditor<any, any, any>) {
     const div = document.createElement('div')
     let contentDOM: HTMLElement | undefined
 

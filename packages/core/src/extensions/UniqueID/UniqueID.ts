@@ -125,13 +125,19 @@ const UniqueID = Extension.create({
                         this.options.filterTransaction &&
                         transactions.some(tr => {
                             let _a, _b
-                            return !((_b = (_a = this.options as any).filterTransaction) === null || _b === void 0 ? void 0 : _b.call(_a, tr))
+                            return !((_b = (_a = this.options as any).filterTransaction) === null || _b === void 0
+                                ? void 0
+                                : _b.call(_a, tr))
                         })
                     if (!docChanges || filterTransactions) {
                         return
                     }
                     const { tr } = newState
-                    const { types, attributeName, generateID } = this.options as { types: string[]; attributeName: string; generateID: () => string }
+                    const { types, attributeName, generateID } = this.options as {
+                        types: string[]
+                        attributeName: string
+                        generateID: () => string
+                    }
                     const transform = combineTransactionSteps(oldState.doc, transactions as any)
                     const { mapping } = transform
                     // 基于旧状态获取变更范围

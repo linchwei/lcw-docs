@@ -1,7 +1,7 @@
-import { Controller, Post, Request, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common'
+import { Controller, Post, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger'
 
 import { UploadService } from './upload.service'
 
@@ -15,10 +15,19 @@ export class UploadController {
 
     @ApiOperation({ summary: '上传文件', description: '上传文件或图片，支持 multipart/form-data，字段名为 file' })
     @ApiConsumes('multipart/form-data')
-    @ApiResponse({ status: 200, description: '上传成功', schema: { properties: { data: { type: 'object', properties: { url: { type: 'string', description: '文件访问URL' } } }, success: { type: 'boolean', description: '是否成功' } } } })
+    @ApiResponse({
+        status: 200,
+        description: '上传成功',
+        schema: {
+            properties: {
+                data: { type: 'object', properties: { url: { type: 'string', description: '文件访问URL' } } },
+                success: { type: 'boolean', description: '是否成功' },
+            },
+        },
+    })
     @Post()
     @UseInterceptors(FileInterceptor('file'))
-    async uploadFile(@UploadedFile() file: any, @Request() req) {
+    async uploadFile(@UploadedFile() file: any, @Request() _req) {
         const result = await this.uploadService.saveFile(file)
         return { data: result, success: true }
     }

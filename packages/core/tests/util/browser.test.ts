@@ -1,10 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-    isAppleOS,
-    formatKeyboardShortcut,
-    mergeCSSClasses,
-    isSafari,
-} from '../../src/util/browser'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { formatKeyboardShortcut, isAppleOS, isSafari, mergeCSSClasses } from '../../src/util/browser'
 
 describe('browser utils', () => {
     const originalNavigator = globalThis.navigator
@@ -35,7 +31,8 @@ describe('browser utils', () => {
             Object.defineProperty(globalThis, 'navigator', {
                 value: {
                     platform: 'iPad',
-                    userAgent: 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+                    userAgent:
+                        'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
                 },
                 writable: true,
                 configurable: true,
@@ -121,7 +118,10 @@ describe('browser utils', () => {
     describe('isSafari', () => {
         it('should return true for Safari user agent', () => {
             Object.defineProperty(globalThis, 'navigator', {
-                value: { userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15' },
+                value: {
+                    userAgent:
+                        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+                },
                 writable: true,
                 configurable: true,
             })
@@ -130,7 +130,10 @@ describe('browser utils', () => {
 
         it('should return false for Chrome user agent', () => {
             Object.defineProperty(globalThis, 'navigator', {
-                value: { userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+                value: {
+                    userAgent:
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                },
                 writable: true,
                 configurable: true,
             })
@@ -139,7 +142,10 @@ describe('browser utils', () => {
 
         it('should return false for Android browser', () => {
             Object.defineProperty(globalThis, 'navigator', {
-                value: { userAgent: 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36' },
+                value: {
+                    userAgent:
+                        'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36',
+                },
                 writable: true,
                 configurable: true,
             })

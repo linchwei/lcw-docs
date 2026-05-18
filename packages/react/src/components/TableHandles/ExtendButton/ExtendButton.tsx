@@ -117,19 +117,19 @@ export const ExtendButton = <I extends InlineContentSchema = DefaultInlineConten
     >()
 
     const mouseDownHandler = (event: ReactMouseEvent) => {
-            props.onMouseDown()
-            setEditingState({
-                originalContent: props.block.content,
-                originalCroppedContent: cropEmptyRowsOrColumns(
-                    props.block.content,
-                    props.orientation === 'addOrRemoveColumns' ? 'columns' : 'rows'
-                ),
-                startPos: props.orientation === 'addOrRemoveColumns' ? event.clientX : event.clientY,
-            })
-            movedMouse.current = false
+        props.onMouseDown()
+        setEditingState({
+            originalContent: props.block.content,
+            originalCroppedContent: cropEmptyRowsOrColumns(
+                props.block.content,
+                props.orientation === 'addOrRemoveColumns' ? 'columns' : 'rows'
+            ),
+            startPos: props.orientation === 'addOrRemoveColumns' ? event.clientX : event.clientY,
+        })
+        movedMouse.current = false
 
-            event.preventDefault()
-        }
+        event.preventDefault()
+    }
 
     const onClickHandler = () => {
         if (movedMouse.current) {

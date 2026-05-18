@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 
 import { useEditorContext } from '@/context/EditorContext'
-import { chatWithAI, ChatMessage } from '@/services'
+import { ChatMessage, chatWithAI } from '@/services'
 
-const SYSTEM_PROMPT = '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
+const SYSTEM_PROMPT =
+    '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
 
 function extractTextFromBlocks(blocks: PartialBlock[]): string {
     let text = ''
@@ -16,7 +17,9 @@ function extractTextFromBlocks(blocks: PartialBlock[]): string {
                 text += block.content + '\n'
             } else if (Array.isArray(block.content)) {
                 for (const inline of block.content) {
-                    if (inline.type === 'text' && inline.text) {
+                    if (typeof inline === 'string') {
+                        text += inline
+                    } else if (inline.type === 'text' && inline.text) {
                         text += inline.text
                     }
                 }
@@ -86,21 +89,17 @@ export function GlobalAIChat() {
         if (editor) {
             try {
                 const blocks = editor.document
-                const docText = extractTextFromBlocks(blocks)
+                const docText = extractTextFromBlocks(blocks as PartialBlock[])
                 context = docText.slice(0, 3000)
-            } catch {}
+            } catch {
+                void 0
+            }
         }
 
-        const systemContent = context
-            ? `${SYSTEM_PROMPT}\n\n当前文档内容：\n${context}`
-            : SYSTEM_PROMPT
+        const systemContent = context ? `${SYSTEM_PROMPT}\n\n当前文档内容：\n${context}` : SYSTEM_PROMPT
 
         const apiUserMessage: ChatMessage = { role: 'user', content: userMessage.content }
-        const apiMessages: ChatMessage[] = [
-            { role: 'system', content: systemContent },
-            ...chatHistory,
-            apiUserMessage,
-        ]
+        const apiMessages: ChatMessage[] = [{ role: 'system', content: systemContent }, ...chatHistory, apiUserMessage]
 
         try {
             const response = await chatWithAI(apiMessages, controller.signal)
@@ -153,21 +152,19 @@ export function GlobalAIChat() {
             setMessages(prev => [...prev, assistantMessage])
             setStreamContent('')
 
-            setChatHistory(prev => [
-                ...prev,
-                apiUserMessage,
-                { role: 'assistant', content: accumulated },
-            ])
+            setChatHistory(prev => [...prev, apiUserMessage, { role: 'assistant', content: accumulated }])
 
             if (editor && accumulated) {
                 try {
                     const blocks = await editor.tryParseMarkdownToBlocks(accumulated)
-                    setLastBlocks(blocks)
+                    setLastBlocks(blocks as PartialBlock[])
                 } catch {
-                    setLastBlocks([{
-                        type: 'paragraph',
-                        content: [{ type: 'text', text: accumulated, styles: {} }],
-                    }])
+                    setLastBlocks([
+                        {
+                            type: 'paragraph',
+                            content: [{ type: 'text', text: accumulated, styles: {} }],
+                        },
+                    ])
                 }
             }
         } catch (err: any) {
@@ -215,39 +212,45 @@ export function GlobalAIChat() {
     return (
         <>
             {isOpen && (
-                <div style={{
-                    position: 'fixed',
-                    bottom: '24px',
-                    right: '24px',
-                    width: '400px',
-                    height: '520px',
-                    backgroundColor: '#fff',
-                    borderRadius: '12px',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-                    border: '1px solid #e9e9e7',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    zIndex: 9999,
-                    overflow: 'hidden',
-                }}>
-                    <div style={{
+                <div
+                    style={{
+                        position: 'fixed',
+                        bottom: '24px',
+                        right: '24px',
+                        width: '400px',
+                        height: '520px',
+                        backgroundColor: '#fff',
+                        borderRadius: '12px',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+                        border: '1px solid #e9e9e7',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '12px 16px',
-                        borderBottom: '1px solid #f0f0ee',
-                    }}>
+                        flexDirection: 'column',
+                        zIndex: 9999,
+                        overflow: 'hidden',
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '12px 16px',
+                            borderBottom: '1px solid #f0f0ee',
+                        }}
+                    >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Sparkles size={18} color="#6B45FF" />
                             <span style={{ fontSize: '14px', fontWeight: 600, color: '#37352f' }}>AI 助手</span>
                             {editor && (
-                                <span style={{
-                                    fontSize: '11px',
-                                    color: '#6B45FF',
-                                    backgroundColor: '#f0ebff',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                }}>
+                                <span
+                                    style={{
+                                        fontSize: '11px',
+                                        color: '#6B45FF',
+                                        backgroundColor: '#f0ebff',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                    }}
+                                >
                                     已连接编辑器
                                 </span>
                             )}
@@ -273,95 +276,113 @@ export function GlobalAIChat() {
                         </button>
                     </div>
 
-                    <div style={{
-                        flex: 1,
-                        overflowY: 'auto',
-                        padding: '16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px',
-                    }}>
+                    <div
+                        style={{
+                            flex: 1,
+                            overflowY: 'auto',
+                            padding: '16px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px',
+                        }}
+                    >
                         {messages.length === 0 && !streamContent && (
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                height: '100%',
-                                color: '#9b9a97',
-                                gap: '8px',
-                            }}>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: '100%',
+                                    color: '#9b9a97',
+                                    gap: '8px',
+                                }}
+                            >
                                 <MessageSquare size={32} color="#d4d4d4" />
                                 <span style={{ fontSize: '13px' }}>向 AI 助手提问，开始对话</span>
                             </div>
                         )}
                         {messages.map((msg, i) => (
-                            <div key={i} style={{
-                                display: 'flex',
-                                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                            }}>
-                                <div style={{
-                                    maxWidth: '85%',
-                                    padding: '8px 12px',
-                                    borderRadius: msg.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
-                                    backgroundColor: msg.role === 'user' ? '#6B45FF' : '#f7f6f3',
-                                    color: msg.role === 'user' ? '#fff' : '#37352f',
-                                    fontSize: '13px',
-                                    lineHeight: '1.6',
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                }}>
+                            <div
+                                key={i}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        maxWidth: '85%',
+                                        padding: '8px 12px',
+                                        borderRadius: msg.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
+                                        backgroundColor: msg.role === 'user' ? '#6B45FF' : '#f7f6f3',
+                                        color: msg.role === 'user' ? '#fff' : '#37352f',
+                                        fontSize: '13px',
+                                        lineHeight: '1.6',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                    }}
+                                >
                                     {msg.content}
                                 </div>
                             </div>
                         ))}
                         {isGenerating && !streamContent && (
                             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                <div style={{
-                                    padding: '12px 16px',
-                                    borderRadius: '12px 12px 12px 4px',
-                                    backgroundColor: '#f7f6f3',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                }}>
+                                <div
+                                    style={{
+                                        padding: '12px 16px',
+                                        borderRadius: '12px 12px 12px 4px',
+                                        backgroundColor: '#f7f6f3',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                    }}
+                                >
                                     {[0, 1, 2].map(i => (
-                                        <span key={i} style={{
-                                            display: 'inline-block',
-                                            width: '6px',
-                                            height: '6px',
-                                            borderRadius: '50%',
-                                            backgroundColor: '#6B45FF',
-                                            animation: `globalAiDotBounce 1.2s ${i * 0.15}s infinite ease-in-out`,
-                                        }} />
+                                        <span
+                                            key={i}
+                                            style={{
+                                                display: 'inline-block',
+                                                width: '6px',
+                                                height: '6px',
+                                                borderRadius: '50%',
+                                                backgroundColor: '#6B45FF',
+                                                animation: `globalAiDotBounce 1.2s ${i * 0.15}s infinite ease-in-out`,
+                                            }}
+                                        />
                                     ))}
                                 </div>
                             </div>
                         )}
                         {streamContent && (
                             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                <div style={{
-                                    maxWidth: '85%',
-                                    padding: '8px 12px',
-                                    borderRadius: '12px 12px 12px 4px',
-                                    backgroundColor: '#f7f6f3',
-                                    color: '#37352f',
-                                    fontSize: '13px',
-                                    lineHeight: '1.6',
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word',
-                                }}>
+                                <div
+                                    style={{
+                                        maxWidth: '85%',
+                                        padding: '8px 12px',
+                                        borderRadius: '12px 12px 12px 4px',
+                                        backgroundColor: '#f7f6f3',
+                                        color: '#37352f',
+                                        fontSize: '13px',
+                                        lineHeight: '1.6',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                    }}
+                                >
                                     {streamContent}
                                     {isGenerating && (
-                                        <span style={{
-                                            display: 'inline-block',
-                                            width: '2px',
-                                            height: '14px',
-                                            backgroundColor: '#6B45FF',
-                                            marginLeft: '1px',
-                                            verticalAlign: 'text-bottom',
-                                            animation: 'globalAiBlink 1s infinite',
-                                        }} />
+                                        <span
+                                            style={{
+                                                display: 'inline-block',
+                                                width: '2px',
+                                                height: '14px',
+                                                backgroundColor: '#6B45FF',
+                                                marginLeft: '1px',
+                                                verticalAlign: 'text-bottom',
+                                                animation: 'globalAiBlink 1s infinite',
+                                            }}
+                                        />
                                     )}
                                 </div>
                             </div>
@@ -401,20 +422,24 @@ export function GlobalAIChat() {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <div style={{
-                        padding: '12px 16px',
-                        borderTop: '1px solid #f0f0ee',
-                        backgroundColor: '#fafaf9',
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'flex-end',
-                            gap: '8px',
-                            backgroundColor: '#fff',
-                            border: '1px solid #e9e9e7',
-                            borderRadius: '8px',
-                            padding: '8px',
-                        }}>
+                    <div
+                        style={{
+                            padding: '12px 16px',
+                            borderTop: '1px solid #f0f0ee',
+                            backgroundColor: '#fafaf9',
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'flex-end',
+                                gap: '8px',
+                                backgroundColor: '#fff',
+                                border: '1px solid #e9e9e7',
+                                borderRadius: '8px',
+                                padding: '8px',
+                            }}
+                        >
                             <TextareaAutosize
                                 disabled={isGenerating}
                                 placeholder="输入消息..."

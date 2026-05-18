@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('API Boundary - Share', () => {
     let app: INestApplication
@@ -92,8 +92,7 @@ describe('API Boundary - Share', () => {
             if (shareRes.status !== 201 || !shareRes.body.data) return
 
             const shareId = shareRes.body.data.shareId
-            const res = await request(app.getHttpServer())
-                .get(`/api/share/${shareId}/content`)
+            const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/content`)
             expect([410, 200]).toContain(res.status)
         })
     })
@@ -108,8 +107,7 @@ describe('API Boundary - Share', () => {
             if (shareRes.status !== 201 || !shareRes.body.data) return
 
             const shareId = shareRes.body.data.shareId
-            const res = await request(app.getHttpServer())
-                .get(`/api/share/${shareId}/info?password=test123`)
+            const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/info?password=test123`)
             expect(res.status).toBe(200)
         })
     })
@@ -124,9 +122,7 @@ describe('API Boundary - Share', () => {
             if (shareRes.status !== 201 || !shareRes.body.data) return
 
             const shareId = shareRes.body.data.shareId
-            const res = await request(app.getHttpServer())
-                .delete(`/api/share/${shareId}`)
-                .set('Authorization', `Bearer ${otherUser.token}`)
+            const res = await request(app.getHttpServer()).delete(`/api/share/${shareId}`).set('Authorization', `Bearer ${otherUser.token}`)
             expect([403, 400, 404]).toContain(res.status)
         })
     })

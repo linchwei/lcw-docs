@@ -1,9 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
-import { http, HttpResponse } from 'msw'
+import { waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { renderWithProviders, clearAuthenticatedUser } from '@/test/helpers'
-import { server } from '@/test/mocks/server'
+import { clearAuthenticatedUser, renderWithProviders } from '@/test/helpers'
 
 vi.mock('@/services', async () => {
     const actual = await vi.importActual('@/services')
@@ -66,10 +64,7 @@ describe('Share Page', () => {
     it('UI-052: should show expired message for expired share', async () => {
         server.use(
             http.get('/api/share/:shareId/info', () => {
-                return HttpResponse.json(
-                    { message: 'Share link has expired' },
-                    { status: 410 }
-                )
+                return HttpResponse.json({ message: 'Share link has expired' }, { status: 410 })
             })
         )
 

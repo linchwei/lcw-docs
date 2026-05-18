@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 import { LoginPage } from './page-objects/login.page'
-import { DocListPage } from './page-objects/doclist.page'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
 
 test.describe('认证流程 E2E 测试', () => {
     test('E2E-001: 未登录访问首页应跳转到登录页', async ({ page }) => {
@@ -44,8 +44,15 @@ test.describe('认证流程 E2E 测试', () => {
         await page.goto('/doc')
 
         await page.waitForURL('**/doc**', { timeout: 10000 })
-        const hasEmptyState = await page.getByText(/暂无文档|还没有文档/).isVisible().catch(() => false)
-        const hasDocList = await page.locator('.doc-card, [data-testid="doc-card"]').first().isVisible().catch(() => false)
+        const hasEmptyState = await page
+            .getByText(/暂无文档|还没有文档/)
+            .isVisible()
+            .catch(() => false)
+        const hasDocList = await page
+            .locator('.doc-card, [data-testid="doc-card"]')
+            .first()
+            .isVisible()
+            .catch(() => false)
         expect(hasEmptyState || hasDocList || true).toBeTruthy()
     })
 
@@ -91,7 +98,9 @@ test.describe('认证流程 E2E 测试', () => {
             }
 
             const savedIndicator = page.getByText(/已保存|已同步/)
-            await expect(savedIndicator).toBeVisible({ timeout: 15000 }).catch(() => {})
+            await expect(savedIndicator)
+                .toBeVisible({ timeout: 15000 })
+                .catch(() => {})
         }
     })
 
@@ -149,7 +158,10 @@ test.describe('认证流程 E2E 测试', () => {
 
         await page.waitForURL('**/doc**', { timeout: 10000 })
 
-        await page.getByText('退出登录').click().catch(() => {})
+        await page
+            .getByText('退出登录')
+            .click()
+            .catch(() => {})
         await page.waitForURL('**/account/login**', { timeout: 10000 }).catch(() => {})
 
         await loginPage.goto()

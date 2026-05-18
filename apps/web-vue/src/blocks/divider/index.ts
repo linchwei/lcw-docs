@@ -20,9 +20,9 @@ export const Divider = createVueBlockSpec(
                                 borderTop: '1px solid #e9e9e7',
                                 margin: 0,
                             },
-                        }),
+                        })
                     )
             },
         }),
-    },
+    }
 )

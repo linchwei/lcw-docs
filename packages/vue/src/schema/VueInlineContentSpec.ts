@@ -9,9 +9,7 @@ import {
     InlineContentFromConfig,
     inlineContentToNodes,
     nodeToCustomInlineContent,
-    PartialCustomInlineContentFromConfig,
     Props,
-    PropSchema,
     propsToAttributes,
     StyleSchema,
 } from '@lcw-doc/core'
@@ -20,13 +18,13 @@ import { Component, defineComponent, h } from 'vue'
 
 import { renderToDOMSpec } from './@util/VueRenderUtil'
 
-export type VueInlineContentImplementation<T extends CustomInlineContentConfig, S extends StyleSchema> = {
+export type VueInlineContentImplementation<_T extends CustomInlineContentConfig, _S extends StyleSchema> = {
     render: Component
 }
 
 export function createVueInlineContentSpec<T extends CustomInlineContentConfig, S extends StyleSchema>(
     inlineContentConfig: T,
-    inlineContentImplementation: VueInlineContentImplementation<T, S>,
+    inlineContentImplementation: VueInlineContentImplementation<T, S>
 ) {
     const node = createStronglyTypedTiptapNode({
         name: inlineContentConfig.type as T['type'],
@@ -34,9 +32,7 @@ export function createVueInlineContentSpec<T extends CustomInlineContentConfig, 
         group: 'inline',
         selectable: inlineContentConfig.content === 'styled',
         atom: inlineContentConfig.content === 'none',
-        content: (inlineContentConfig.content === 'styled' ? 'inline*' : '') as T['content'] extends 'styled'
-            ? 'inline*'
-            : '',
+        content: (inlineContentConfig.content === 'styled' ? 'inline*' : '') as T['content'] extends 'styled' ? 'inline*' : '',
 
         addAttributes() {
             return propsToAttributes(inlineContentConfig.propSchema)
@@ -56,7 +52,7 @@ export function createVueInlineContentSpec<T extends CustomInlineContentConfig, 
             const ic = nodeToCustomInlineContent(
                 pmNode,
                 editor.schema.inlineContentSchema,
-                editor.schema.styleSchema,
+                editor.schema.styleSchema
             ) as any as InlineContentFromConfig<T, S>
 
             const Content = inlineContentImplementation.render
@@ -69,14 +65,14 @@ export function createVueInlineContentSpec<T extends CustomInlineContentConfig, 
                         },
                         contentRef: refCB,
                     }),
-                editor,
+                editor
             )
 
             return addInlineContentAttributes(
                 output,
                 inlineContentConfig.type,
                 pmNode.attrs as Props<T['propSchema']>,
-                inlineContentConfig.propSchema,
+                inlineContentConfig.propSchema
             )
         },
 
@@ -101,13 +97,10 @@ export function createVueInlineContentSpec<T extends CustomInlineContentConfig, 
                                 'data-inline-content-type': inlineContentConfig.type,
                                 ...Object.fromEntries(
                                     Object.entries(props.node?.attrs || {})
-                                        .filter(
-                                            ([prop, value]) =>
-                                                value !== inlineContentConfig.propSchema[prop]?.default,
-                                        )
+                                        .filter(([prop, value]) => value !== inlineContentConfig.propSchema[prop]?.default)
                                         .map(([prop, value]) => {
                                             return [camelToDataKebab(prop), value]
-                                        }),
+                                        })
                                 ),
                             },
                             {
@@ -117,25 +110,25 @@ export function createVueInlineContentSpec<T extends CustomInlineContentConfig, 
                                         inlineContent: nodeToCustomInlineContent(
                                             props.node,
                                             editor.schema.inlineContentSchema,
-                                            editor.schema.styleSchema,
+                                            editor.schema.styleSchema
                                         ) as any as InlineContentFromConfig<T, S>,
                                         updateInlineContent: (update: any) => {
                                             const content = inlineContentToNodes(
                                                 [update],
                                                 editor._tiptapEditor.schema,
-                                                editor.schema.styleSchema,
+                                                editor.schema.styleSchema
                                             )
 
                                             editor._tiptapEditor.view.dispatch(
                                                 editor._tiptapEditor.view.state.tr.replaceWith(
                                                     props.getPos(),
                                                     props.getPos() + props.node.nodeSize,
-                                                    content,
-                                                ),
+                                                    content
+                                                )
                                             )
                                         },
                                     }),
-                            },
+                            }
                         )
                     }
                 },

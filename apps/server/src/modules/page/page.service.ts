@@ -4,8 +4,8 @@ import { Repository } from 'typeorm'
 import { PostgresqlPersistence } from 'y-postgresql'
 
 import { CollaboratorEntity } from '../../entities/collaborator.entity'
-import { ForbiddenCode, ForbiddenError } from '../../fundamentals/common/exceptions/forbidden.exception'
 import { PageEntity } from '../../entities/page.entity'
+import { ForbiddenCode, ForbiddenError } from '../../fundamentals/common/exceptions/forbidden.exception'
 import { yjsXmlMentionCollect } from '../../utils/yjsXMLMentionCollect'
 import { yjsXmlToText } from '../../utils/yjsXmlToText'
 
@@ -31,10 +31,7 @@ export class PageService {
         if (payload.coverImage !== undefined) allowedFields.coverImage = payload.coverImage
         if (payload.folderId !== undefined) allowedFields.folderId = payload.folderId
 
-        const res = await this.pageRepository.update(
-            { pageId: payload.pageId },
-            { ...allowedFields, updatedAt: new Date() }
-        )
+        const res = await this.pageRepository.update({ pageId: payload.pageId }, { ...allowedFields, updatedAt: new Date() })
 
         if (res.affected === 0) {
             throw new NotFoundException('page not found')
@@ -210,20 +207,22 @@ export class PageService {
         const pages = await this.pageRepository.find({
             where: { user: { id: params.userId }, isDeleted: false },
         })
-        const withLinksPages = await Promise.all(pages.map(async page => {
-            const doc = await this.yjsPostgresqlAdapter.getYDoc(`doc-yjs-${page.pageId}`)
-            const pageDoc = doc.getXmlFragment(`document-store-${page.pageId}`).toJSON()
-            if (pageDoc) {
+        const withLinksPages = await Promise.all(
+            pages.map(async page => {
+                const doc = await this.yjsPostgresqlAdapter.getYDoc(`doc-yjs-${page.pageId}`)
+                const pageDoc = doc.getXmlFragment(`document-store-${page.pageId}`).toJSON()
+                if (pageDoc) {
+                    return {
+                        ...page,
+                        links: yjsXmlMentionCollect(pageDoc),
+                    }
+                }
                 return {
                     ...page,
-                    links: yjsXmlMentionCollect(pageDoc),
+                    links: [],
                 }
-            }
-            return {
-                ...page,
-                links: [],
-            }
-        }))
+            })
+        )
 
         return withLinksPages
     }
@@ -236,43 +235,43 @@ export class PageService {
             where: { user: { id: params.userId }, isDeleted: false },
         })
 
-        const results = await Promise.all(pages.map(async page => {
-            const titleMatch = page.title.toLowerCase().includes(keyword)
+        const results = await Promise.all(
+            pages.map(async page => {
+                const titleMatch = page.title.toLowerCase().includes(keyword)
 
-            const doc = await this.yjsPostgresqlAdapter.getYDoc(`doc-yjs-${page.pageId}`)
-            const pageDoc = doc.getXmlFragment(`document-store-${page.pageId}`).toJSON()
-            const contentText = pageDoc ? yjsXmlToText(pageDoc) : ''
-            const contentMatch = contentText.toLowerCase().includes(keyword)
+                const doc = await this.yjsPostgresqlAdapter.getYDoc(`doc-yjs-${page.pageId}`)
+                const pageDoc = doc.getXmlFragment(`document-store-${page.pageId}`).toJSON()
+                const contentText = pageDoc ? yjsXmlToText(pageDoc) : ''
+                const contentMatch = contentText.toLowerCase().includes(keyword)
 
-            if (!titleMatch && !contentMatch) return null
+                if (!titleMatch && !contentMatch) return null
 
-            let snippet = ''
-            if (titleMatch) {
-                snippet = contentText.slice(0, 150)
-            } else {
-                const idx = contentText.toLowerCase().indexOf(keyword)
-                const start = Math.max(0, idx - 50)
-                const end = Math.min(contentText.length, idx + keyword.length + 100)
-                snippet = (start > 0 ? '...' : '') + contentText.slice(start, end) + (end < contentText.length ? '...' : '')
-            }
+                let snippet = ''
+                if (titleMatch) {
+                    snippet = contentText.slice(0, 150)
+                } else {
+                    const idx = contentText.toLowerCase().indexOf(keyword)
+                    const start = Math.max(0, idx - 50)
+                    const end = Math.min(contentText.length, idx + keyword.length + 100)
+                    snippet = (start > 0 ? '...' : '') + contentText.slice(start, end) + (end < contentText.length ? '...' : '')
+                }
 
-            return {
-                pageId: page.pageId,
-                emoji: page.emoji,
-                title: page.title,
-                snippet,
-                updatedAt: page.updatedAt,
-                matchType: titleMatch ? 'title' : 'content',
-            }
-        }))
-
-        return results
-            .filter(Boolean)
-            .sort((a, b) => {
-                if (a.matchType === 'title' && b.matchType !== 'title') return -1
-                if (a.matchType !== 'title' && b.matchType === 'title') return 1
-                return 0
+                return {
+                    pageId: page.pageId,
+                    emoji: page.emoji,
+                    title: page.title,
+                    snippet,
+                    updatedAt: page.updatedAt,
+                    matchType: titleMatch ? 'title' : 'content',
+                }
             })
+        )
+
+        return results.filter(Boolean).sort((a, b) => {
+            if (a.matchType === 'title' && b.matchType !== 'title') return -1
+            if (a.matchType !== 'title' && b.matchType === 'title') return 1
+            return 0
+        })
     }
 
     async backlinks(params: { pageId: string; userId: number }) {
@@ -280,23 +279,25 @@ export class PageService {
             where: { user: { id: params.userId }, isDeleted: false },
         })
 
-        const results = await Promise.all(pages.map(async page => {
-            if (page.pageId === params.pageId) return null
+        const results = await Promise.all(
+            pages.map(async page => {
+                if (page.pageId === params.pageId) return null
 
-            const doc = await this.yjsPostgresqlAdapter.getYDoc(`doc-yjs-${page.pageId}`)
-            const pageDoc = doc.getXmlFragment(`document-store-${page.pageId}`).toJSON()
-            if (!pageDoc) return null
+                const doc = await this.yjsPostgresqlAdapter.getYDoc(`doc-yjs-${page.pageId}`)
+                const pageDoc = doc.getXmlFragment(`document-store-${page.pageId}`).toJSON()
+                if (!pageDoc) return null
 
-            const links = yjsXmlMentionCollect(pageDoc)
-            if (!links.includes(params.pageId)) return null
+                const links = yjsXmlMentionCollect(pageDoc)
+                if (!links.includes(params.pageId)) return null
 
-            return {
-                pageId: page.pageId,
-                emoji: page.emoji,
-                title: page.title,
-                updatedAt: page.updatedAt,
-            }
-        }))
+                return {
+                    pageId: page.pageId,
+                    emoji: page.emoji,
+                    title: page.title,
+                    updatedAt: page.updatedAt,
+                }
+            })
+        )
 
         return results.filter(Boolean)
     }

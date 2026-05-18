@@ -1,5 +1,6 @@
-import { onMounted, onUnmounted } from 'vue'
 import type { LcwDocEditor } from '@lcw-doc/core'
+import { onMounted, onUnmounted } from 'vue'
+
 import { injectEditor } from '../editor/inject'
 
 export function useEditorSelectionChange(callback: () => void, editor?: LcwDocEditor<any, any, any>) {

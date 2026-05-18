@@ -1,5 +1,5 @@
 import { Block, LcwDocEditor } from '@lcw-doc/core'
-import { Copy, GripVertical, Plus, Scissors, Trash2, List, ListOrdered, Code } from 'lucide-react'
+import { Code, Copy, GripVertical, List, ListOrdered, Plus, Scissors, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 function getBlockTypeIcon(block: Block): React.ReactNode {
@@ -31,15 +31,7 @@ interface EditorSideMenuProps {
     unfreezeMenu: () => void
 }
 
-export function EditorSideMenu({
-    editor,
-    block,
-    isBlockEmpty,
-    blockDragStart,
-    blockDragEnd,
-    freezeMenu,
-    unfreezeMenu,
-}: EditorSideMenuProps) {
+export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, blockDragEnd, freezeMenu }: EditorSideMenuProps) {
     const blockIcon = getBlockTypeIcon(block)
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)

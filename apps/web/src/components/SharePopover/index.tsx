@@ -112,7 +112,7 @@ export function SharePopover({ pageId }: SharePopoverProps) {
                             <Label className="text-xs">权限</Label>
                             <select
                                 value={permission}
-                                onChange={(e) => setPermission(e.target.value as 'view' | 'comment' | 'edit')}
+                                onChange={e => setPermission(e.target.value as 'view' | 'comment' | 'edit')}
                                 className="w-full h-9 rounded-md border border-zinc-200 bg-transparent px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-zinc-400"
                             >
                                 <option value="view">可查看</option>
@@ -126,25 +126,15 @@ export function SharePopover({ pageId }: SharePopoverProps) {
                                 type="text"
                                 placeholder="留空则无需密码"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={e => setPassword(e.target.value)}
                                 className="h-9"
                             />
                         </div>
                         <div className="space-y-2">
                             <Label className="text-xs">过期时间（可选）</Label>
-                            <Input
-                                type="datetime-local"
-                                value={expiresAt}
-                                onChange={(e) => setExpiresAt(e.target.value)}
-                                className="h-9"
-                            />
+                            <Input type="datetime-local" value={expiresAt} onChange={e => setExpiresAt(e.target.value)} className="h-9" />
                         </div>
-                        <Button
-                            size="sm"
-                            className="w-full"
-                            onClick={handleCreate}
-                            disabled={createMutation.isPending}
-                        >
+                        <Button size="sm" className="w-full" onClick={handleCreate} disabled={createMutation.isPending}>
                             {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
                             创建链接
                         </Button>
@@ -158,7 +148,7 @@ export function SharePopover({ pageId }: SharePopoverProps) {
                                 新建
                             </Button>
                         </div>
-                        {shares.map((share) => (
+                        {shares.map(share => (
                             <div key={share.shareId} className="flex items-center gap-2 p-2 rounded-md bg-zinc-50">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
@@ -181,11 +171,7 @@ export function SharePopover({ pageId }: SharePopoverProps) {
                                     className="h-8 w-8 p-0 shrink-0"
                                     onClick={() => handleCopy(share.shareId)}
                                 >
-                                    {copiedId === share.shareId ? (
-                                        <Check size={14} className="text-green-500" />
-                                    ) : (
-                                        <Copy size={14} />
-                                    )}
+                                    {copiedId === share.shareId ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
                                 </Button>
                                 <Button
                                     variant="ghost"

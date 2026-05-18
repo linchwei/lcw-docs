@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('Security - Input Validation & Injection', () => {
     let app: INestApplication
@@ -19,9 +19,7 @@ describe('Security - Input Validation & Injection', () => {
 
     describe('SEC-011: SQL Injection - Login', () => {
         it('should not allow SQL injection in login', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/auth/login')
-                .send({ username: "' OR 1=1--", password: "' OR 1=1--" })
+            const res = await request(app.getHttpServer()).post('/api/auth/login').send({ username: "' OR 1=1--", password: "' OR 1=1--" })
             expect(res.status).toBe(400)
             expect(res.body).not.toHaveProperty('sql')
         })
@@ -74,17 +72,12 @@ describe('Security - Input Validation & Injection', () => {
 
     describe('SEC-017: Empty request body', () => {
         it('should reject empty body for page creation', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/page')
-                .set('Authorization', `Bearer ${testUser.token}`)
-                .send({})
+            const res = await request(app.getHttpServer()).post('/api/page').set('Authorization', `Bearer ${testUser.token}`).send({})
             expect(res.status).toBe(400)
         })
 
         it('should reject empty body for user registration', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({})
+            const res = await request(app.getHttpServer()).post('/api/user/register').send({})
             expect(res.status).toBe(400)
         })
     })
@@ -122,8 +115,7 @@ describe('Security - Input Validation & Injection', () => {
                 .send({ pageId, permission: 'view', password: 'secret123' })
             const shareId = shareRes.body.data.shareId
 
-            const res = await request(app.getHttpServer())
-                .get(`/api/share/${shareId}/info`)
+            const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/info`)
             expect(res.status).toBe(403)
         })
     })

@@ -80,7 +80,10 @@ export function ShortcutPanel({ open, onClose }: ShortcutPanelProps) {
             <div className="relative bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-700 w-[560px] max-h-[80vh] overflow-auto">
                 <div className="sticky top-0 bg-white dark:bg-zinc-900 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
                     <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">快捷键</h2>
-                    <button onClick={onClose} className="p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
+                    <button
+                        onClick={onClose}
+                        className="p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors"
+                    >
                         <X size={16} />
                     </button>
                 </div>
@@ -96,7 +99,10 @@ export function ShortcutPanel({ open, onClose }: ShortcutPanelProps) {
                                         <span className="text-sm text-zinc-700 dark:text-zinc-300">{item.label}</span>
                                         <div className="flex items-center gap-1">
                                             {item.keys.map((key, i) => (
-                                                <span key={i} className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded">
+                                                <span
+                                                    key={i}
+                                                    className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded"
+                                                >
                                                     {key}
                                                 </span>
                                             ))}

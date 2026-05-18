@@ -1,9 +1,9 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
-import * as path from 'path'
 import * as fs from 'fs'
+import * as path from 'path'
+import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('UploadController', () => {
     let app: INestApplication
@@ -35,15 +35,12 @@ describe('UploadController', () => {
     })
 
     it('UP-002: should return 401 without auth', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/upload')
+        const res = await request(app.getHttpServer()).post('/api/upload')
         expect(res.status).toBe(401)
     })
 
     it('UP-003: should fail without file', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/upload')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).post('/api/upload').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(400)
     })
 })

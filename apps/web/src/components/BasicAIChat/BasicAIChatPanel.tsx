@@ -4,11 +4,11 @@ import { useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import TextareaAutosize from 'react-textarea-autosize'
 
-import { chatWithAI, ChatMessage } from '@/services'
+import { ChatMessage, chatWithAI } from '@/services'
 
 interface BasicAIChatPanelProps<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema> {
     editor?: LcwDocEditor<BSchema, ISchema, SSchema>
-    onResponse?: (response: PartialBlock[]) => void
+    onResponse?: (response: PartialBlock<BSchema, ISchema, SSchema>[]) => void
 }
 
 function extractTextFromBlocks(blocks: PartialBlock[]): string {
@@ -19,7 +19,9 @@ function extractTextFromBlocks(blocks: PartialBlock[]): string {
                 text += block.content + '\n'
             } else if (Array.isArray(block.content)) {
                 for (const inline of block.content) {
-                    if (inline.type === 'text' && inline.text) {
+                    if (typeof inline === 'string') {
+                        text += inline
+                    } else if (inline.type === 'text' && inline.text) {
                         text += inline.text
                     }
                 }
@@ -33,9 +35,12 @@ function extractTextFromBlocks(blocks: PartialBlock[]): string {
     return text
 }
 
-const SYSTEM_PROMPT = '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
+const SYSTEM_PROMPT =
+    '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
 
-export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema>(props: BasicAIChatPanelProps<BSchema, ISchema, SSchema>) {
+export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema>(
+    props: BasicAIChatPanelProps<BSchema, ISchema, SSchema>
+) {
     const [keyword, setKeyword] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
     const [streamContent, setStreamContent] = useState('')
@@ -55,21 +60,17 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
         if (props.editor) {
             try {
                 const blocks = props.editor.document
-                const docText = extractTextFromBlocks(blocks)
+                const docText = extractTextFromBlocks(blocks as PartialBlock[])
                 context = docText.slice(0, 3000)
-            } catch {}
+            } catch {
+                void 0
+            }
         }
 
-        const systemContent = context
-            ? `${SYSTEM_PROMPT}\n\n当前文档内容：\n${context}`
-            : SYSTEM_PROMPT
+        const systemContent = context ? `${SYSTEM_PROMPT}\n\n当前文档内容：\n${context}` : SYSTEM_PROMPT
 
         const userMessage: ChatMessage = { role: 'user', content: keyword }
-        const messages: ChatMessage[] = [
-            { role: 'system', content: systemContent },
-            ...chatHistory,
-            userMessage,
-        ]
+        const messages: ChatMessage[] = [{ role: 'system', content: systemContent }, ...chatHistory, userMessage]
 
         try {
             const response = await chatWithAI(messages, controller.signal)
@@ -118,27 +119,27 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
             setIsGenerating(false)
             setKeyword('')
 
-            setChatHistory(prev => [
-                ...prev,
-                userMessage,
-                { role: 'assistant', content: accumulated },
-            ])
+            setChatHistory(prev => [...prev, userMessage, { role: 'assistant', content: accumulated }])
 
-            let blocks: PartialBlock[]
+            let blocks: PartialBlock<BSchema, ISchema, SSchema>[]
             try {
                 if (props.editor) {
-                    blocks = await props.editor.tryParseMarkdownToBlocks(accumulated)
+                    blocks = (await props.editor.tryParseMarkdownToBlocks(accumulated)) as PartialBlock<BSchema, ISchema, SSchema>[]
                 } else {
-                    blocks = [{
-                        type: 'paragraph',
-                        content: [{ type: 'text', text: accumulated, styles: {} }],
-                    }]
+                    blocks = [
+                        {
+                            type: 'paragraph',
+                            content: [{ type: 'text', text: accumulated, styles: {} }],
+                        },
+                    ] as PartialBlock<BSchema, ISchema, SSchema>[]
                 }
             } catch {
-                blocks = [{
-                    type: 'paragraph',
-                    content: [{ type: 'text', text: accumulated, styles: {} }],
-                }]
+                blocks = [
+                    {
+                        type: 'paragraph',
+                        content: [{ type: 'text', text: accumulated, styles: {} }],
+                    },
+                ] as PartialBlock<BSchema, ISchema, SSchema>[]
             }
 
             if (props.onResponse) {
@@ -170,37 +171,43 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
     )
 
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '8px',
-            backgroundColor: '#f7f6f3',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-            border: '1px solid #e9e9e7',
-        }}>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '8px',
+                backgroundColor: '#f7f6f3',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                border: '1px solid #e9e9e7',
+            }}
+        >
             {streamContent && (
-                <div style={{
-                    fontSize: '13px',
-                    color: '#37352f',
-                    lineHeight: '1.5',
-                    padding: '4px 8px',
-                    marginBottom: '8px',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    whiteSpace: 'pre-wrap',
-                }}>
+                <div
+                    style={{
+                        fontSize: '13px',
+                        color: '#37352f',
+                        lineHeight: '1.5',
+                        padding: '4px 8px',
+                        marginBottom: '8px',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        whiteSpace: 'pre-wrap',
+                    }}
+                >
                     {streamContent}
                     {isGenerating && (
-                        <span style={{
-                            display: 'inline-block',
-                            width: '2px',
-                            height: '14px',
-                            backgroundColor: '#6B45FF',
-                            marginLeft: '1px',
-                            verticalAlign: 'text-bottom',
-                            animation: 'blink 1s infinite',
-                        }} />
+                        <span
+                            style={{
+                                display: 'inline-block',
+                                width: '2px',
+                                height: '14px',
+                                backgroundColor: '#6B45FF',
+                                marginLeft: '1px',
+                                verticalAlign: 'text-bottom',
+                                animation: 'blink 1s infinite',
+                            }}
+                        />
                     )}
                 </div>
             )}

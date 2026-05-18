@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { createTestApp, closeTestApp } from '../../test/helpers'
+import { closeTestApp, createTestApp } from '../../test/helpers'
 
 describe('HealthController', () => {
     let app: INestApplication

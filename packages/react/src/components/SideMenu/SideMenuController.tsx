@@ -24,10 +24,13 @@ export const SideMenuController = <
     const editor = useLcwDocEditor<BSchema, I, S>()
     const [isDragging, setIsDragging] = useState(false)
 
-    const blockDragStart = useCallback((event: { dataTransfer: DataTransfer | null; clientY: number }) => {
-        setIsDragging(true)
-        editor.sideMenu.blockDragStart(event)
-    }, [editor])
+    const blockDragStart = useCallback(
+        (event: { dataTransfer: DataTransfer | null; clientY: number }) => {
+            setIsDragging(true)
+            editor.sideMenu.blockDragStart(event)
+        },
+        [editor]
+    )
 
     const blockDragEnd = useCallback(() => {
         editor.sideMenu.blockDragEnd()

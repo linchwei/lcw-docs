@@ -32,6 +32,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Build core
+        run: pnpm --filter @lcw-doc/core build
+
       - name: TypeCheck
         run: pnpm typecheck
 

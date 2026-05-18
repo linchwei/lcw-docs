@@ -1,5 +1,5 @@
-import { inject, provide, ref, type InjectionKey, type Ref } from 'vue'
-import type { LcwDocEditor, BlockSchema, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
+import type { BlockSchema, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
+import { inject, type InjectionKey, provide, type Ref, ref } from 'vue'
 
 interface EditorContextValue {
     editor: LcwDocEditor<BlockSchema, InlineContentSchema, StyleSchema>

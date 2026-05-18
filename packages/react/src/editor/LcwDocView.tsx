@@ -1,7 +1,6 @@
-// @ts-ignore
 import './styles.css'
 
-import { BlockSchema, InlineContentSchema, mergeCSSClasses, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
+import { BlockSchema, InlineContentSchema, LcwDocEditor, mergeCSSClasses, StyleSchema } from '@lcw-doc/core'
 import { forwardRef, HTMLAttributes, ReactNode, Ref, useEffect, useState } from 'react'
 
 import { usePrefersColorScheme } from '../hooks/usePrefersColorScheme'
@@ -93,8 +92,8 @@ function LcwDocViewComponent<BSchema extends BlockSchema, ISchema extends Inline
     )
 
     const setElementRenderer = (elementRenderer: (node: React.ReactNode, container: HTMLElement) => void) => {
-            ;(editor as any).elementRenderer = elementRenderer
-        }
+        ;(editor as any).elementRenderer = elementRenderer
+    }
 
     const context = { editor, setContentEditableProps }
 
@@ -118,5 +117,4 @@ function LcwDocViewComponent<BSchema extends BlockSchema, ISchema extends Inline
     )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const LcwDocViewRaw: any = forwardRef(LcwDocViewComponent)

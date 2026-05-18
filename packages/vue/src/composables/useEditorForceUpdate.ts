@@ -1,5 +1,5 @@
-import { shallowRef, onMounted, onUnmounted } from 'vue'
 import type { Editor } from '@tiptap/core'
+import { onMounted, onUnmounted, shallowRef } from 'vue'
 
 export const useEditorForceUpdate = (editor: Editor) => {
     const forceUpdateCounter = shallowRef(0)

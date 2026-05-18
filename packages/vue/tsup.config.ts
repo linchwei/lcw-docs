@@ -1,5 +1,5 @@
-import { defineConfig } from 'tsup'
 import vuePlugin from 'esbuild-plugin-vue-next'
+import { defineConfig } from 'tsup'
 
 export default defineConfig({
     entry: ['src/index.ts'],

@@ -1,8 +1,8 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
 import * as bcrypt from 'bcryptjs'
 import { Repository } from 'typeorm'
-import { JwtService } from '@nestjs/jwt'
 
 import { AppModule } from '../app.module'
 import { UserEntity } from '../entities/user.entity'
@@ -30,7 +30,7 @@ export async function closeTestApp(): Promise<void> {
 export async function createTestUser(
     app: INestApplication,
     username = 'testuser',
-    password = 'testpass123',
+    password = 'testpass123'
 ): Promise<{ user: Partial<UserEntity>; token: string }> {
     const userRepository = app.get('UserEntityRepository') as Repository<UserEntity>
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -43,7 +43,7 @@ export async function createTestUser(
     const jwtService = app.get(JwtService)
     const token = jwtService.sign({ username: user.username, sub: user.id })
 
-    const { password: _, ...result } = user
+    const { password: __, ...result } = user
     return { user: result, token }
 }
 
@@ -69,10 +69,7 @@ export async function cleanupAll(app: INestApplication): Promise<void> {
 
 export function generateExpiredToken(app: INestApplication): string {
     const jwtService = app.get(JwtService)
-    return jwtService.sign(
-        { username: 'expired', sub: 99999 },
-        { expiresIn: '0s' },
-    )
+    return jwtService.sign({ username: 'expired', sub: 99999 }, { expiresIn: '0s' })
 }
 
 export function generateInvalidToken(): string {

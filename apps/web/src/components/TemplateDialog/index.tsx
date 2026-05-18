@@ -1,16 +1,10 @@
-import { useState } from 'react'
-import { Search } from 'lucide-react'
-
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@lcw-doc/shadcn-shared-ui/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@lcw-doc/shadcn-shared-ui/components/ui/dialog'
 import { Input } from '@lcw-doc/shadcn-shared-ui/components/ui/input'
 import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
+import { Search } from 'lucide-react'
+import { useState } from 'react'
 
-import { templates, templateCategories, Template } from '@/data/templates'
+import { Template, templateCategories, templates } from '@/data/templates'
 
 interface TemplateDialogProps {
     open: boolean
@@ -22,7 +16,7 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
     const [search, setSearch] = useState('')
     const [activeCategory, setActiveCategory] = useState('all')
 
-    const filteredTemplates = templates.filter((t) => {
+    const filteredTemplates = templates.filter(t => {
         const matchesCategory = activeCategory === 'all' || t.category === activeCategory
         const matchesSearch =
             search === '' ||
@@ -40,12 +34,7 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
                 <div className="space-y-4">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="搜索模板..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-9"
-                        />
+                        <Input placeholder="搜索模板..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
                     </div>
                     <div className="flex flex-wrap gap-2">
                         <button
@@ -59,7 +48,7 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
                         >
                             全部
                         </button>
-                        {templateCategories.map((cat) => (
+                        {templateCategories.map(cat => (
                             <button
                                 key={cat.id}
                                 onClick={() => setActiveCategory(cat.id)}
@@ -75,7 +64,7 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
                         ))}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {filteredTemplates.map((template) => (
+                        {filteredTemplates.map(template => (
                             <div
                                 key={template.id}
                                 className="border rounded-lg p-4 hover:border-foreground/30 transition-colors flex items-start justify-between gap-3"
@@ -97,9 +86,7 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
                         ))}
                     </div>
                     {filteredTemplates.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground text-sm">
-                            没有找到匹配的模板
-                        </div>
+                        <div className="text-center py-8 text-muted-foreground text-sm">没有找到匹配的模板</div>
                     )}
                 </div>
             </DialogContent>

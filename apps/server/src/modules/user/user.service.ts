@@ -17,7 +17,7 @@ export class UserService {
             where: { username },
         })
         if (user && (await bcrypt.compare(pass, user.password))) {
-            const { password, ...result } = user
+            const { password: _password, ...result } = user
             return result
         }
         return null
@@ -28,7 +28,7 @@ export class UserService {
             where: { id },
         })
         if (user) {
-            const { password, ...result } = user
+            const { password: _password, ...result } = user
             return result
         }
         return null
@@ -47,7 +47,7 @@ export class UserService {
             password: hashedPassword,
         })
         await this.userRepository.save(user)
-        const { password: _, ...result } = user
+        const { password: __, ...result } = user
         return result
     }
 }

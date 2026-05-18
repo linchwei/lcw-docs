@@ -1,4 +1,5 @@
-import { describe, test, expect } from 'vitest'
+import { describe, expect, test } from 'vitest'
+
 import type { DefaultSuggestionItem } from '../../src/extensions/SuggestionMenu/DefaultSuggestionItem'
 
 describe('DefaultSuggestionItem', () => {

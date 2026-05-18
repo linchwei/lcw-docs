@@ -29,9 +29,7 @@ export function BacklinksPanel({ pageId, onClose }: BacklinksPanelProps) {
                 <div className="flex items-center gap-2">
                     <Link2 size={18} />
                     <span className="font-medium">反向链接</span>
-                    {backlinks.length > 0 && (
-                        <span className="text-xs text-zinc-500">({backlinks.length})</span>
-                    )}
+                    {backlinks.length > 0 && <span className="text-xs text-zinc-500">({backlinks.length})</span>}
                 </div>
                 {onClose && (
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
@@ -61,9 +59,7 @@ export function BacklinksPanel({ pageId, onClose }: BacklinksPanelProps) {
                             <span className="text-base shrink-0">{item.emoji}</span>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm truncate">{item.title}</p>
-                                <p className="text-xs text-zinc-400">
-                                    {new Date(item.updatedAt).toLocaleDateString('zh-CN')}
-                                </p>
+                                <p className="text-xs text-zinc-400">{new Date(item.updatedAt).toLocaleDateString('zh-CN')}</p>
                             </div>
                             <ArrowLeft size={14} className="text-zinc-300 shrink-0" />
                         </div>

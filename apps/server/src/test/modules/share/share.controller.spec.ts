@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('ShareController', () => {
     let app: INestApplication
@@ -57,9 +57,7 @@ describe('ShareController', () => {
         })
 
         it('SH-004: should return 401 without auth', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/share')
-                .send({ pageId: createdPageId, permission: 'view' })
+            const res = await request(app.getHttpServer()).post('/api/share').send({ pageId: createdPageId, permission: 'view' })
             expect(res.status).toBe(401)
         })
     })
@@ -93,8 +91,7 @@ describe('ShareController', () => {
                 .send({ pageId: createdPageId, permission: 'view' })
             const shareId = shareRes.body.data.shareId
 
-            const res = await request(app.getHttpServer())
-                .get(`/api/share/${shareId}/info`)
+            const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/info`)
             expect(res.status).toBe(200)
             expect(res.body).toHaveProperty('data')
         })
@@ -106,8 +103,7 @@ describe('ShareController', () => {
                 .send({ pageId: createdPageId, permission: 'view', password: 'secret123' })
             const shareId = shareRes.body.data.shareId
 
-            const res = await request(app.getHttpServer())
-                .get(`/api/share/${shareId}/info`)
+            const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/info`)
             expect(res.status).toBe(403)
         })
 
@@ -118,8 +114,7 @@ describe('ShareController', () => {
                 .send({ pageId: createdPageId, permission: 'view', password: 'secret123' })
             const shareId = shareRes.body.data.shareId
 
-            const res = await request(app.getHttpServer())
-                .get(`/api/share/${shareId}/info?password=wrongpassword`)
+            const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/info?password=wrongpassword`)
             expect(res.status).toBe(403)
         })
     })
@@ -132,14 +127,12 @@ describe('ShareController', () => {
                 .send({ pageId: createdPageId, permission: 'view' })
             const shareId = shareRes.body.data.shareId
 
-            const res = await request(app.getHttpServer())
-                .get(`/api/share/${shareId}/content`)
+            const res = await request(app.getHttpServer()).get(`/api/share/${shareId}/content`)
             expect(res.status).toBe(200)
         })
 
         it('SH-011: should return 404 for non-existent share', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/share/nonexistentshareid/content')
+            const res = await request(app.getHttpServer()).get('/api/share/nonexistentshareid/content')
             expect(res.status).toBe(404)
         })
     })

@@ -4,9 +4,9 @@ import { nanoid } from 'nanoid'
 import { Repository } from 'typeorm'
 
 import { CollaboratorEntity } from '../../entities/collaborator.entity'
-import { ForbiddenCode, ForbiddenError } from '../../fundamentals/common/exceptions/forbidden.exception'
 import { PageEntity } from '../../entities/page.entity'
 import { UserEntity } from '../../entities/user.entity'
+import { ForbiddenCode, ForbiddenError } from '../../fundamentals/common/exceptions/forbidden.exception'
 import { AuditService } from '../audit/audit.service'
 import { NotificationService } from '../notification/notification.service'
 
@@ -20,7 +20,7 @@ export class CollaboratorService {
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
         private readonly auditService: AuditService,
-        private readonly notificationService: NotificationService,
+        private readonly notificationService: NotificationService
     ) {}
 
     async list(params: { pageId: string; userId: number }) {

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { renderWithProviders, mockAuthenticatedUser, clearAuthenticatedUser } from '@/test/helpers'
+import { clearAuthenticatedUser, renderWithProviders } from '@/test/helpers'
 
 vi.mock('@/services', () => ({
     login: vi.fn().mockResolvedValue({ data: { access_token: 'mock-token' }, success: true }),
@@ -19,7 +19,7 @@ vi.mock('@/components/PasswordInput', () => ({
             data-testid="password-input"
             type="password"
             value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={e => onChange(e.target.value)}
             placeholder={placeholder}
         />
     ),

@@ -2,8 +2,8 @@ import { GoneException, Inject, Injectable, NotFoundException, UnauthorizedExcep
 import { InjectRepository } from '@nestjs/typeorm'
 import * as bcrypt from 'bcryptjs'
 import { nanoid } from 'nanoid'
-import { PostgresqlPersistence } from 'y-postgresql'
 import { Repository } from 'typeorm'
+import { PostgresqlPersistence } from 'y-postgresql'
 
 import { PageEntity } from '../../entities/page.entity'
 import { ShareEntity } from '../../entities/share.entity'
@@ -53,7 +53,7 @@ export class ShareService {
             where: { pageId: params.pageId },
         })
 
-        return shares.map(({ password, ...rest }) => rest)
+        return shares.map(({ password: _password, ...rest }) => rest)
     }
 
     async delete(params: { shareId: string; userId: number }) {
@@ -97,7 +97,7 @@ export class ShareService {
             }
         }
 
-        const { password, ...result } = share
+        const { password: _password, ...result } = share
         return result
     }
 

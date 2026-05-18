@@ -98,17 +98,20 @@ export function SearchBar({ editor, open, onClose, replaceMode: initialReplaceMo
         scrollToMatch(prev - 1)
     }, [editor, currentMatch, matchCount])
 
-    const scrollToMatch = useCallback((index: number) => {
-        if (!editor || !searchText) return
-        const view = editor._tiptapEditor.view
-        const matches = findMatchesInDoc(editor, searchText)
-        if (matches[index]) {
-            const { TextSelection } = view.state.selection.constructor as any
-            const sel = TextSelection.create(view.state.doc, matches[index].from, matches[index].to)
-            view.dispatch(view.state.tr.setSelection(sel))
-            view.focus()
-        }
-    }, [editor, searchText])
+    const scrollToMatch = useCallback(
+        (index: number) => {
+            if (!editor || !searchText) return
+            const view = editor._tiptapEditor.view
+            const matches = findMatchesInDoc(editor, searchText)
+            if (matches[index]) {
+                const { TextSelection } = view.state.selection.constructor as any
+                const sel = TextSelection.create(view.state.doc, matches[index].from, matches[index].to)
+                view.dispatch(view.state.tr.setSelection(sel))
+                view.focus()
+            }
+        },
+        [editor, searchText]
+    )
 
     const handleReplace = useCallback(() => {
         if (!editor || !searchText || matchCount === 0) return

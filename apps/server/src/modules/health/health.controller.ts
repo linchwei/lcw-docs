@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
-import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator, MemoryHealthIndicator } from '@nestjs/terminus'
+import { HealthCheck, HealthCheckService, MemoryHealthIndicator, TypeOrmHealthIndicator } from '@nestjs/terminus'
 
 @ApiTags('健康检查')
 @Controller('health')
@@ -8,7 +8,7 @@ export class HealthController {
     constructor(
         private health: HealthCheckService,
         private db: TypeOrmHealthIndicator,
-        private memory: MemoryHealthIndicator,
+        private memory: MemoryHealthIndicator
     ) {}
 
     @ApiOperation({ summary: '健康检查', description: '检查数据库连接和内存状态' })

@@ -1,4 +1,5 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+
 import { getDefaultEmojiPickerItems } from '../../src/extensions/SuggestionMenu/getDefaultEmojiPickerItems'
 
 const { mockCheckDefaultInlineContentTypeInSchema, mockSearchIndex } = vi.hoisted(() => ({
@@ -18,13 +19,13 @@ vi.mock('emoji-mart', () => ({
 }))
 
 const mockEmojis = {
-    'smile': {
+    smile: {
         skins: [{ native: '😊' }],
     },
-    'thumbsup': {
+    thumbsup: {
         skins: [{ native: '👍' }],
     },
-    'heart': {
+    heart: {
         skins: [{ native: '❤️' }],
     },
 }
@@ -105,9 +106,7 @@ describe('getDefaultEmojiPickerItems', () => {
     test('should search emojis when query is provided', async () => {
         mockCheckDefaultInlineContentTypeInSchema.mockReturnValue(true)
         const editor = createMockEditor(true)
-        mockSearchIndex.search.mockResolvedValue([
-            { skins: [{ native: '😊' }] },
-        ])
+        mockSearchIndex.search.mockResolvedValue([{ skins: [{ native: '😊' }] }])
 
         const result = await getDefaultEmojiPickerItems(editor, 'smile')
 
@@ -128,10 +127,7 @@ describe('getDefaultEmojiPickerItems', () => {
     test('should map emoji native character as id', async () => {
         mockCheckDefaultInlineContentTypeInSchema.mockReturnValue(true)
         const editor = createMockEditor(true)
-        mockSearchIndex.search.mockResolvedValue([
-            { skins: [{ native: '🎉' }] },
-            { skins: [{ native: '🚀' }] },
-        ])
+        mockSearchIndex.search.mockResolvedValue([{ skins: [{ native: '🎉' }] }, { skins: [{ native: '🚀' }] }])
 
         const result = await getDefaultEmojiPickerItems(editor, 'party')
 
@@ -142,9 +138,7 @@ describe('getDefaultEmojiPickerItems', () => {
     test('onItemClick should insert emoji with trailing space', async () => {
         mockCheckDefaultInlineContentTypeInSchema.mockReturnValue(true)
         const editor = createMockEditor(true)
-        mockSearchIndex.search.mockResolvedValue([
-            { skins: [{ native: '😊' }] },
-        ])
+        mockSearchIndex.search.mockResolvedValue([{ skins: [{ native: '😊' }] }])
 
         const result = await getDefaultEmojiPickerItems(editor, 'smile')
 

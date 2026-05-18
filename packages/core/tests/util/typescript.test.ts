@@ -1,9 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import {
-    UnreachableCaseError,
-    assertEmpty,
-    NoInfer,
-} from '../../src/util/typescript'
+import { describe, expect, it } from 'vitest'
+
+import { assertEmpty, NoInfer, UnreachableCaseError } from '../../src/util/typescript'
 
 describe('typescript utils', () => {
     describe('UnreachableCaseError', () => {

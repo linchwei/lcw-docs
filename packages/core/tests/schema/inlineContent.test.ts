@@ -1,11 +1,12 @@
-import { describe, expect, test } from 'vitest'
 import { Node } from '@tiptap/core'
+import { describe, expect, test } from 'vitest'
+
 import {
     createInlineContentSpecFromTipTapNode,
     createInternalInlineContentSpec,
     getInlineContentSchemaFromSpecs,
 } from '../../src/schema/inlineContent/internal'
-import { InlineContentSpecs, CustomInlineContentConfig } from '../../src/schema/inlineContent/types'
+import { CustomInlineContentConfig, InlineContentSpecs } from '../../src/schema/inlineContent/types'
 
 describe('inlineContent/internal', () => {
     describe('createInlineContentSpecFromTipTapNode', () => {

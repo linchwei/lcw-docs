@@ -1,8 +1,9 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
-import { getLcwDocExtensions } from '../../src/editor/LcwDocExtensions'
-import { LcwDocEditor } from '../../src/editor/LcwDocEditor'
-import { LcwDocSchema } from '../../src/editor/LcwDocSchema'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import * as Y from 'yjs'
+
+import { LcwDocEditor } from '../../src/editor/LcwDocEditor'
+import { getLcwDocExtensions } from '../../src/editor/LcwDocExtensions'
+import { LcwDocSchema } from '../../src/editor/LcwDocSchema'
 
 vi.mock('../../src/editor/LcwDocEditor', () => ({
     LcwDocEditor: {
@@ -61,7 +62,7 @@ describe('LcwDocExtensions', () => {
 
             const extensionNames = extensions.map(ext => ext.name)
 
-            expect(extensionNames).toContain('clipboardTextSerializer')
+            expect(extensionNames).toContain('copyToClipboard')
             expect(extensionNames).toContain('uniqueID')
             expect(extensionNames).toContain('text')
             expect(extensionNames).toContain('link')
@@ -96,11 +97,11 @@ describe('LcwDocExtensions', () => {
                 inlineContentSpecs: schema.inlineContentSpecs,
                 styleSpecs: schema.styleSpecs,
                 trailingBlock: true,
-                disableExtensions: ['clipboardTextSerializer'],
+                disableExtensions: ['copyToClipboard'],
             })
 
             const extensionNames = extensions.map(ext => ext.name)
-            expect(extensionNames).not.toContain('clipboardTextSerializer')
+            expect(extensionNames).not.toContain('copyToClipboard')
         })
 
         test('禁用多个扩展时，所有指定的扩展应被过滤掉', () => {
@@ -112,11 +113,11 @@ describe('LcwDocExtensions', () => {
                 inlineContentSpecs: schema.inlineContentSpecs,
                 styleSpecs: schema.styleSpecs,
                 trailingBlock: true,
-                disableExtensions: ['clipboardTextSerializer', 'link', 'text'],
+                disableExtensions: ['copyToClipboard', 'link', 'text'],
             })
 
             const extensionNames = extensions.map(ext => ext.name)
-            expect(extensionNames).not.toContain('clipboardTextSerializer')
+            expect(extensionNames).not.toContain('copyToClipboard')
             expect(extensionNames).not.toContain('link')
             expect(extensionNames).not.toContain('text')
         })
@@ -159,7 +160,7 @@ describe('LcwDocExtensions', () => {
             })
 
             const extensionNames = extensions.map(ext => ext.name)
-            expect(extensionNames).toContain('clipboardTextSerializer')
+            expect(extensionNames).toContain('copyToClipboard')
             expect(extensionNames).toContain('link')
         })
     })

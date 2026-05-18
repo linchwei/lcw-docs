@@ -84,12 +84,14 @@ export function SharePage() {
                         type="password"
                         placeholder="请输入访问密码"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                        onChange={e => setPassword(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handlePasswordSubmit()}
                         className="mb-3"
                     />
                     {passwordError && <p className="text-red-500 text-sm mb-3">{passwordError}</p>}
-                    <Button onClick={handlePasswordSubmit} className="w-full">确认</Button>
+                    <Button onClick={handlePasswordSubmit} className="w-full">
+                        确认
+                    </Button>
                 </div>
             </div>
         )
@@ -109,7 +111,9 @@ export function SharePage() {
                         <span className="text-sm font-medium text-zinc-700">{shareInfo?.title || '共享文档'}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${permInfo.className}`}>
+                        <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${permInfo.className}`}
+                        >
                             <PermIcon size={12} />
                             {permInfo.label}
                         </span>
@@ -132,9 +136,7 @@ export function SharePage() {
                         />
                     )}
                 </div>
-                <div className="text-center text-xs text-zinc-400 mt-12 pb-8">
-                    由 LcwDoc 提供支持
-                </div>
+                <div className="text-center text-xs text-zinc-400 mt-12 pb-8">由 LcwDoc 提供支持</div>
             </div>
         </div>
     )

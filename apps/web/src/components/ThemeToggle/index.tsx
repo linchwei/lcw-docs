@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { Sun, Moon } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import styles from './ThemeToggle.module.css'
 
 export function ThemeToggle() {
@@ -21,10 +22,10 @@ export function ThemeToggle() {
 
     const toggleTheme = () => {
         if (isAnimating) return
-        
+
         setIsAnimating(true)
         setIsDark(!isDark)
-        
+
         setTimeout(() => {
             setIsAnimating(false)
         }, 600)
@@ -38,11 +39,7 @@ export function ThemeToggle() {
         >
             <div className={styles.switch}>
                 <div className={styles.handle}>
-                    {isDark ? (
-                        <Moon className={styles.icon} size={16} />
-                    ) : (
-                        <Sun className={styles.icon} size={16} />
-                    )}
+                    {isDark ? <Moon className={styles.icon} size={16} /> : <Sun className={styles.icon} size={16} />}
                 </div>
             </div>
             <div className={styles.glow} />

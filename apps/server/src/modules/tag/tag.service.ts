@@ -120,11 +120,12 @@ export class TagService {
         })
 
         const tagIds = [...new Set(pageTags.map(pt => pt.tagId))]
-        const tags = tagIds.length > 0
-            ? await this.tagRepository.find({
-                where: tagIds.map(id => ({ tagId: id })),
-            })
-            : []
+        const tags =
+            tagIds.length > 0
+                ? await this.tagRepository.find({
+                      where: tagIds.map(id => ({ tagId: id })),
+                  })
+                : []
 
         const tagMap = new Map(tags.map(t => [t.tagId, t]))
 

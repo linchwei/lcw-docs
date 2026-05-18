@@ -21,9 +21,7 @@ export const LinkInputRule = Extension.create({
                     if (state.schema.marks.link) {
                         chain()
                             .deleteRange({ from: linkStart, to: linkEnd })
-                            .insertContentAt(linkStart, state.schema.text(text, [
-                                state.schema.marks.link.create({ href: url }),
-                            ]))
+                            .insertContentAt(linkStart, state.schema.text(text, [state.schema.marks.link.create({ href: url })]))
                             .run()
                     }
                 },

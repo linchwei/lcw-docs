@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('TagController', () => {
     let app: INestApplication
@@ -26,9 +26,7 @@ describe('TagController', () => {
     })
 
     it('TG-001: should return tag list', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/tags')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).get('/api/tags').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty('data')
     })
@@ -100,9 +98,7 @@ describe('TagController', () => {
 
     it('TG-005: should delete a tag', async () => {
         if (!createdTagId) return
-        const res = await request(app.getHttpServer())
-            .delete(`/api/tag/${createdTagId}`)
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).delete(`/api/tag/${createdTagId}`).set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
     })

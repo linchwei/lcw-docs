@@ -33,15 +33,15 @@ export const FileCaptionButton = () => {
     })()
 
     const handleEnter = (event: KeyboardEvent) => {
-            if (fileBlock && event.key === 'Enter') {
-                event.preventDefault()
-                editor.updateBlock(fileBlock, {
-                    props: {
-                        caption: currentEditingCaption as any,
-                    },
-                })
-            }
+        if (fileBlock && event.key === 'Enter') {
+            event.preventDefault()
+            editor.updateBlock(fileBlock, {
+                props: {
+                    caption: currentEditingCaption as any,
+                },
+            })
         }
+    }
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => setCurrentEditingCaption(event.currentTarget.value)
 

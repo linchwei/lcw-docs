@@ -44,12 +44,12 @@ import { BacklinksPanel } from '@/components/BacklinksPanel'
 import { CollaboratorPanel } from '@/components/CollaboratorPanel'
 import { CommentButton } from '@/components/CommentButton'
 import { CommentPanel } from '@/components/CommentPanel'
+import { DocInfoPanel } from '@/components/DocInfoPanel'
 import { ExportPanel } from '@/components/ExportPanel'
 import { AboutDialog } from '@/components/LayoutAside/AboutDialog'
 import { SettingsDialog } from '@/components/LayoutAside/SettingsDialog'
 import { NotificationBell } from '@/components/NotificationBell'
 import { PageTags } from '@/components/PageTags'
-import { DocInfoPanel } from '@/components/DocInfoPanel'
 import { SearchBar } from '@/components/SearchBar'
 import { SharePopover } from '@/components/SharePopover'
 import { ShortcutPanel } from '@/components/ShortcutPanel'
@@ -218,7 +218,7 @@ export const Doc = () => {
                 const active = document.activeElement
                 const isEditor = active?.closest('.bn-editor')
                 const isInput = active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA' || (active as HTMLElement)?.isContentEditable
-                if (!isInput && !isEditor && page?.role === 'owner' || page?.role === 'editor') {
+                if ((!isInput && !isEditor && page?.role === 'owner') || page?.role === 'editor') {
                     setMode('edit')
                 }
             }
@@ -442,7 +442,10 @@ export const Doc = () => {
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-36 rounded-lg" align="end">
-                            <DropdownMenuItem onClick={() => setPageWidth('default')} className={pageWidth === 'default' ? 'bg-accent' : ''}>
+                            <DropdownMenuItem
+                                onClick={() => setPageWidth('default')}
+                                className={pageWidth === 'default' ? 'bg-accent' : ''}
+                            >
                                 默认宽度
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setPageWidth('wide')} className={pageWidth === 'wide' ? 'bg-accent' : ''}>
@@ -577,56 +580,20 @@ export const Doc = () => {
                     )}
                     <div className="flex-1 min-w-0 overflow-auto">
                         <SearchBar editor={editorInstance} open={searchBarOpen} onClose={() => setSearchBarOpen(false)} />
-                        <div className={`w-full ${pageWidth === 'default' ? 'max-w-[820px]' : pageWidth === 'wide' ? 'max-w-[1100px]' : 'max-w-none'} pl-6 pr-6 lg:pr-24 pt-24`}>
-                                {isLoading ? (
-                                    <div className="flex items-center justify-center py-20">
-                                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                                        <span className="ml-2 text-muted-foreground">加载中...</span>
-                                    </div>
-                                ) : (
-                                    <>
-                                        {page?.coverImage && (
-                                            <div className="relative -mx-6 -mt-24 mb-6 group">
-                                                <img src={page.coverImage} alt="cover" className="w-full h-48 object-cover rounded-b-lg" />
-                                                <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={async () => {
-                                                            const covers = [
-                                                                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1505144808419-1957a94ca61e?w=1200&h=400&fit=crop',
-                                                                'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1200&h=400&fit=crop',
-                                                            ]
-                                                            const cover = covers[Math.floor(Math.random() * covers.length)]
-                                                            await srv.updatePage({ pageId: page.pageId, coverImage: cover })
-                                                            queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
-                                                        }}
-                                                        className="h-7 px-3 text-xs bg-black/50 text-white rounded-md hover:bg-black/70 transition-colors"
-                                                    >
-                                                        更换封面
-                                                    </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            await srv.updatePage({ pageId: page.pageId, coverImage: null })
-                                                            queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
-                                                        }}
-                                                        className="h-7 px-3 text-xs bg-black/50 text-white rounded-md hover:bg-black/70 transition-colors"
-                                                    >
-                                                        移除
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {!page?.coverImage && (
-                                            <div className="-mt-16 mb-4">
+                        <div
+                            className={`w-full ${pageWidth === 'default' ? 'max-w-[820px]' : pageWidth === 'wide' ? 'max-w-[1100px]' : 'max-w-none'} pl-6 pr-6 lg:pr-24 pt-24`}
+                        >
+                            {isLoading ? (
+                                <div className="flex items-center justify-center py-20">
+                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                    <span className="ml-2 text-muted-foreground">加载中...</span>
+                                </div>
+                            ) : (
+                                <>
+                                    {page?.coverImage && (
+                                        <div className="relative -mx-6 -mt-24 mb-6 group">
+                                            <img src={page.coverImage} alt="cover" className="w-full h-48 object-cover rounded-b-lg" />
+                                            <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={async () => {
                                                         const covers = [
@@ -636,104 +603,210 @@ export const Doc = () => {
                                                             'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&h=400&fit=crop',
                                                             'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=400&fit=crop',
                                                             'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&h=400&fit=crop',
+                                                            'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1200&h=400&fit=crop',
+                                                            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&h=400&fit=crop',
+                                                            'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=400&fit=crop',
+                                                            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=400&fit=crop',
+                                                            'https://images.unsplash.com/photo-1505144808419-1957a94ca61e?w=1200&h=400&fit=crop',
+                                                            'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1200&h=400&fit=crop',
                                                         ]
                                                         const cover = covers[Math.floor(Math.random() * covers.length)]
-                                                        await srv.updatePage({ pageId: page!.pageId, coverImage: cover })
+                                                        await srv.updatePage({ pageId: page.pageId, coverImage: cover })
                                                         queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
                                                     }}
-                                                    className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+                                                    className="h-7 px-3 text-xs bg-black/50 text-white rounded-md hover:bg-black/70 transition-colors"
                                                 >
-                                                    + 添加封面
+                                                    更换封面
                                                 </button>
-                                            </div>
-                                        )}
-                                        <div className="flex flex-row items-start gap-2 mb-1">
-                                            <div className="relative shrink-0" ref={emojiPickerRef}>
                                                 <button
-                                                    onClick={() => {
-                                                        if (mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')) {
-                                                            setEmojiPickerOpen(!emojiPickerOpen)
-                                                        }
+                                                    onClick={async () => {
+                                                        await srv.updatePage({ pageId: page.pageId, coverImage: null })
+                                                        queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
                                                     }}
-                                                    className="text-[40px] leading-none hover:bg-zinc-100 rounded-md p-1 transition-colors"
-                                                    title={page?.emoji ? '更换图标' : '添加图标'}
+                                                    className="h-7 px-3 text-xs bg-black/50 text-white rounded-md hover:bg-black/70 transition-colors"
                                                 >
-                                                    {page?.emoji || '📄'}
+                                                    移除
                                                 </button>
-                                                {emojiPickerOpen && (
-                                                    <div className="absolute left-0 top-12 z-50 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 p-3 w-[280px]">
-                                                        <div className="grid grid-cols-8 gap-1">
-                                                            {['📄', '📝', '📋', '📌', '📎', '📁', '📂', '🗂️', '📊', '📈', '📉', '🗓️', '📆', '⏰', '🔔', '💬', '💡', '🎯', '🏆', '⭐', '🔥', '💎', '🚀', '🎨', '🎵', '📷', '🎬', '🎮', '🏠', '🏢', '🌍', '🌈', '☀️', '🌙', '⭐', '🍀', '🌸', '🌺', '🌻', '🌲', '🍎', '🍕', '☕', '🎂', '🎁', '❤️', '💙', '💚', '💜', '🧡', '💛', '🤍', '🖤', '✅', '❌', '⚡', '🔧', '🔨', '⚙️', '🔑', '🔒', '📖', '🎓', '💰'].map(e => (
-                                                                <button
-                                                                    key={e}
-                                                                    onClick={() => handleEmojiSelect(e)}
-                                                                    className="text-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded p-1 transition-colors"
-                                                                >
-                                                                    {e}
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                        {page?.emoji && (
-                                                            <button
-                                                                onClick={async () => {
-                                                                    setEmojiPickerOpen(false)
-                                                                    await srv.updatePage({ pageId: page.pageId, emoji: '📄' })
-                                                                    queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
-                                                                }}
-                                                                className="mt-2 w-full text-xs text-zinc-400 hover:text-zinc-600 py-1 transition-colors"
-                                                            >
-                                                                重置图标
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
-                                        <h1 className="flex flex-row font-serif text-[40px] font-bold leading-tight">
-                                            <div
-                                                contentEditable={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')}
-                                                ref={titleRef}
-                                                className="inline-block flex-1 outline-none text-[#37352f] empty:before:content-[attr(data-placeholder)] empty:before:text-[#c7c7c5]"
-                                                data-placeholder="无标题"
-                                                onInput={
-                                                    mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')
-                                                        ? handleTitleInput
-                                                        : undefined
-                                                }
-                                            />
-                                        </h1>
-                                        {mode === 'read' && (page?.role === 'editor' || page?.role === 'owner') && (
-                                            <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
-                                                <BookOpen size={14} className="text-zinc-500" />
-                                                <span className="text-xs text-zinc-500">阅读模式 - 你只能查看和复制此文档</span>
-                                            </div>
-                                        )}
-                                        {page?.role === 'viewer' && (
-                                            <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
-                                                <Eye size={14} className="text-zinc-500" />
-                                                <span className="text-xs text-zinc-500">只读模式 - 你只能查看此文档</span>
-                                            </div>
-                                        )}
-                                        {page?.role === 'commenter' && (
-                                            <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-amber-50 rounded-md w-fit">
-                                                <Eye size={14} className="text-amber-500" />
-                                                <span className="text-xs text-amber-600">评论模式 - 你可以查看和评论此文档</span>
-                                            </div>
-                                        )}
-                                        <PageTags pageId={page?.pageId} />
-                                        {page?.id && (
-                                            <DocEditor
-                                                key={page?.id}
-                                                pageId={page.pageId}
-                                                doc={doc}
-                                                provider={provider}
-                                                onEditorReady={handleEditorReady}
-                                                editable={(mode === 'edit' || mode === 'review') && (page?.role === 'editor' || page?.role === 'owner')}
-                                            />
-                                        )}
-                                    </>
-                                )}
-                            </div>
+                                    )}
+                                    {!page?.coverImage && (
+                                        <div className="-mt-16 mb-4">
+                                            <button
+                                                onClick={async () => {
+                                                    const covers = [
+                                                        'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&h=400&fit=crop',
+                                                        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=400&fit=crop',
+                                                        'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1200&h=400&fit=crop',
+                                                        'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1200&h=400&fit=crop',
+                                                        'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=400&fit=crop',
+                                                        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&h=400&fit=crop',
+                                                    ]
+                                                    const cover = covers[Math.floor(Math.random() * covers.length)]
+                                                    await srv.updatePage({ pageId: page!.pageId, coverImage: cover })
+                                                    queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
+                                                }}
+                                                className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+                                            >
+                                                + 添加封面
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div className="flex flex-row items-start gap-2 mb-1">
+                                        <div className="relative shrink-0" ref={emojiPickerRef}>
+                                            <button
+                                                onClick={() => {
+                                                    if (mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')) {
+                                                        setEmojiPickerOpen(!emojiPickerOpen)
+                                                    }
+                                                }}
+                                                className="text-[40px] leading-none hover:bg-zinc-100 rounded-md p-1 transition-colors"
+                                                title={page?.emoji ? '更换图标' : '添加图标'}
+                                            >
+                                                {page?.emoji || '📄'}
+                                            </button>
+                                            {emojiPickerOpen && (
+                                                <div className="absolute left-0 top-12 z-50 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 p-3 w-[280px]">
+                                                    <div className="grid grid-cols-8 gap-1">
+                                                        {[
+                                                            '📄',
+                                                            '📝',
+                                                            '📋',
+                                                            '📌',
+                                                            '📎',
+                                                            '📁',
+                                                            '📂',
+                                                            '🗂️',
+                                                            '📊',
+                                                            '📈',
+                                                            '📉',
+                                                            '🗓️',
+                                                            '📆',
+                                                            '⏰',
+                                                            '🔔',
+                                                            '💬',
+                                                            '💡',
+                                                            '🎯',
+                                                            '🏆',
+                                                            '⭐',
+                                                            '🔥',
+                                                            '💎',
+                                                            '🚀',
+                                                            '🎨',
+                                                            '🎵',
+                                                            '📷',
+                                                            '🎬',
+                                                            '🎮',
+                                                            '🏠',
+                                                            '🏢',
+                                                            '🌍',
+                                                            '🌈',
+                                                            '☀️',
+                                                            '🌙',
+                                                            '⭐',
+                                                            '🍀',
+                                                            '🌸',
+                                                            '🌺',
+                                                            '🌻',
+                                                            '🌲',
+                                                            '🍎',
+                                                            '🍕',
+                                                            '☕',
+                                                            '🎂',
+                                                            '🎁',
+                                                            '❤️',
+                                                            '💙',
+                                                            '💚',
+                                                            '💜',
+                                                            '🧡',
+                                                            '💛',
+                                                            '🤍',
+                                                            '🖤',
+                                                            '✅',
+                                                            '❌',
+                                                            '⚡',
+                                                            '🔧',
+                                                            '🔨',
+                                                            '⚙️',
+                                                            '🔑',
+                                                            '🔒',
+                                                            '📖',
+                                                            '🎓',
+                                                            '💰',
+                                                        ].map(e => (
+                                                            <button
+                                                                key={e}
+                                                                onClick={() => handleEmojiSelect(e)}
+                                                                className="text-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded p-1 transition-colors"
+                                                            >
+                                                                {e}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    {page?.emoji && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                setEmojiPickerOpen(false)
+                                                                await srv.updatePage({ pageId: page.pageId, emoji: '📄' })
+                                                                queryClient.invalidateQueries({ queryKey: ['page', page?.pageId] })
+                                                            }}
+                                                            className="mt-2 w-full text-xs text-zinc-400 hover:text-zinc-600 py-1 transition-colors"
+                                                        >
+                                                            重置图标
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <h1 className="flex flex-row font-serif text-[40px] font-bold leading-tight">
+                                        <div
+                                            contentEditable={mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')}
+                                            ref={titleRef}
+                                            className="inline-block flex-1 outline-none text-[#37352f] empty:before:content-[attr(data-placeholder)] empty:before:text-[#c7c7c5]"
+                                            data-placeholder="无标题"
+                                            onInput={
+                                                mode === 'edit' && (page?.role === 'editor' || page?.role === 'owner')
+                                                    ? handleTitleInput
+                                                    : undefined
+                                            }
+                                        />
+                                    </h1>
+                                    {mode === 'read' && (page?.role === 'editor' || page?.role === 'owner') && (
+                                        <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
+                                            <BookOpen size={14} className="text-zinc-500" />
+                                            <span className="text-xs text-zinc-500">阅读模式 - 你只能查看和复制此文档</span>
+                                        </div>
+                                    )}
+                                    {page?.role === 'viewer' && (
+                                        <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
+                                            <Eye size={14} className="text-zinc-500" />
+                                            <span className="text-xs text-zinc-500">只读模式 - 你只能查看此文档</span>
+                                        </div>
+                                    )}
+                                    {page?.role === 'commenter' && (
+                                        <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-amber-50 rounded-md w-fit">
+                                            <Eye size={14} className="text-amber-500" />
+                                            <span className="text-xs text-amber-600">评论模式 - 你可以查看和评论此文档</span>
+                                        </div>
+                                    )}
+                                    <PageTags pageId={page?.pageId} />
+                                    {page?.id && (
+                                        <DocEditor
+                                            key={page?.id}
+                                            pageId={page.pageId}
+                                            doc={doc}
+                                            provider={provider}
+                                            onEditorReady={handleEditorReady}
+                                            editable={
+                                                (mode === 'edit' || mode === 'review') &&
+                                                (page?.role === 'editor' || page?.role === 'owner')
+                                            }
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
                     {commentPanelOpen && page?.pageId && <CommentPanel pageId={page.pageId} onClose={() => setCommentPanelOpen(false)} />}
                     {versionPanelOpen && page?.pageId && <VersionPanel pageId={page.pageId} onClose={() => setVersionPanelOpen(false)} />}

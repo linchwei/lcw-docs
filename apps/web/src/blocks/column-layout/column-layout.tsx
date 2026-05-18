@@ -21,22 +21,12 @@ export const ColumnLayout = createReactBlockSpec(
     {
         render: props => {
             const layout = (props.block.props.layout || '2-col') as ColumnLayout
-            return (
-                <ColumnLayoutContent
-                    layout={layout}
-                    editor={props.editor}
-                    blockId={props.block.id}
-                />
-            )
+            return <ColumnLayoutContent layout={layout} editor={props.editor} blockId={props.block.id} />
         },
     }
 )
 
-function ColumnLayoutContent({ layout, editor, blockId }: {
-    layout: ColumnLayout
-    editor: any
-    blockId: string
-}) {
+function ColumnLayoutContent({ layout, editor, blockId }: { layout: ColumnLayout; editor: any; blockId: string }) {
     const [showMenu, setShowMenu] = useState(false)
     const config = LAYOUT_CONFIG[layout]
 
@@ -47,11 +37,13 @@ function ColumnLayoutContent({ layout, editor, blockId }: {
 
     return (
         <div style={{ position: 'relative' }}>
-            <div style={{
-                display: 'flex',
-                gap: '8px',
-                padding: '4px 0',
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    gap: '8px',
+                    padding: '4px 0',
+                }}
+            >
                 {config.widths.map((width, i) => (
                     <div
                         key={i}
@@ -64,12 +56,14 @@ function ColumnLayoutContent({ layout, editor, blockId }: {
                             backgroundColor: '#fafaf9',
                         }}
                     >
-                        <div style={{
-                            fontSize: '12px',
-                            color: '#b4b4b0',
-                            textAlign: 'center',
-                            padding: '16px 0',
-                        }}>
+                        <div
+                            style={{
+                                fontSize: '12px',
+                                color: '#b4b4b0',
+                                textAlign: 'center',
+                                padding: '16px 0',
+                            }}
+                        >
                             栏 {i + 1}
                         </div>
                     </div>
@@ -94,29 +88,31 @@ function ColumnLayoutContent({ layout, editor, blockId }: {
                     fontSize: '14px',
                 }}
                 onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f7f6f3'
+                    ;(e.currentTarget as HTMLElement).style.backgroundColor = '#f7f6f3'
                     ;(e.currentTarget as HTMLElement).style.color = '#787774'
                 }}
                 onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
+                    ;(e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
                     ;(e.currentTarget as HTMLElement).style.color = '#b4b4b0'
                 }}
             >
                 ⋯
             </button>
             {showMenu && (
-                <div style={{
-                    position: 'absolute',
-                    top: '28px',
-                    right: '0',
-                    zIndex: 100,
-                    backgroundColor: '#fff',
-                    borderRadius: '6px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    border: '1px solid #e9e9e7',
-                    padding: '4px',
-                    minWidth: '140px',
-                }}>
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '28px',
+                        right: '0',
+                        zIndex: 100,
+                        backgroundColor: '#fff',
+                        borderRadius: '6px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        border: '1px solid #e9e9e7',
+                        padding: '4px',
+                        minWidth: '140px',
+                    }}
+                >
                     {(Object.entries(LAYOUT_CONFIG) as [ColumnLayout, typeof config][]).map(([key, cfg]) => (
                         <div
                             key={key}
@@ -159,12 +155,15 @@ function LayoutIcon({ layout }: { layout: ColumnLayout }) {
     return (
         <div style={{ display: 'flex', gap: '2px', width: '24px' }}>
             {configs[layout].map((w, i) => (
-                <div key={i} style={{
-                    width: w,
-                    height: '12px',
-                    backgroundColor: '#e9e9e7',
-                    borderRadius: '2px',
-                }} />
+                <div
+                    key={i}
+                    style={{
+                        width: w,
+                        height: '12px',
+                        backgroundColor: '#e9e9e7',
+                        borderRadius: '2px',
+                    }}
+                />
             ))}
         </div>
     )

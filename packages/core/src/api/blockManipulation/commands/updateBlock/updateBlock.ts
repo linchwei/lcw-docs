@@ -72,8 +72,7 @@ export const updateBlockCommand =
                 const oldContentType = state.schema.nodes[oldType].spec.content
                 const newContentType = state.schema.nodes[newType].spec.content
 
-                if (oldContentType === '') {
-                } else if (newContentType !== oldContentType) {
+                if (oldContentType !== '' && newContentType !== oldContentType) {
                     content = []
                 }
             }

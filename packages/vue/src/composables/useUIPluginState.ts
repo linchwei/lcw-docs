@@ -1,6 +1,6 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
-export function useUIPluginState<State>(onUpdate: (callback: (state: State) => void) => (() => void)) {
+export function useUIPluginState<State>(onUpdate: (callback: (state: State) => void) => () => void) {
     const state = ref<State>()
 
     let cleanup: (() => void) | undefined

@@ -1,4 +1,5 @@
 import { onMounted, onUnmounted } from 'vue'
+
 import { useLcwDocEditor } from '../editor/inject'
 
 export function useOnUploadEnd(callback: (blockId?: string) => void) {

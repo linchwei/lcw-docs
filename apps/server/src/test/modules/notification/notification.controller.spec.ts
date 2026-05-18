@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('NotificationController', () => {
     let app: INestApplication
@@ -18,9 +18,7 @@ describe('NotificationController', () => {
     })
 
     it('NT-001: should return notification list', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/notification')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).get('/api/notification').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty('data')
     })
@@ -34,9 +32,7 @@ describe('NotificationController', () => {
     })
 
     it('NT-004: should mark all as read', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/notification/read-all')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).post('/api/notification/read-all').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(201)
         expect(res.body.success).toBe(true)
     })

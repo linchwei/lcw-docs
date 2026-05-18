@@ -1,14 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { mockAuthenticatedUser, clearAuthenticatedUser } from '../test/helpers'
-
-import { fetchTags, createTag, addPageTag, fetchPageTags } from './tag'
-import { fetchFolders, createFolder } from './folder'
-import { fetchNotifications, fetchUnreadCount, markAllNotificationsRead } from './notification'
-import { fetchVersions } from './version'
-import { createShare, fetchSharesByPageId } from './share'
+import { clearAuthenticatedUser, mockAuthenticatedUser } from '../test/helpers'
 import { fetchCollaborators } from './collaborator'
 import { fetchComments } from './comment'
+import { createFolder, fetchFolders } from './folder'
+import { fetchNotifications, fetchUnreadCount, markAllNotificationsRead } from './notification'
+import { createShare, fetchSharesByPageId } from './share'
+import { addPageTag, createTag, fetchPageTags, fetchTags } from './tag'
+import { fetchVersions } from './version'
 
 describe('tag service', () => {
     beforeEach(() => mockAuthenticatedUser())

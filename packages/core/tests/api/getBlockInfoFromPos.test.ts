@@ -1,12 +1,13 @@
-import { describe, test, expect } from 'vitest'
 import { Schema } from 'prosemirror-model'
 import { EditorState, TextSelection } from 'prosemirror-state'
+import { describe, expect, test } from 'vitest'
+
 import {
-    getNearestBlockContainerPos,
-    getBlockInfoWithManualOffset,
     getBlockInfo,
     getBlockInfoFromResolvedPos,
     getBlockInfoFromSelection,
+    getBlockInfoWithManualOffset,
+    getNearestBlockContainerPos,
 } from '../../src/api/getBlockInfoFromPos'
 
 const createTestSchema = () => {
@@ -39,28 +40,18 @@ const createDocWithBlocks = (schema: Schema, blockCount: number, ids?: string[])
     const containers = []
     for (let i = 0; i < blockCount; i++) {
         const id = ids ? ids[i] : `block-${i}`
-        containers.push(
-            schema.nodes.blockContainer.create({ id }, [
-                schema.nodes.blockContent.create(),
-            ])
-        )
+        containers.push(schema.nodes.blockContainer.create({ id }, [schema.nodes.blockContent.create()]))
     }
-    return schema.nodes.doc.create(null, [
-        schema.nodes.blockGroup.create(null, containers),
-    ])
+    return schema.nodes.doc.create(null, [schema.nodes.blockGroup.create(null, containers)])
 }
 
 const createDocWithNestedBlocks = (schema: Schema) => {
-    const childContainer = schema.nodes.blockContainer.create({ id: 'child-block' }, [
-        schema.nodes.blockContent.create(),
-    ])
+    const childContainer = schema.nodes.blockContainer.create({ id: 'child-block' }, [schema.nodes.blockContent.create()])
     const parentContainer = schema.nodes.blockContainer.create({ id: 'parent-block' }, [
         schema.nodes.blockContent.create(),
         schema.nodes.blockGroup.create(null, [childContainer]),
     ])
-    return schema.nodes.doc.create(null, [
-        schema.nodes.blockGroup.create(null, [parentContainer]),
-    ])
+    return schema.nodes.doc.create(null, [schema.nodes.blockGroup.create(null, [parentContainer])])
 }
 
 describe('api/getBlockInfoFromPos', () => {

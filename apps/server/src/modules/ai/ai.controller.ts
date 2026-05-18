@@ -29,14 +29,20 @@ export class AiController {
                         required: ['role', 'content'],
                         properties: {
                             role: { type: 'string', description: '消息角色', enum: ['system', 'user', 'assistant'] },
-                            content: { type: 'string', description: '消息内容' }
-                        }
-                    }
-                }
-            }
-        }
+                            content: { type: 'string', description: '消息内容' },
+                        },
+                    },
+                },
+            },
+        },
     })
-    @ApiResponse({ status: 200, description: '成功，返回SSE流式响应', schema: { properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } } } })
+    @ApiResponse({
+        status: 200,
+        description: '成功，返回SSE流式响应',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
     @Post('chat')
     async chat(@Body(new ZodValidationPipe(chatSchema)) body: ChatDto, @Request() req, @Res() res: Response) {
         const upstream = await this.aiService.chatStream(body.messages as import('./ai.service').ChatMessage[])

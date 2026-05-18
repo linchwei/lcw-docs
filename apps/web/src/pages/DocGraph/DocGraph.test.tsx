@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { renderWithProviders, mockAuthenticatedUser, clearAuthenticatedUser } from '@/test/helpers'
+import { clearAuthenticatedUser, mockAuthenticatedUser, renderWithProviders } from '@/test/helpers'
 import { server } from '@/test/mocks/server'
 
 vi.mock('@/services', async () => {
@@ -39,7 +39,9 @@ vi.mock('d3-force', () => {
         forceSimulation: vi.fn().mockImplementation(createMockSimulation),
         forceManyBody: vi.fn().mockReturnValue({ strength: vi.fn().mockReturnValue({}) }),
         forceCollide: vi.fn().mockReturnValue({}),
-        forceLink: vi.fn().mockReturnValue({ strength: vi.fn().mockReturnValue({ distance: vi.fn().mockReturnValue({ iterations: vi.fn().mockReturnValue({}) }) }) }),
+        forceLink: vi.fn().mockReturnValue({
+            strength: vi.fn().mockReturnValue({ distance: vi.fn().mockReturnValue({ iterations: vi.fn().mockReturnValue({}) }) }),
+        }),
         forceCenter: vi.fn().mockReturnValue({}),
         forceRadial: vi.fn().mockReturnValue({ strength: vi.fn().mockReturnValue({}) }),
     }

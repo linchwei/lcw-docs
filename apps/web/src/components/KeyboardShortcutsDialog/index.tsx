@@ -1,9 +1,4 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@lcw-doc/shadcn-shared-ui/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@lcw-doc/shadcn-shared-ui/components/ui/dialog'
 
 interface KeyboardShortcutsDialogProps {
     open: boolean
@@ -11,47 +6,59 @@ interface KeyboardShortcutsDialogProps {
 }
 
 const shortcuts = [
-    { category: '通用', items: [
-        { keys: ['⌘', 'K'], description: '搜索文档' },
-        { keys: ['⌘', 'B'], description: '切换侧边栏' },
-        { keys: ['⌘', '/'], description: '快捷键帮助' },
-    ]},
-    { category: '编辑', items: [
-        { keys: ['⌘', 'Z'], description: '撤销' },
-        { keys: ['⌘', '⇧', 'Z'], description: '重做' },
-        { keys: ['⌘', 'B'], description: '加粗' },
-        { keys: ['⌘', 'I'], description: '斜体' },
-        { keys: ['⌘', 'U'], description: '下划线' },
-        { keys: ['⌘', 'K'], description: '插入链接' },
-    ]},
-    { category: 'Markdown 快捷格式', items: [
-        { keys: ['#', 'Space'], description: '一级标题' },
-        { keys: ['##', 'Space'], description: '二级标题' },
-        { keys: ['###', 'Space'], description: '三级标题' },
-        { keys: ['####', 'Space'], description: '四级标题' },
-        { keys: ['#####', 'Space'], description: '五级标题' },
-        { keys: ['######', 'Space'], description: '六级标题' },
-        { keys: ['**text**'], description: '粗体' },
-        { keys: ['*text*'], description: '斜体' },
-        { keys: ['~~text~~'], description: '删除线' },
-        { keys: ['`text`'], description: '行内代码' },
-        { keys: ['==text=='], description: '高亮标记' },
-        { keys: ['^text^'], description: '上标' },
-        { keys: ['~text~'], description: '下标' },
-        { keys: ['[text](url)'], description: '超链接' },
-        { keys: ['![alt](url)'], description: '图片' },
-    ]},
-    { category: '块级快捷格式', items: [
-        { keys: ['-', 'Space'], description: '无序列表' },
-        { keys: ['1.', 'Space'], description: '有序列表' },
-        { keys: ['[]', 'Space'], description: '任务列表' },
-        { keys: ['>', 'Space'], description: '引用块' },
-        { keys: ['---', 'Space'], description: '分割线' },
-        { keys: ['```', 'Space'], description: '代码块' },
-        { keys: ['| 表头 | 表头 |'], description: '表格' },
-        { keys: ['/'], description: '插入块菜单' },
-        { keys: ['@'], description: '引用文档' },
-    ]},
+    {
+        category: '通用',
+        items: [
+            { keys: ['⌘', 'K'], description: '搜索文档' },
+            { keys: ['⌘', 'B'], description: '切换侧边栏' },
+            { keys: ['⌘', '/'], description: '快捷键帮助' },
+        ],
+    },
+    {
+        category: '编辑',
+        items: [
+            { keys: ['⌘', 'Z'], description: '撤销' },
+            { keys: ['⌘', '⇧', 'Z'], description: '重做' },
+            { keys: ['⌘', 'B'], description: '加粗' },
+            { keys: ['⌘', 'I'], description: '斜体' },
+            { keys: ['⌘', 'U'], description: '下划线' },
+            { keys: ['⌘', 'K'], description: '插入链接' },
+        ],
+    },
+    {
+        category: 'Markdown 快捷格式',
+        items: [
+            { keys: ['#', 'Space'], description: '一级标题' },
+            { keys: ['##', 'Space'], description: '二级标题' },
+            { keys: ['###', 'Space'], description: '三级标题' },
+            { keys: ['####', 'Space'], description: '四级标题' },
+            { keys: ['#####', 'Space'], description: '五级标题' },
+            { keys: ['######', 'Space'], description: '六级标题' },
+            { keys: ['**text**'], description: '粗体' },
+            { keys: ['*text*'], description: '斜体' },
+            { keys: ['~~text~~'], description: '删除线' },
+            { keys: ['`text`'], description: '行内代码' },
+            { keys: ['==text=='], description: '高亮标记' },
+            { keys: ['^text^'], description: '上标' },
+            { keys: ['~text~'], description: '下标' },
+            { keys: ['[text](url)'], description: '超链接' },
+            { keys: ['![alt](url)'], description: '图片' },
+        ],
+    },
+    {
+        category: '块级快捷格式',
+        items: [
+            { keys: ['-', 'Space'], description: '无序列表' },
+            { keys: ['1.', 'Space'], description: '有序列表' },
+            { keys: ['[]', 'Space'], description: '任务列表' },
+            { keys: ['>', 'Space'], description: '引用块' },
+            { keys: ['---', 'Space'], description: '分割线' },
+            { keys: ['```', 'Space'], description: '代码块' },
+            { keys: ['| 表头 | 表头 |'], description: '表格' },
+            { keys: ['/'], description: '插入块菜单' },
+            { keys: ['@'], description: '引用文档' },
+        ],
+    },
 ]
 
 export function KeyboardShortcutsDialog({ open, onOpenChange }: KeyboardShortcutsDialogProps) {
@@ -75,7 +82,9 @@ export function KeyboardShortcutsDialog({ open, onOpenChange }: KeyboardShortcut
                                                     <kbd className="pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded border border-border bg-muted px-2 font-mono text-[11px] font-medium text-muted-foreground">
                                                         {key}
                                                     </kbd>
-                                                    {i < item.keys.length - 1 && <span className="text-muted-foreground text-xs mx-0.5">+</span>}
+                                                    {i < item.keys.length - 1 && (
+                                                        <span className="text-muted-foreground text-xs mx-0.5">+</span>
+                                                    )}
                                                 </span>
                                             ))}
                                         </div>

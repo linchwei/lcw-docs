@@ -6,28 +6,28 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { WinstonModule } from 'nest-winston'
 
 import databaseConfig from './config/database'
-import { MetricsMiddleware } from './fundamentals/metrics/metrics.middleware'
-import { MetricsModule } from './fundamentals/metrics/metrics.module'
 import { winstonConfig } from './fundamentals/common/logger/winston.config'
 import { RequestLoggerMiddleware } from './fundamentals/common/middleware/request-logger.middleware'
+import { MetricsMiddleware } from './fundamentals/metrics/metrics.middleware'
+import { MetricsModule } from './fundamentals/metrics/metrics.module'
 import { YjsPostgresqlModule } from './fundamentals/yjs-postgresql/yjs-postgresql.module'
 import { AiModule } from './modules/ai/ai.module'
 import { ApplicationModule } from './modules/application/application.module'
 import { AuditModule } from './modules/audit/audit.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { CollaboratorModule } from './modules/collaborator/collaborator.module'
+import { CommentModule } from './modules/comment/comment.module'
 import { DocYjsModule } from './modules/doc-yjs/doc-yjs.module'
 import { FolderModule } from './modules/folder/folder.module'
 import { HealthModule } from './modules/health/health.module'
 import { NotificationModule } from './modules/notification/notification.module'
 import { PageModule } from './modules/page/page.module'
-import { CommentModule } from './modules/comment/comment.module'
 import { ShareModule } from './modules/share/share.module'
+import { SyncModule } from './modules/sync/sync.module'
 import { TagModule } from './modules/tag/tag.module'
 import { UploadModule } from './modules/upload/upload.module'
 import { UserModule } from './modules/user/user.module'
 import { VersionModule } from './modules/version/version.module'
-import { SyncModule } from './modules/sync/sync.module'
 
 @Module({
     imports: [
@@ -87,9 +87,6 @@ import { SyncModule } from './modules/sync/sync.module'
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer
-            .apply(RequestLoggerMiddleware, MetricsMiddleware)
-            .exclude('health', 'metrics')
-            .forRoutes('*')
+        consumer.apply(RequestLoggerMiddleware, MetricsMiddleware).exclude('health', 'metrics').forRoutes('*')
     }
 }

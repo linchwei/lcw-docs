@@ -1,33 +1,33 @@
 export interface Template {
-  id: string
-  name: string
-  category: string
-  description: string
-  emoji: string
-  content: string
+    id: string
+    name: string
+    category: string
+    description: string
+    emoji: string
+    content: string
 }
 
 export interface TemplateCategory {
-  id: string
-  name: string
-  emoji: string
+    id: string
+    name: string
+    emoji: string
 }
 
 export const templateCategories: TemplateCategory[] = [
-  { id: 'office', name: '通用办公', emoji: '💼' },
-  { id: 'product', name: '产品/项目', emoji: '📋' },
-  { id: 'personal', name: '个人效率', emoji: '🎯' },
-  { id: 'resume', name: '简历类', emoji: '📄' },
+    { id: 'office', name: '通用办公', emoji: '💼' },
+    { id: 'product', name: '产品/项目', emoji: '📋' },
+    { id: 'personal', name: '个人效率', emoji: '🎯' },
+    { id: 'resume', name: '简历类', emoji: '📄' },
 ]
 
 export const templates: Template[] = [
-  {
-    id: 'weekly-report',
-    name: '周报模板',
-    category: 'office',
-    description: '每周工作汇总与计划，清晰呈现工作成果与下一步安排',
-    emoji: '📊',
-    content: `# 周报
+    {
+        id: 'weekly-report',
+        name: '周报模板',
+        category: 'office',
+        description: '每周工作汇总与计划，清晰呈现工作成果与下一步安排',
+        emoji: '📊',
+        content: `# 周报
 
 **汇报人：** {请填写}
 **汇报周期：** {请填写} ~ {请填写}
@@ -83,14 +83,14 @@ export const templates: Template[] = [
 - {请填写}
 - {请填写}
 `,
-  },
-  {
-    id: 'monthly-report',
-    name: '月报模板',
-    category: 'office',
-    description: '月度工作总结与规划，含环比分析与目标追踪',
-    emoji: '📅',
-    content: `# 月报
+    },
+    {
+        id: 'monthly-report',
+        name: '月报模板',
+        category: 'office',
+        description: '月度工作总结与规划，含环比分析与目标追踪',
+        emoji: '📅',
+        content: `# 月报
 
 **汇报人：** {请填写}
 **汇报月份：** {请填写}年{请填写}月
@@ -159,14 +159,14 @@ export const templates: Template[] = [
 - **风险 2：** {请填写}
   - 应对措施：{请填写}
 `,
-  },
-  {
-    id: 'meeting-minutes',
-    name: '会议纪要模板',
-    category: 'office',
-    description: '结构化记录会议信息、讨论要点与待办事项',
-    emoji: '📝',
-    content: `# 会议纪要
+    },
+    {
+        id: 'meeting-minutes',
+        name: '会议纪要模板',
+        category: 'office',
+        description: '结构化记录会议信息、讨论要点与待办事项',
+        emoji: '📝',
+        content: `# 会议纪要
 
 ## 会议基本信息
 
@@ -234,14 +234,14 @@ export const templates: Template[] = [
 - **主题：** {请填写}
 - **需准备材料：** {请填写}
 `,
-  },
-  {
-    id: 'work-log',
-    name: '工作日志模板',
-    category: 'office',
-    description: '每日工作记录，追踪时间分配与产出成果',
-    emoji: '📋',
-    content: `# 工作日志
+    },
+    {
+        id: 'work-log',
+        name: '工作日志模板',
+        category: 'office',
+        description: '每日工作记录，追踪时间分配与产出成果',
+        emoji: '📋',
+        content: `# 工作日志
 
 **日期：** {请填写}
 **姓名：** {请填写}
@@ -301,14 +301,14 @@ export const templates: Template[] = [
 
 {请填写}
 `,
-  },
-  {
-    id: 'requirement-doc',
-    name: '需求文档模板',
-    category: 'product',
-    description: '产品需求分析文档，涵盖功能需求、非功能需求与用户故事',
-    emoji: '📑',
-    content: `# 需求文档
+    },
+    {
+        id: 'requirement-doc',
+        name: '需求文档模板',
+        category: 'product',
+        description: '产品需求分析文档，涵盖功能需求、非功能需求与用户故事',
+        emoji: '📑',
+        content: `# 需求文档
 
 **项目名称：** {请填写}
 **文档版本：** v{请填写}
@@ -407,14 +407,14 @@ export const templates: Template[] = [
   - {请填写}
   - {请填写}
 `,
-  },
-  {
-    id: 'project-proposal',
-    name: '项目方案模板',
-    category: 'product',
-    description: '完整项目方案规划，包含目标、范围、时间表与风险预估',
-    emoji: '🗂️',
-    content: `# 项目方案
+    },
+    {
+        id: 'project-proposal',
+        name: '项目方案模板',
+        category: 'product',
+        description: '完整项目方案规划，包含目标、范围、时间表与风险预估',
+        emoji: '🗂️',
+        content: `# 项目方案
 
 **项目名称：** {请填写}
 **方案版本：** v{请填写}
@@ -507,14 +507,14 @@ export const templates: Template[] = [
 - **场景二：** {请填写}
   - 应对措施：{请填写}
 `,
-  },
-  {
-    id: 'product-experience-report',
-    name: '产品体验报告模板',
-    category: 'product',
-    description: '产品体验分析报告，记录核心功能体验与改进建议',
-    emoji: '🔍',
-    content: `# 产品体验报告
+    },
+    {
+        id: 'product-experience-report',
+        name: '产品体验报告模板',
+        category: 'product',
+        description: '产品体验分析报告，记录核心功能体验与改进建议',
+        emoji: '🔍',
+        content: `# 产品体验报告
 
 **产品名称：** {请填写}
 **版本号：** v{请填写}
@@ -604,14 +604,14 @@ export const templates: Template[] = [
 - **综合评分：** ⭐⭐⭐⭐⭐（{请填写}/5）
 - **一句话总结：** {请填写}
 `,
-  },
-  {
-    id: 'reading-notes',
-    name: '读书笔记模板',
-    category: 'personal',
-    description: '结构化读书笔记，涵盖章节概要、金句摘录与个人感悟',
-    emoji: '📖',
-    content: `# 读书笔记
+    },
+    {
+        id: 'reading-notes',
+        name: '读书笔记模板',
+        category: 'personal',
+        description: '结构化读书笔记，涵盖章节概要、金句摘录与个人感悟',
+        emoji: '📖',
+        content: `# 读书笔记
 
 ## 基本信息
 
@@ -695,14 +695,14 @@ export const templates: Template[] = [
 
 {请填写}
 `,
-  },
-  {
-    id: 'study-notes',
-    name: '学习笔记模板',
-    category: 'personal',
-    description: '系统化学习笔记，记录核心概念、要点与思考',
-    emoji: '✏️',
-    content: `# 学习笔记
+    },
+    {
+        id: 'study-notes',
+        name: '学习笔记模板',
+        category: 'personal',
+        description: '系统化学习笔记，记录核心概念、要点与思考',
+        emoji: '✏️',
+        content: `# 学习笔记
 
 **学习主题：** {请填写}
 **学习日期：** {请填写}
@@ -797,14 +797,14 @@ export const templates: Template[] = [
 | 2 | {请填写} | {请填写} | {请填写} | {请填写} |
 | 3 | {请填写} | {请填写} | {请填写} | {请填写} |
 `,
-  },
-  {
-    id: 'review-summary',
-    name: '复盘模板',
-    category: 'personal',
-    description: '项目/事件复盘，对比目标与结果，提炼经验与行动',
-    emoji: '🔄',
-    content: `# 复盘
+    },
+    {
+        id: 'review-summary',
+        name: '复盘模板',
+        category: 'personal',
+        description: '项目/事件复盘，对比目标与结果，提炼经验与行动',
+        emoji: '🔄',
+        content: `# 复盘
 
 **复盘主题：** {请填写}
 **复盘时间：** {请填写}
@@ -896,14 +896,14 @@ export const templates: Template[] = [
 | 3 | {请填写} | {请填写} | {请填写} | {请填写} |
 | 4 | {请填写} | {请填写} | {请填写} | {请填写} |
 `,
-  },
-  {
-    id: 'resume',
-    name: '简历模板',
-    category: 'resume',
-    description: '专业简历模板，涵盖个人信息、工作经历与技能清单',
-    emoji: '📄',
-    content: `# {请填写姓名}
+    },
+    {
+        id: 'resume',
+        name: '简历模板',
+        category: 'resume',
+        description: '专业简历模板，涵盖个人信息、工作经历与技能清单',
+        emoji: '📄',
+        content: `# {请填写姓名}
 
 ## 个人信息
 
@@ -1022,5 +1022,5 @@ export const templates: Template[] = [
 
 {请填写}
 `,
-  },
+    },
 ]

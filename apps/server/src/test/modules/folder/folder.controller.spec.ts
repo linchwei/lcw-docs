@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('FolderController', () => {
     let app: INestApplication
@@ -20,9 +20,7 @@ describe('FolderController', () => {
 
     describe('GET /api/folder', () => {
         it('FD-001: should return folder list', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/folder')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/folder').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
             expect(res.body).toHaveProperty('data')
         })

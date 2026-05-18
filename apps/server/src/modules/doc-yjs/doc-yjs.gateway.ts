@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config'
 import { HttpAdapterHost } from '@nestjs/core'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as jwt from 'jsonwebtoken'
-import { Server } from 'ws'
 import { Repository } from 'typeorm'
+import { Server } from 'ws'
 
 import { CollaboratorEntity } from '../../entities/collaborator.entity'
 import { PageEntity } from '../../entities/page.entity'
@@ -24,7 +24,7 @@ export class DocYjsGateway implements OnModuleInit {
         @InjectRepository(PageEntity)
         private readonly pageRepository: Repository<PageEntity>,
         @InjectRepository(CollaboratorEntity)
-        private readonly collaboratorRepository: Repository<CollaboratorEntity>,
+        private readonly collaboratorRepository: Repository<CollaboratorEntity>
     ) {}
 
     onModuleInit() {
@@ -50,45 +50,53 @@ export class DocYjsGateway implements OnModuleInit {
                     const payload: any = jwt.verify(token, secret)
                     const userId = payload.sub
 
-                    this.pageRepository.findOne({
-                        where: { pageId, isDeleted: false },
-                        relations: ['user'],
-                    }).then(page => {
-                        if (!page) {
-                            connection.close(4004, 'Page not found')
-                            return
-                        }
-                        if (page.user.id === userId) {
-                            const existingDoc = docs.get(docName)
-                            if (existingDoc && existingDoc.conns.size >= MAX_CONNECTIONS_PER_DOC) {
-                                setupWSConnection(connection, request, { docName, readOnly: true })
-                                Logger.warn(`Doc ${pageId} reached max connections (${MAX_CONNECTIONS_PER_DOC}), connecting as observer`)
-                            } else {
-                                setupWSConnection(connection, request, { docName })
-                            }
-                            return
-                        }
-                        this.collaboratorRepository.findOne({
-                            where: { pageId, userId },
-                        }).then(collab => {
-                            if (!collab) {
-                                connection.close(4003, 'No access')
+                    this.pageRepository
+                        .findOne({
+                            where: { pageId, isDeleted: false },
+                            relations: ['user'],
+                        })
+                        .then(page => {
+                            if (!page) {
+                                connection.close(4004, 'Page not found')
                                 return
                             }
-                            const readOnly = collab.role === 'viewer' || collab.role === 'commenter'
-                            const existingDoc = docs.get(docName)
-                            if (!readOnly && existingDoc && existingDoc.conns.size >= MAX_CONNECTIONS_PER_DOC) {
-                                setupWSConnection(connection, request, { docName, readOnly: true })
-                                Logger.warn(`Doc ${pageId} reached max connections, connecting editor as observer`)
-                            } else {
-                                setupWSConnection(connection, request, { docName, readOnly })
+                            if (page.user.id === userId) {
+                                const existingDoc = docs.get(docName)
+                                if (existingDoc && existingDoc.conns.size >= MAX_CONNECTIONS_PER_DOC) {
+                                    setupWSConnection(connection, request, { docName, readOnly: true })
+                                    Logger.warn(
+                                        `Doc ${pageId} reached max connections (${MAX_CONNECTIONS_PER_DOC}), connecting as observer`
+                                    )
+                                } else {
+                                    setupWSConnection(connection, request, { docName })
+                                }
+                                return
                             }
-                        }).catch(() => {
-                            connection.close(4003, 'No access')
+                            this.collaboratorRepository
+                                .findOne({
+                                    where: { pageId, userId },
+                                })
+                                .then(collab => {
+                                    if (!collab) {
+                                        connection.close(4003, 'No access')
+                                        return
+                                    }
+                                    const readOnly = collab.role === 'viewer' || collab.role === 'commenter'
+                                    const existingDoc = docs.get(docName)
+                                    if (!readOnly && existingDoc && existingDoc.conns.size >= MAX_CONNECTIONS_PER_DOC) {
+                                        setupWSConnection(connection, request, { docName, readOnly: true })
+                                        Logger.warn(`Doc ${pageId} reached max connections, connecting editor as observer`)
+                                    } else {
+                                        setupWSConnection(connection, request, { docName, readOnly })
+                                    }
+                                })
+                                .catch(() => {
+                                    connection.close(4003, 'No access')
+                                })
                         })
-                    }).catch(() => {
-                        connection.close(4004, 'Page not found')
-                    })
+                        .catch(() => {
+                            connection.close(4004, 'Page not found')
+                        })
                     return
                 } catch {
                     Logger.warn('WebSocket connection rejected: invalid token')
@@ -124,7 +132,7 @@ export class DocYjsGateway implements OnModuleInit {
             const pathname = new URL(request.url, `http://${request.headers.host}`).pathname
 
             if (pathname.startsWith('/doc-yjs-')) {
-                this.wss.handleUpgrade(request, socket, head, (ws) => {
+                this.wss.handleUpgrade(request, socket, head, ws => {
                     this.wss.emit('connection', ws, request)
                 })
             } else {

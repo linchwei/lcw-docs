@@ -22,19 +22,17 @@ export const Callout = createReactBlockSpec(
         render: props => {
             const calloutType = (props.block.props.calloutType || 'info') as CalloutType
 
-            return (
-                <CalloutContent
-                    calloutType={calloutType}
-                    editor={props.editor}
-                    blockId={props.block.id}
-                    contentRef={props.contentRef}
-                />
-            )
+            return <CalloutContent calloutType={calloutType} editor={props.editor} blockId={props.block.id} contentRef={props.contentRef} />
         },
     }
 )
 
-function CalloutContent({ calloutType, editor, blockId, contentRef }: {
+function CalloutContent({
+    calloutType,
+    editor,
+    blockId,
+    contentRef,
+}: {
     calloutType: CalloutType
     editor: any
     blockId: string
@@ -49,16 +47,18 @@ function CalloutContent({ calloutType, editor, blockId, contentRef }: {
     }
 
     return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '8px',
-            padding: '8px 12px',
-            backgroundColor: config.bg,
-            borderRadius: '4px',
-            border: `1px solid ${config.color}22`,
-            position: 'relative',
-        }}>
+        <div
+            style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '8px',
+                padding: '8px 12px',
+                backgroundColor: config.bg,
+                borderRadius: '4px',
+                border: `1px solid ${config.color}22`,
+                position: 'relative',
+            }}
+        >
             <span
                 style={{
                     fontSize: '18px',
@@ -73,18 +73,20 @@ function CalloutContent({ calloutType, editor, blockId, contentRef }: {
             </span>
             <div ref={contentRef} style={{ flex: 1, outline: 'none' }} />
             {showMenu && (
-                <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: '12px',
-                    zIndex: 100,
-                    backgroundColor: '#fff',
-                    borderRadius: '6px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    border: '1px solid #e9e9e7',
-                    padding: '4px',
-                    minWidth: '120px',
-                }}>
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '12px',
+                        zIndex: 100,
+                        backgroundColor: '#fff',
+                        borderRadius: '6px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        border: '1px solid #e9e9e7',
+                        padding: '4px',
+                        minWidth: '120px',
+                    }}
+                >
                     {(Object.entries(CALLOUT_CONFIG) as [CalloutType, typeof config][]).map(([type, cfg]) => (
                         <div
                             key={type}

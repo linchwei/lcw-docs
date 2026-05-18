@@ -1,5 +1,6 @@
-import { describe, test, expect } from 'vitest'
 import { Schema } from 'prosemirror-model'
+import { describe, expect, test } from 'vitest'
+
 import { getNodeById } from '../../src/api/nodeUtil'
 
 const createTestSchema = () => {
@@ -29,30 +30,18 @@ const createTestSchema = () => {
 }
 
 const createDocWithBlocks = (schema: Schema, ids: string[]) => {
-    const containers = ids.map(id =>
-        schema.nodes.blockContainer.create({ id }, [
-            schema.nodes.blockContent.create(),
-        ])
-    )
-    return schema.nodes.doc.create(null, [
-        schema.nodes.blockGroup.create(null, containers),
-    ])
+    const containers = ids.map(id => schema.nodes.blockContainer.create({ id }, [schema.nodes.blockContent.create()]))
+    return schema.nodes.doc.create(null, [schema.nodes.blockGroup.create(null, containers)])
 }
 
 const createDocWithNestedBlocks = (schema: Schema) => {
-    const childContainer = schema.nodes.blockContainer.create({ id: 'child-block' }, [
-        schema.nodes.blockContent.create(),
-    ])
+    const childContainer = schema.nodes.blockContainer.create({ id: 'child-block' }, [schema.nodes.blockContent.create()])
     const parentContainer = schema.nodes.blockContainer.create({ id: 'parent-block' }, [
         schema.nodes.blockContent.create(),
         schema.nodes.blockGroup.create(null, [childContainer]),
     ])
-    const siblingContainer = schema.nodes.blockContainer.create({ id: 'sibling-block' }, [
-        schema.nodes.blockContent.create(),
-    ])
-    return schema.nodes.doc.create(null, [
-        schema.nodes.blockGroup.create(null, [parentContainer, siblingContainer]),
-    ])
+    const siblingContainer = schema.nodes.blockContainer.create({ id: 'sibling-block' }, [schema.nodes.blockContent.create()])
+    return schema.nodes.doc.create(null, [schema.nodes.blockGroup.create(null, [parentContainer, siblingContainer])])
 }
 
 describe('api/nodeUtil', () => {

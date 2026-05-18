@@ -26,7 +26,6 @@ export function useLcwDocContext<
     BSchema extends BlockSchema = DefaultBlockSchema,
     ISchema extends InlineContentSchema = DefaultInlineContentSchema,
     SSchema extends StyleSchema = DefaultStyleSchema,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(_schema?: LcwDocSchema<BSchema, ISchema, SSchema>): LcwDocContextValue<BSchema, ISchema, SSchema> | undefined {
     const context = useContext(LcwDocContext) as any
 

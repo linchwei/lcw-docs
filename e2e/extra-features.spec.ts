@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 
 test.describe('导出/AI/通知/图谱/Markdown上传 E2E 测试', () => {
     let token: string
@@ -153,7 +154,10 @@ test.describe('导出/AI/通知/图谱/Markdown上传 E2E 测试', () => {
                 await page.waitForURL('**/doc/**', { timeout: 10000 })
             }
 
-            const aiButton = page.locator('button').filter({ has: page.locator('svg.lucide-sparkles, svg.lucide-bot') }).first()
+            const aiButton = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-sparkles, svg.lucide-bot') })
+                .first()
             if (await aiButton.isVisible().catch(() => false)) {
                 await aiButton.click()
                 await page.waitForTimeout(1000)
@@ -170,7 +174,10 @@ test.describe('导出/AI/通知/图谱/Markdown上传 E2E 测试', () => {
                 await page.waitForURL('**/doc/**', { timeout: 10000 })
             }
 
-            const aiButton = page.locator('button').filter({ has: page.locator('svg.lucide-sparkles, svg.lucide-bot') }).first()
+            const aiButton = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-sparkles, svg.lucide-bot') })
+                .first()
             if (await aiButton.isVisible().catch(() => false)) {
                 await aiButton.click()
                 await page.waitForTimeout(1000)
@@ -230,7 +237,10 @@ test.describe('导出/AI/通知/图谱/Markdown上传 E2E 测试', () => {
             await page.goto('/doc')
             await page.waitForURL('**/doc**', { timeout: 10000 })
 
-            const notificationBell = page.locator('button').filter({ has: page.locator('svg.lucide-bell') }).first()
+            const notificationBell = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-bell') })
+                .first()
             if (await notificationBell.isVisible().catch(() => false)) {
                 const badge = notificationBell.locator('.badge, [data-testid="unread-count"]')
                 if (await badge.isVisible().catch(() => false)) {
@@ -243,7 +253,10 @@ test.describe('导出/AI/通知/图谱/Markdown上传 E2E 测试', () => {
             await page.goto('/doc')
             await page.waitForURL('**/doc**', { timeout: 10000 })
 
-            const notificationBell = page.locator('button').filter({ has: page.locator('svg.lucide-bell') }).first()
+            const notificationBell = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-bell') })
+                .first()
             if (await notificationBell.isVisible().catch(() => false)) {
                 await notificationBell.click()
                 await page.waitForTimeout(1000)
@@ -259,7 +272,10 @@ test.describe('导出/AI/通知/图谱/Markdown上传 E2E 测试', () => {
             await page.goto('/doc')
             await page.waitForURL('**/doc**', { timeout: 10000 })
 
-            const notificationBell = page.locator('button').filter({ has: page.locator('svg.lucide-bell') }).first()
+            const notificationBell = page
+                .locator('button')
+                .filter({ has: page.locator('svg.lucide-bell') })
+                .first()
             if (await notificationBell.isVisible().catch(() => false)) {
                 await notificationBell.click()
                 await page.waitForTimeout(1000)

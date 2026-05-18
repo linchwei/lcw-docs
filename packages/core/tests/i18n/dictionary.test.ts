@@ -1,7 +1,8 @@
-import { describe, test, expect } from 'vitest'
+import { describe, expect, test } from 'vitest'
+
+import type { Dictionary } from '../../src/i18n/dictionary'
 import { en } from '../../src/i18n/locales/en'
 import { zh } from '../../src/i18n/locales/zh'
-import type { Dictionary } from '../../src/i18n/dictionary'
 
 describe('i18n/dictionary', () => {
     describe('Dictionary 类型', () => {
@@ -26,10 +27,20 @@ describe('i18n/dictionary', () => {
 
         test('slash_menu 包含所有必需的块类型', () => {
             const requiredKeys = [
-                'heading', 'heading_2', 'heading_3',
-                'numbered_list', 'bullet_list', 'check_list',
-                'paragraph', 'code_block', 'table',
-                'image', 'video', 'audio', 'file', 'emoji',
+                'heading',
+                'heading_2',
+                'heading_3',
+                'numbered_list',
+                'bullet_list',
+                'check_list',
+                'paragraph',
+                'code_block',
+                'table',
+                'image',
+                'video',
+                'audio',
+                'file',
+                'emoji',
             ] as const
 
             for (const key of requiredKeys) {
@@ -151,10 +162,20 @@ describe('i18n/dictionary', () => {
 
         test('slash_menu 包含所有必需的块类型', () => {
             const requiredKeys = [
-                'heading', 'heading_2', 'heading_3',
-                'numbered_list', 'bullet_list', 'check_list',
-                'paragraph', 'code_block', 'table',
-                'image', 'video', 'audio', 'file', 'emoji',
+                'heading',
+                'heading_2',
+                'heading_3',
+                'numbered_list',
+                'bullet_list',
+                'check_list',
+                'paragraph',
+                'code_block',
+                'table',
+                'image',
+                'video',
+                'audio',
+                'file',
+                'emoji',
             ] as const
 
             for (const key of requiredKeys) {
@@ -176,7 +197,7 @@ describe('i18n/dictionary', () => {
 
         test('包含 placeholders 配置', () => {
             expect(zh.placeholders).toBeDefined()
-            expect(zh.placeholders.default).toBe('输入 \u201c/\u201d 快速插入内容')
+            expect(zh.placeholders.default).toBe('输入 \u201c/\u201d 插入块，输入 \u201c@\u201d 引用文档')
             expect(zh.placeholders.heading).toBe('标题')
         })
 

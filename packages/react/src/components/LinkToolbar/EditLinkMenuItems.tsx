@@ -20,11 +20,11 @@ export const EditLinkMenuItems = (props: Pick<LinkToolbarProps, 'url' | 'text' |
     }, [text, url])
 
     const handleEnter = (event: KeyboardEvent) => {
-            if (event.key === 'Enter') {
-                event.preventDefault()
-                editLink(currentUrl, currentText)
-            }
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            editLink(currentUrl, currentText)
         }
+    }
 
     const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => setCurrentUrl(event.currentTarget.value)
 

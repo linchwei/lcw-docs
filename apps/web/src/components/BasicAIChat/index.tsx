@@ -12,7 +12,9 @@ interface BasicAIChatProps<BSchema extends BlockSchema, ISchema extends InlineCo
     editor: LcwDocEditor<BSchema, ISchema, SSchema>
 }
 
-export function BasicAIChat<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema>(props: BasicAIChatProps<BSchema, ISchema, SSchema>) {
+export function BasicAIChat<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema>(
+    props: BasicAIChatProps<BSchema, ISchema, SSchema>
+) {
     const { editor } = props
     const [currentAIPoweredParagraphBlockId, setCurrentAIPoweredParagraphBlockId] = useState<string | null>()
     const ref = useClickOutside(() => setCurrentAIPoweredParagraphBlockId(null))

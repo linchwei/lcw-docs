@@ -1,13 +1,10 @@
 import { describe, expect, test } from 'vitest'
-import {
-    BlockConfig,
-    BlockSchema,
-    BlockSpecs,
-} from '../../src/schema/blocks/types'
+
+import { BlockConfig, BlockSchema, BlockSpecs } from '../../src/schema/blocks/types'
 import { InlineContentSchema } from '../../src/schema/inlineContent/types'
-import { StyleSchema, StyleConfig } from '../../src/schema/styles/types'
-import { PropSchema } from '../../src/schema/propTypes'
 import { CustomInlineContentConfig } from '../../src/schema/inlineContent/types'
+import { PropSchema } from '../../src/schema/propTypes'
+import { StyleConfig, StyleSchema } from '../../src/schema/styles/types'
 
 describe('类型定义验证', () => {
     describe('BlockConfig 类型', () => {

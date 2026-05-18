@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, cleanupUsers } from '../../test/helpers'
+import { cleanupUsers, closeTestApp, createTestApp } from '../../test/helpers'
 
 describe('UserController', () => {
     let app: INestApplication
@@ -32,9 +32,7 @@ describe('UserController', () => {
         })
 
         it('US-002: should fail with username too short', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({ username: 'ab', password: 'testpass123' })
+            const res = await request(app.getHttpServer()).post('/api/user/register').send({ username: 'ab', password: 'testpass123' })
             expect(res.status).toBe(400)
         })
 
@@ -46,16 +44,12 @@ describe('UserController', () => {
         })
 
         it('US-004: should fail with password too short', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({ username: 'testreguser', password: '12345' })
+            const res = await request(app.getHttpServer()).post('/api/user/register').send({ username: 'testreguser', password: '12345' })
             expect(res.status).toBe(400)
         })
 
         it('US-005: should fail with duplicate username', async () => {
-            await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({ username: 'testdupuser', password: 'testpass123' })
+            await request(app.getHttpServer()).post('/api/user/register').send({ username: 'testdupuser', password: 'testpass123' })
 
             const res = await request(app.getHttpServer())
                 .post('/api/user/register')
@@ -64,9 +58,7 @@ describe('UserController', () => {
         })
 
         it('US-006: should fail with missing required fields', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/user/register')
-                .send({})
+            const res = await request(app.getHttpServer()).post('/api/user/register').send({})
             expect(res.status).toBe(400)
         })
     })

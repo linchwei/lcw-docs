@@ -67,9 +67,7 @@ function getActiveHeadingId(editor: LcwDocEditor, headings: HeadingItem[]): stri
 
 export function useDocOutline(editor: LcwDocEditor) {
     const [headings, setHeadings] = useState<HeadingItem[]>(() => getHeadingsFromBlocks(editor))
-    const [activeHeadingId, setActiveHeadingId] = useState<string | null>(() =>
-        getActiveHeadingId(editor, getHeadingsFromBlocks(editor))
-    )
+    const [activeHeadingId, setActiveHeadingId] = useState<string | null>(() => getActiveHeadingId(editor, getHeadingsFromBlocks(editor)))
     const scrollContainerRef = useRef<HTMLElement | null>(null)
 
     const updateOutline = () => {

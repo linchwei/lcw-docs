@@ -1,4 +1,3 @@
-// @ts-ignore
 import './style.css'
 
 import { mergeCSSClasses } from '@lcw-doc/core'
@@ -97,14 +96,12 @@ export const components: Components = {
     },
 }
 
-export const LcwDocView = (
-    props: {
-        shadCNComponents?: Partial<ShadCNComponents>
-        className?: string
-        editor: any
-        [key: string]: any
-    }
-) => {
+export const LcwDocView = (props: {
+    shadCNComponents?: Partial<ShadCNComponents>
+    className?: string
+    editor: any
+    [key: string]: any
+}) => {
     const { className, shadCNComponents, ...rest } = props
 
     const componentsValue = useMemo(() => {
@@ -117,7 +114,6 @@ export const LcwDocView = (
     return (
         <ShadCNComponentsContext.Provider value={componentsValue}>
             <ComponentsContext.Provider value={components}>
-                {/* @ts-ignore - LcwDocViewRaw is typed as any but TS still checks props */}
                 <LcwDocViewRaw {...rest} className={mergeCSSClasses('bn-shadcn', className || '')} />
             </ComponentsContext.Provider>
         </ShadCNComponentsContext.Provider>

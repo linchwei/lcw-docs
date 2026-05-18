@@ -1,5 +1,6 @@
-import { describe, test, expect } from 'vitest'
 import { Plugin, PluginKey } from 'prosemirror-state'
+import { describe, expect, test } from 'vitest'
+
 import { TrailingNode } from '../../src/extensions/TrailingNode/TrailingNodeExtension'
 
 function createTrailingNodePlugin() {

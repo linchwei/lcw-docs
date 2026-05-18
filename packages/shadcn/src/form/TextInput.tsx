@@ -5,7 +5,7 @@ import { forwardRef } from 'react'
 import { useShadCNComponentsContext } from '../ShadCNComponentsContext'
 
 export const TextInput = forwardRef<HTMLInputElement, ComponentProps['Generic']['Form']['TextInput']>((props, ref) => {
-    const { className, name, label, icon, value, autoFocus, placeholder, onKeyDown, onChange, onSubmit, ...rest } = props
+    const { className, name, label, icon: _icon, value, autoFocus, placeholder, onKeyDown, onChange, onSubmit, ...rest } = props
 
     assertEmpty(rest)
 

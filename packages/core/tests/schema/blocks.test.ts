@@ -1,11 +1,12 @@
-import { describe, expect, test } from 'vitest'
 import { Node } from '@tiptap/core'
+import { describe, expect, test } from 'vitest'
+
 import {
-    createStronglyTypedTiptapNode,
     createBlockSpecFromStronglyTypedTiptapNode,
     createInternalBlockSpec,
-    propsToAttributes,
+    createStronglyTypedTiptapNode,
     getBlockSchemaFromSpecs,
+    propsToAttributes,
 } from '../../src/schema/blocks/internal'
 import { BlockConfig, BlockSpec, BlockSpecs } from '../../src/schema/blocks/types'
 

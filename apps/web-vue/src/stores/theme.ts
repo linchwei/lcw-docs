@@ -1,11 +1,9 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { darkTheme } from 'naive-ui'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 
 export const useThemeStore = defineStore('theme', () => {
-    const theme = ref<'light' | 'dark' | 'system'>(
-        (localStorage.getItem('lcwdoc-theme') as 'light' | 'dark' | 'system') || 'light'
-    )
+    const theme = ref<'light' | 'dark' | 'system'>((localStorage.getItem('lcwdoc-theme') as 'light' | 'dark' | 'system') || 'light')
 
     const isDark = computed(() => {
         if (theme.value === 'dark') return true

@@ -42,9 +42,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         return () => clearTimeout(timer)
     }, [query])
 
-    const titleFiltered = !pages ? [] : !query.trim() ? pages : pages.filter(page =>
-        page.title.toLowerCase().includes(query.toLowerCase())
-    )
+    const titleFiltered = !pages ? [] : !query.trim() ? pages : pages.filter(page => page.title.toLowerCase().includes(query.toLowerCase()))
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,21 +73,25 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         const parts = text.split(regex)
         return parts.map((part, i) =>
             regex.test(part) ? (
-                <mark key={i} className="bg-yellow-200 text-[#37352f] rounded-sm px-0.5">{part}</mark>
+                <mark key={i} className="bg-yellow-200 text-[#37352f] rounded-sm px-0.5">
+                    {part}
+                </mark>
             ) : (
                 part
             )
         )
     }
 
-    const displayResults = isSearchMode ? searchResults : titleFiltered.map(p => ({
-        pageId: p.pageId,
-        emoji: p.emoji,
-        title: p.title,
-        snippet: '',
-        updatedAt: p.updatedAt,
-        matchType: 'title' as const,
-    }))
+    const displayResults = isSearchMode
+        ? searchResults
+        : titleFiltered.map(p => ({
+              pageId: p.pageId,
+              emoji: p.emoji,
+              title: p.title,
+              snippet: '',
+              updatedAt: p.updatedAt,
+              matchType: 'title' as const,
+          }))
 
     return (
         <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -119,18 +121,12 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                                 >
                                     <span className="text-base mt-0.5 shrink-0">{result.emoji}</span>
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-sm truncate text-[#37352f]">
-                                            {highlightMatch(result.title, query)}
-                                        </div>
+                                        <div className="text-sm truncate text-[#37352f]">{highlightMatch(result.title, query)}</div>
                                         {result.snippet && (
-                                            <p className="text-xs text-[#9b9a97] mt-1 line-clamp-2 leading-relaxed">
-                                                {result.snippet}
-                                            </p>
+                                            <p className="text-xs text-[#9b9a97] mt-1 line-clamp-2 leading-relaxed">{result.snippet}</p>
                                         )}
                                     </div>
-                                    {result.matchType === 'content' && (
-                                        <FileText size={14} className="text-[#9b9a97] shrink-0 mt-1" />
-                                    )}
+                                    {result.matchType === 'content' && <FileText size={14} className="text-[#9b9a97] shrink-0 mt-1" />}
                                 </div>
                             ))
                         ) : (
@@ -140,9 +136,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                         )}
                     </div>
                     {isSearchMode && searchResults.length > 0 && (
-                        <div className="border-t px-4 py-2 text-xs text-[#9b9a97]">
-                            找到 {searchResults.length} 个结果
-                        </div>
+                        <div className="border-t px-4 py-2 text-xs text-[#9b9a97]">找到 {searchResults.length} 个结果</div>
                     )}
                 </Dialog.Content>
             </Dialog.Portal>

@@ -1,9 +1,10 @@
-import { describe, test, expect, beforeEach } from 'vitest'
-import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
-import { moveBlockUp, moveBlockDown, moveSelectedBlockAndSelection } from '../../../src/api/blockManipulation/commands/moveBlock/moveBlock'
-import { getNodeById } from '../../../src/api/nodeUtil'
-import { getBlockInfo } from '../../../src/api/getBlockInfoFromPos'
 import { TextSelection } from 'prosemirror-state'
+import { beforeEach, describe, expect, test } from 'vitest'
+
+import { moveBlockDown, moveBlockUp, moveSelectedBlockAndSelection } from '../../../src/api/blockManipulation/commands/moveBlock/moveBlock'
+import { getBlockInfo } from '../../../src/api/getBlockInfoFromPos'
+import { getNodeById } from '../../../src/api/nodeUtil'
+import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 
 function setupEditorWithView(editor: LcwDocEditor) {
     const ttEditor = editor._tiptapEditor
@@ -32,9 +33,7 @@ function setCursorToBlock(editor: LcwDocEditor, blockId: string) {
     const { node, posBeforeNode } = getNodeById(blockId, ttEditor.state.doc)
     const blockInfo = getBlockInfo({ node, posBeforeNode })
     const contentPos = blockInfo.blockContent.beforePos + 1
-    const tr = ttEditor.state.tr.setSelection(
-        TextSelection.create(ttEditor.state.doc, contentPos)
-    )
+    const tr = ttEditor.state.tr.setSelection(TextSelection.create(ttEditor.state.doc, contentPos))
     editor.dispatch(tr)
 }
 

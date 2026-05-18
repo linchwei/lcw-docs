@@ -40,35 +40,35 @@ export const UploadTab = <
     }, [uploadFailed])
 
     const handleFileChange = (file: File | null) => {
-            if (file === null) {
-                return
-            }
+        if (file === null) {
+            return
+        }
 
-            async function upload(file: File) {
-                setLoading(true)
+        async function upload(file: File) {
+            setLoading(true)
 
-                if (editor.uploadFile !== undefined) {
-                    try {
-                        let updateData = await editor.uploadFile(file)
-                        if (typeof updateData === 'string') {
-                            updateData = {
-                                props: {
-                                    name: file.name,
-                                    url: updateData,
-                                },
-                            }
+            if (editor.uploadFile !== undefined) {
+                try {
+                    let updateData = await editor.uploadFile(file)
+                    if (typeof updateData === 'string') {
+                        updateData = {
+                            props: {
+                                name: file.name,
+                                url: updateData,
+                            },
                         }
-                        editor.updateBlock(block, updateData)
-                    } catch {
-                        setUploadFailed(true)
-                    } finally {
-                        setLoading(false)
                     }
+                    editor.updateBlock(block, updateData)
+                } catch {
+                    setUploadFailed(true)
+                } finally {
+                    setLoading(false)
                 }
             }
-
-            upload(file)
         }
+
+        upload(file)
+    }
 
     const config = editor.schema.blockSchema[block.type]
     const accept = config.isFileBlock && config.fileBlockAccept?.length ? config.fileBlockAccept.join(',') : '*/*'

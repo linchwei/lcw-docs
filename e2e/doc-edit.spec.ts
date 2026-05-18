@@ -1,6 +1,7 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 import { DocPage } from './page-objects/doc.page'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
 
 test.describe('文档编辑 E2E 测试', () => {
     let token: string
@@ -42,13 +43,15 @@ test.describe('文档编辑 E2E 测试', () => {
         await page.waitForTimeout(2000)
 
         const breadcrumb = page.getByText('Updated E2E Title')
-        await expect(breadcrumb).toBeVisible({ timeout: 10000 }).catch(() => {})
+        await expect(breadcrumb)
+            .toBeVisible({ timeout: 10000 })
+            .catch(() => {})
     })
 
     test('E2E-010: 选择 emoji 后文档 emoji 应更新', async ({ page }) => {
-        const emojiButton = page.getByRole('button', { name: /emoji|表情/ }).or(
-            page.locator('[data-testid="emoji-picker"], .emoji-picker').first()
-        )
+        const emojiButton = page
+            .getByRole('button', { name: /emoji|表情/ })
+            .or(page.locator('[data-testid="emoji-picker"], .emoji-picker').first())
 
         if (await emojiButton.isVisible().catch(() => false)) {
             await emojiButton.click()
@@ -62,23 +65,21 @@ test.describe('文档编辑 E2E 测试', () => {
     })
 
     test('E2E-011: 添加封面后封面图应显示', async ({ page }) => {
-        const addCoverButton = page.getByText('+ 添加封面').or(
-            page.getByRole('button', { name: /添加封面|封面/ })
-        )
+        const addCoverButton = page.getByText('+ 添加封面').or(page.getByRole('button', { name: /添加封面|封面/ }))
 
         if (await addCoverButton.isVisible().catch(() => false)) {
             await addCoverButton.click()
             await page.waitForTimeout(2000)
 
             const coverImage = page.locator('img').first()
-            await expect(coverImage).toBeVisible({ timeout: 5000 }).catch(() => {})
+            await expect(coverImage)
+                .toBeVisible({ timeout: 5000 })
+                .catch(() => {})
         }
     })
 
     test('E2E-012: 移除封面后封面应消失', async ({ page }) => {
-        const addCoverButton = page.getByText('+ 添加封面').or(
-            page.getByRole('button', { name: /添加封面|封面/ })
-        )
+        const addCoverButton = page.getByText('+ 添加封面').or(page.getByRole('button', { name: /添加封面|封面/ }))
 
         if (await addCoverButton.isVisible().catch(() => false)) {
             await addCoverButton.click()

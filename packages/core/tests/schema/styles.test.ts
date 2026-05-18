@@ -1,8 +1,9 @@
-import { describe, expect, test } from 'vitest'
 import { Mark } from '@tiptap/core'
+import { describe, expect, test } from 'vitest'
+
 import {
-    createStyleSpecFromTipTapMark,
     createInternalStyleSpec,
+    createStyleSpecFromTipTapMark,
     getStyleSchemaFromSpecs,
     stylePropsToAttributes,
 } from '../../src/schema/styles/internal'

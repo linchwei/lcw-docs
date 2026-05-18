@@ -1,11 +1,11 @@
-import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue'
+import { onBeforeUnmount, onMounted, type Ref, ref } from 'vue'
 
 const DEFAULT_EVENTS = ['mousedown', 'touchstart']
 
 export function useClickOutside<T extends HTMLElement = any>(
     handler: () => void,
     events?: string[] | null,
-    nodes?: Ref<(HTMLElement | null)[]>,
+    nodes?: Ref<(HTMLElement | null)[]>
 ) {
     const targetRef = ref<T | null>(null)
 
@@ -15,8 +15,7 @@ export function useClickOutside<T extends HTMLElement = any>(
 
         if (nodes?.value) {
             const shouldIgnore =
-                target?.hasAttribute('data-ignore-outside-clicks') ||
-                (!document.body.contains(target) && target.tagName !== 'HTML')
+                target?.hasAttribute('data-ignore-outside-clicks') || (!document.body.contains(target) && target.tagName !== 'HTML')
             const shouldTrigger = nodes.value.every(node => !!node && !event.composedPath().includes(node))
             if (shouldTrigger && !shouldIgnore) {
                 handler()

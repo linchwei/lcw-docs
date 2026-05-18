@@ -1,12 +1,12 @@
-import { LcwDocEditor } from '@lcw-doc/core'
+import { BlockSchema, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
 import { Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 
-import { chatWithAI, ChatMessage } from '@/services'
+import { ChatMessage, chatWithAI } from '@/services'
 
-interface SelectionAIMenuProps {
-    editor: LcwDocEditor
+interface SelectionAIMenuProps<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema> {
+    editor: LcwDocEditor<BSchema, ISchema, SSchema>
 }
 
 const aiActions = [
@@ -22,7 +22,9 @@ const aiActions = [
 
 const SYSTEM_PROMPT = '你是一个专业的文档编辑助手。请根据用户的要求处理文本内容，直接输出处理结果，不要添加多余的解释。'
 
-export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
+export function SelectionAIMenu<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema>({
+    editor,
+}: SelectionAIMenuProps<BSchema, ISchema, SSchema>) {
     const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
     const [selectedText, setSelectedText] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
@@ -79,7 +81,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
         }
     }, [updatePosition, isGenerating])
 
-    const handleAction = async (action: typeof aiActions[0]) => {
+    const handleAction = async (action: (typeof aiActions)[0]) => {
         if (!selectedText || isGenerating) return
 
         setIsGenerating(true)
@@ -147,10 +149,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
                     editor.insertBlocks(blocks, currentBlock, 'after')
                 } catch {
                     const tiptapEditor = editor._tiptapEditor
-                    tiptapEditor.chain().focus().insertContentAt(
-                        tiptapEditor.state.selection.to,
-                        accumulated
-                    ).run()
+                    tiptapEditor.chain().focus().insertContentAt(tiptapEditor.state.selection.to, accumulated).run()
                 }
             }
         } catch {
@@ -208,7 +207,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
             }}
         >
             <button
-                onClick={(e) => {
+                onClick={e => {
                     e.stopPropagation()
                     setPosition(null)
                     setSelectedText('')
@@ -224,18 +223,20 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
                     alignItems: 'center',
                     lineHeight: 1,
                 }}
-                onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f5f5f4'
+                onMouseEnter={e => {
+                    ;(e.currentTarget as HTMLElement).style.backgroundColor = '#f5f5f4'
                 }}
-                onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
+                onMouseLeave={e => {
+                    ;(e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
                 }}
             >
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', paddingRight: '4px', borderRight: '1px solid #e9e9e7', marginRight: '2px' }}>
+            <div
+                style={{ display: 'flex', alignItems: 'center', paddingRight: '4px', borderRight: '1px solid #e9e9e7', marginRight: '2px' }}
+            >
                 <Sparkles size={14} color="#6B45FF" />
             </div>
             {aiActions.map(action => (
@@ -258,7 +259,7 @@ export function SelectionAIMenu({ editor }: SelectionAIMenuProps) {
                         if (!isGenerating) (e.currentTarget as HTMLElement).style.backgroundColor = '#f5f5f4'
                     }}
                     onMouseLeave={e => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
+                        ;(e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
                     }}
                 >
                     {action.label}

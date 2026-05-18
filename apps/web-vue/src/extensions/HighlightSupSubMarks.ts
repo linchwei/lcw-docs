@@ -53,7 +53,7 @@ const SuperscriptMarkImpl = Mark.create({
     addInputRules() {
         return [
             markInputRule({
-                find: /(\^(?!\s+\^)((?:[^\^]+))\^(?!\s+\^))$/,
+                find: /(\^(?!\s+\^)((?:[^^]+))\^(?!\s+\^))$/,
                 type: this.type,
             }),
         ]
@@ -62,7 +62,7 @@ const SuperscriptMarkImpl = Mark.create({
     addPasteRules() {
         return [
             markPasteRule({
-                find: /(\^(?!\s+\^)((?:[^\^]+))\^(?!\s+\^))/g,
+                find: /(\^(?!\s+\^)((?:[^^]+))\^(?!\s+\^))/g,
                 type: this.type,
             }),
         ]

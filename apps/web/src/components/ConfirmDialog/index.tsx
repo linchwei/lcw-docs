@@ -1,3 +1,4 @@
+import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 import {
     Dialog,
     DialogContent,
@@ -6,7 +7,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@lcw-doc/shadcn-shared-ui/components/ui/dialog'
-import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 
 interface ConfirmDialogProps {
     open: boolean

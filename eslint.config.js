@@ -10,6 +10,7 @@ const tseslint = require('typescript-eslint')
 const ignores = [
   'dist',
   'build',
+  '**/coverage/**',
   '**/*.js',
   '**/*.mjs',
   '**/*.d.ts',
@@ -58,6 +59,8 @@ const backendBuilderConfig = {
 module.exports = tseslint.config(
   {
     ignores,
+  },
+  {
     extends: [eslint.configs.recommended, ...tseslint.configs.recommended],
     plugins: {
       prettier: eslintPrettier,
@@ -67,6 +70,10 @@ module.exports = tseslint.config(
       'prettier/prettier': 'error',
       'simple-import-sort/imports': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   },
   frontendBuilderConfig,

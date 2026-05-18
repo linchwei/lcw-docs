@@ -1,8 +1,8 @@
-import { describe, test, expect, beforeEach } from 'vitest'
 import { Node } from '@tiptap/pm/model'
+import { beforeEach, describe, expect, test } from 'vitest'
 
+import { contentNodeToInlineContent, contentNodeToTableContent, nodeToBlock } from '../../../src/api/nodeConversions/nodeToBlock'
 import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
-import { nodeToBlock, contentNodeToInlineContent, contentNodeToTableContent } from '../../../src/api/nodeConversions/nodeToBlock'
 
 function getFirstBlockContainerNode(editor: LcwDocEditor): Node {
     let result: Node | undefined
@@ -37,12 +37,7 @@ describe('nodeToBlock', () => {
 
         test('将 blockContainer 节点转换为 Block 对象', () => {
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block).toBeDefined()
             expect(block.id).toBe('test-paragraph-1')
@@ -51,12 +46,7 @@ describe('nodeToBlock', () => {
 
         test('转换的 Block 包含正确的内联内容', () => {
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.content).toBeDefined()
             expect(Array.isArray(block.content)).toBe(true)
@@ -70,12 +60,7 @@ describe('nodeToBlock', () => {
 
         test('转换的 Block 包含空的 children 数组', () => {
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.children).toBeDefined()
             expect(Array.isArray(block.children)).toBe(true)
@@ -96,12 +81,7 @@ describe('nodeToBlock', () => {
 
             const blockGroupNode = editor._tiptapEditor.state.doc.firstChild!
             expect(() => {
-                nodeToBlock(
-                    blockGroupNode,
-                    editor.schema.blockSchema,
-                    editor.schema.inlineContentSchema,
-                    editor.schema.styleSchema
-                )
+                nodeToBlock(blockGroupNode, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
             }).toThrow('Node must be of type blockContainer')
         })
     })
@@ -121,23 +101,11 @@ describe('nodeToBlock', () => {
             const cache = new WeakMap<Node, any>()
             const node = getFirstBlockContainerNode(editor)
 
-            const block1 = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema,
-                cache
-            )
+            const block1 = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema, cache)
 
             expect(cache.has(node)).toBe(true)
 
-            const block2 = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema,
-                cache
-            )
+            const block2 = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema, cache)
 
             expect(block1).toBe(block2)
         })
@@ -155,19 +123,9 @@ describe('nodeToBlock', () => {
 
             const node = getFirstBlockContainerNode(editor)
 
-            const block1 = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block1 = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
-            const block2 = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block2 = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block1).not.toBe(block2)
             expect(block1.id).toBe(block2.id)
@@ -193,12 +151,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.content).toHaveLength(1)
             expect((block.content as any[])[0]).toEqual({
@@ -231,12 +184,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.content).toHaveLength(2)
             expect((block.content as any[])[0]).toEqual({
@@ -271,12 +219,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.content).toHaveLength(1)
             expect((block.content as any[])[0]).toEqual({
@@ -318,12 +261,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.children).toHaveLength(2)
             expect(block.children[0].id).toBe('child-block-1')
@@ -346,12 +284,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.type).toBe('heading')
             expect((block.props as any).level).toBe(2)
@@ -369,12 +302,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.type).toBe('bulletListItem')
         })
@@ -392,12 +320,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.type).toBe('checkListItem')
             expect((block.props as any).checked).toBe(true)
@@ -416,12 +339,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.type).toBe('paragraph')
             expect(block.content).toHaveLength(0)
@@ -440,12 +358,7 @@ describe('nodeToBlock', () => {
             })
 
             const node = getFirstBlockContainerNode(editor)
-            const block = nodeToBlock(
-                node,
-                editor.schema.blockSchema,
-                editor.schema.inlineContentSchema,
-                editor.schema.styleSchema
-            )
+            const block = nodeToBlock(node, editor.schema.blockSchema, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
             expect(block.id).toBeDefined()
             expect(typeof block.id).toBe('string')
@@ -479,11 +392,7 @@ describe('contentNodeToInlineContent', () => {
             return true
         })
 
-        const inlineContent = contentNodeToInlineContent(
-            blockContentNode!,
-            editor.schema.inlineContentSchema,
-            editor.schema.styleSchema
-        )
+        const inlineContent = contentNodeToInlineContent(blockContentNode!, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
         expect(Array.isArray(inlineContent)).toBe(true)
         expect(inlineContent).toHaveLength(1)
@@ -525,11 +434,7 @@ describe('contentNodeToInlineContent', () => {
             return true
         })
 
-        const inlineContent = contentNodeToInlineContent(
-            blockContentNode!,
-            editor2.schema.inlineContentSchema,
-            editor2.schema.styleSchema
-        )
+        const inlineContent = contentNodeToInlineContent(blockContentNode!, editor2.schema.inlineContentSchema, editor2.schema.styleSchema)
 
         expect(inlineContent).toHaveLength(1)
         expect(inlineContent[0]).toEqual({
@@ -549,10 +454,7 @@ describe('contentNodeToTableContent', () => {
                     id: 'table-test',
                     content: {
                         type: 'tableContent',
-                        rows: [
-                            { cells: ['Cell 1', 'Cell 2'] },
-                            { cells: ['Cell 3', 'Cell 4'] },
-                        ],
+                        rows: [{ cells: ['Cell 1', 'Cell 2'] }, { cells: ['Cell 3', 'Cell 4'] }],
                     },
                 },
             ],
@@ -567,11 +469,7 @@ describe('contentNodeToTableContent', () => {
             return true
         })
 
-        const tableContent = contentNodeToTableContent(
-            tableNode!,
-            editor.schema.inlineContentSchema,
-            editor.schema.styleSchema
-        )
+        const tableContent = contentNodeToTableContent(tableNode!, editor.schema.inlineContentSchema, editor.schema.styleSchema)
 
         expect(tableContent.type).toBe('tableContent')
         expect(tableContent.rows).toHaveLength(2)

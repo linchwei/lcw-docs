@@ -9,9 +9,6 @@ export function initSentry() {
         environment: process.env.NODE_ENV || 'development',
         tracesSampleRate: 1.0,
         profilesSampleRate: 1.0,
-        integrations: [
-            Sentry.httpIntegration(),
-            Sentry.expressIntegration(),
-        ],
+        integrations: [Sentry.httpIntegration(), Sentry.expressIntegration()],
     })
 }

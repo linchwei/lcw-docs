@@ -1,4 +1,5 @@
 import { FileText, Plus } from 'lucide-react'
+
 import styles from './EmptyState.module.css'
 
 interface EmptyStateProps {

@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('PageController', () => {
     let app: INestApplication
@@ -32,17 +32,12 @@ describe('PageController', () => {
         })
 
         it('PG-002: should return 401 without auth', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/page')
-                .send({ emoji: '📄', title: 'Test' })
+            const res = await request(app.getHttpServer()).post('/api/page').send({ emoji: '📄', title: 'Test' })
             expect(res.status).toBe(401)
         })
 
         it('PG-003: should fail with missing required fields', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/api/page')
-                .set('Authorization', `Bearer ${testUser.token}`)
-                .send({})
+            const res = await request(app.getHttpServer()).post('/api/page').set('Authorization', `Bearer ${testUser.token}`).send({})
             expect(res.status).toBe(400)
         })
     })
@@ -85,9 +80,7 @@ describe('PageController', () => {
 
     describe('GET /api/page', () => {
         it('PG-008: should return page list', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/page')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/page').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
             expect(res.body).toHaveProperty('data')
             expect(res.body.data).toHaveProperty('pages')
@@ -123,18 +116,14 @@ describe('PageController', () => {
         })
 
         it('PG-012: should return empty for empty query', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/page/search?q=')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/page/search?q=').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
         })
     })
 
     describe('GET /api/page/shared', () => {
         it('PG-013: should return shared pages', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/page/shared')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/page/shared').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
         })
     })
@@ -150,27 +139,21 @@ describe('PageController', () => {
 
     describe('GET /api/page/trash', () => {
         it('PG-015: should return trash pages', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/page/trash')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/page/trash').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
         })
     })
 
     describe('GET /api/page/recent', () => {
         it('PG-016: should return recent pages', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/page/recent')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/page/recent').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
         })
     })
 
     describe('GET /api/page/graph', () => {
         it('PG-017: should return page graph', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/page/graph')
-                .set('Authorization', `Bearer ${testUser.token}`)
+            const res = await request(app.getHttpServer()).get('/api/page/graph').set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
         })
     })

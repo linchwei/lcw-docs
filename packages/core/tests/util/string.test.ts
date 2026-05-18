@@ -1,8 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import {
-    camelToDataKebab,
-    filenameFromURL,
-} from '../../src/util/string'
+import { describe, expect, it } from 'vitest'
+
+import { camelToDataKebab, filenameFromURL } from '../../src/util/string'
 
 describe('string utils', () => {
     describe('camelToDataKebab', () => {

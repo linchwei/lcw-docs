@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
 import axios from 'axios'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { clearAuthenticatedUser } from '@/test/helpers'
 
@@ -49,7 +49,7 @@ describe('request interceptor', () => {
 
         const handler = request.interceptors.response.handlers[0]?.rejected
         if (handler) {
-            const result = handler({ response: { status: 401, data: {} } })
+            const _result = handler({ response: { status: 401, data: {} } })
             expect(window.location.href).toBe('/account/login')
         }
 

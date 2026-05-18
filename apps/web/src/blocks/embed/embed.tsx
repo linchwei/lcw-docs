@@ -24,12 +24,7 @@ export const Embed = createReactBlockSpec(
     }
 )
 
-function EmbedContent({ url, title, editor, blockId }: {
-    url: string
-    title: string
-    editor: any
-    blockId: string
-}) {
+function EmbedContent({ url, title, editor, blockId }: { url: string; title: string; editor: any; blockId: string }) {
     const [editing, setEditing] = useState(!url)
     const [inputUrl, setInputUrl] = useState(url)
 
@@ -50,15 +45,15 @@ function EmbedContent({ url, title, editor, blockId }: {
 
     if (editing || !url) {
         return (
-            <div style={{
-                padding: '16px',
-                border: '1px dashed #e9e9e7',
-                borderRadius: '8px',
-                backgroundColor: '#fafaf9',
-            }}>
-                <div style={{ fontSize: '13px', color: '#787774', marginBottom: '8px' }}>
-                    嵌入网页
-                </div>
+            <div
+                style={{
+                    padding: '16px',
+                    border: '1px dashed #e9e9e7',
+                    borderRadius: '8px',
+                    backgroundColor: '#fafaf9',
+                }}
+            >
+                <div style={{ fontSize: '13px', color: '#787774', marginBottom: '8px' }}>嵌入网页</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <input
                         type="text"
@@ -100,18 +95,18 @@ function EmbedContent({ url, title, editor, blockId }: {
 
     return (
         <div style={{ position: 'relative' }}>
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 0',
-                fontSize: '12px',
-                color: '#b4b4b0',
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '4px 0',
+                    fontSize: '12px',
+                    color: '#b4b4b0',
+                }}
+            >
                 <span>🔗</span>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {title || url}
-                </span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title || url}</span>
                 <button
                     onClick={() => setEditing(true)}
                     style={{
@@ -139,11 +134,13 @@ function EmbedContent({ url, title, editor, blockId }: {
                     删除
                 </button>
             </div>
-            <div style={{
-                borderRadius: '8px',
-                overflow: 'hidden',
-                border: '1px solid #e9e9e7',
-            }}>
+            <div
+                style={{
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    border: '1px solid #e9e9e7',
+                }}
+            >
                 <iframe
                     src={url}
                     title={title || url}

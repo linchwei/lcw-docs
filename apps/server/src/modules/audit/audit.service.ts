@@ -19,7 +19,7 @@ export interface AuditLogParams {
 export class AuditService {
     constructor(
         @InjectRepository(AuditLogEntity)
-        private readonly auditRepository: Repository<AuditLogEntity>,
+        private readonly auditRepository: Repository<AuditLogEntity>
     ) {}
 
     async log(params: AuditLogParams): Promise<AuditLogEntity> {

@@ -1,10 +1,10 @@
-import { defineConfig } from 'tsup'
 import { transformSync } from '@babel/core'
+import { defineConfig } from 'tsup'
 
 const reactCompilerPlugin = () => ({
     name: 'react-compiler',
     setup(build) {
-        build.onLoad({ filter: /\.tsx$/ }, async (args) => {
+        build.onLoad({ filter: /\.tsx$/ }, async args => {
             if (args.path.includes('node_modules')) return
 
             const fs = await import('fs/promises')
@@ -14,10 +14,7 @@ const reactCompilerPlugin = () => ({
                 filename: args.path,
                 sourceMaps: true,
                 plugins: [['babel-plugin-react-compiler', { target: '19' }]],
-                presets: [
-                    ['@babel/preset-react', { runtime: 'automatic' }],
-                    ['@babel/preset-typescript'],
-                ],
+                presets: [['@babel/preset-react', { runtime: 'automatic' }], ['@babel/preset-typescript']],
                 babelrc: false,
                 configFile: false,
             })

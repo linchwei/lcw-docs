@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 export const usePrefersColorScheme = () => {
     const preferredColorSchema = ref<'dark' | 'light' | 'no-preference'>('no-preference')

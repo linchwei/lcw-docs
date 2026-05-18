@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { EventEmitter } from '../../src/util/EventEmitter'
 
 interface TestEvents {
@@ -10,7 +11,6 @@ interface TestEvents {
 
 class TestableEventEmitter<T extends Record<string, any>> extends EventEmitter<T> {
     testEmit(event: keyof T, ...args: any[]) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.emit(event as any, ...(args as any))
     }
     testRemoveAllListeners() {

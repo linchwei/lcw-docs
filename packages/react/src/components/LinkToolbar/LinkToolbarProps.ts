@@ -1,4 +1,4 @@
-import { BlockSchema, InlineContentSchema, LinkToolbarState, LcwDocEditor, StyleSchema, UiElementPosition } from '@lcw-doc/core'
+import { BlockSchema, InlineContentSchema, LcwDocEditor, LinkToolbarState, StyleSchema, UiElementPosition } from '@lcw-doc/core'
 
 export type LinkToolbarProps = Omit<LinkToolbarState, keyof UiElementPosition> &
     Pick<

@@ -1,5 +1,6 @@
-import { ref, onMounted } from 'vue'
 import type { LcwDocEditor, StyleSchema } from '@lcw-doc/core'
+import { onMounted, ref } from 'vue'
+
 import { injectEditor } from '../editor/inject'
 import { useEditorChange } from './useEditorChange'
 import { useEditorSelectionChange } from './useEditorSelectionChange'

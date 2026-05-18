@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 
 test.describe('离线与重连 E2E 测试', () => {
     let token: string

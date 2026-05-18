@@ -6,7 +6,6 @@ import {
     InlineContentSchema,
     StyleSchema,
 } from '@lcw-doc/core'
-
 import { AiOutlinePlus } from 'react-icons/ai'
 
 import { useComponentsContext } from '../../../editor/ComponentsContext'

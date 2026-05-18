@@ -1,22 +1,21 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
-import { mockAuthenticatedUser, clearAuthenticatedUser } from '../test/helpers'
-
+import { clearAuthenticatedUser, mockAuthenticatedUser } from '../test/helpers'
 import {
-    fetchPageList,
     createPage,
-    updatePage,
-    removePage,
-    searchPages,
-    toggleFavorite,
-    fetchTrashList,
-    restorePage,
-    permanentDeletePage,
-    fetchRecentPages,
-    fetchSharedPages,
-    fetchPageGraph,
     fetchBacklinks,
     fetchPageDetail,
+    fetchPageGraph,
+    fetchPageList,
+    fetchRecentPages,
+    fetchSharedPages,
+    fetchTrashList,
+    permanentDeletePage,
+    removePage,
+    restorePage,
+    searchPages,
+    toggleFavorite,
+    updatePage,
 } from './page'
 
 describe('page service', () => {

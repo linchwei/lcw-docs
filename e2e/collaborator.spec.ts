@@ -1,6 +1,7 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+
+import { apiLogin, apiRegister, generateUniqueUsername, setToken } from './helpers'
 import { DocPage } from './page-objects/doc.page'
-import { generateUniqueUsername, apiRegister, apiLogin, setToken } from './helpers'
 
 test.describe('协作者权限 E2E 测试', () => {
     let token: string
@@ -38,7 +39,10 @@ test.describe('协作者权限 E2E 测试', () => {
         const usernameInput = page.getByPlaceholderText('输入用户名')
         if (await usernameInput.isVisible().catch(() => false)) {
             await usernameInput.fill('otheruser')
-            await page.getByRole('button', { name: /邀请协作者|邀请/ }).click().catch(() => {})
+            await page
+                .getByRole('button', { name: /邀请协作者|邀请/ })
+                .click()
+                .catch(() => {})
             await page.waitForTimeout(2000)
         }
     })
@@ -47,7 +51,10 @@ test.describe('协作者权限 E2E 测试', () => {
         await page.goto('/doc')
         await page.waitForURL('**/doc**', { timeout: 10000 })
 
-        const notificationBell = page.locator('[data-testid="notification-bell"], button').filter({ has: page.locator('svg.lucide-bell') }).first()
+        const notificationBell = page
+            .locator('[data-testid="notification-bell"], button')
+            .filter({ has: page.locator('svg.lucide-bell') })
+            .first()
         if (await notificationBell.isVisible().catch(() => false)) {
             await notificationBell.click()
         }
@@ -57,7 +64,10 @@ test.describe('协作者权限 E2E 测试', () => {
         await page.goto('/doc')
         await page.waitForURL('**/doc**', { timeout: 10000 })
 
-        const notificationBell = page.locator('[data-testid="notification-bell"], button').filter({ has: page.locator('svg.lucide-bell') }).first()
+        const notificationBell = page
+            .locator('[data-testid="notification-bell"], button')
+            .filter({ has: page.locator('svg.lucide-bell') })
+            .first()
         if (await notificationBell.isVisible().catch(() => false)) {
             await notificationBell.click()
             await page.waitForTimeout(1000)
@@ -74,7 +84,10 @@ test.describe('协作者权限 E2E 测试', () => {
         const docPage = new DocPage(page)
         await docPage.openCollaboratorPanel()
 
-        const moreButton = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') }).first()
+        const moreButton = page
+            .locator('button')
+            .filter({ has: page.locator('svg.lucide-more-horizontal') })
+            .first()
         if (await moreButton.isVisible().catch(() => false)) {
             await moreButton.click()
             const viewerOption = page.getByText('改为查看者')
@@ -88,7 +101,10 @@ test.describe('协作者权限 E2E 测试', () => {
         const docPage = new DocPage(page)
         await docPage.openCollaboratorPanel()
 
-        const moreButton = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') }).first()
+        const moreButton = page
+            .locator('button')
+            .filter({ has: page.locator('svg.lucide-more-horizontal') })
+            .first()
         if (await moreButton.isVisible().catch(() => false)) {
             await moreButton.click()
             const removeOption = page.getByText('移除')
@@ -105,7 +121,10 @@ test.describe('协作者权限 E2E 测试', () => {
         const usernameInput = page.getByPlaceholderText('输入用户名')
         if (await usernameInput.isVisible().catch(() => false)) {
             await usernameInput.fill(username)
-            await page.getByRole('button', { name: /邀请协作者|邀请/ }).click().catch(() => {})
+            await page
+                .getByRole('button', { name: /邀请协作者|邀请/ })
+                .click()
+                .catch(() => {})
             await page.waitForTimeout(2000)
 
             const errorMsg = page.getByText(/不能将自己|不能添加自己/i)
@@ -122,7 +141,10 @@ test.describe('协作者权限 E2E 测试', () => {
         const usernameInput = page.getByPlaceholderText('输入用户名')
         if (await usernameInput.isVisible().catch(() => false)) {
             await usernameInput.fill('nonexistent_user_xyz')
-            await page.getByRole('button', { name: /邀请协作者|邀请/ }).click().catch(() => {})
+            await page
+                .getByRole('button', { name: /邀请协作者|邀请/ })
+                .click()
+                .catch(() => {})
             await page.waitForTimeout(2000)
 
             const errorMsg = page.getByText(/不存在|未找到|not found/i)

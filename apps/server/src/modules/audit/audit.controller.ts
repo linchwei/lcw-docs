@@ -14,10 +14,30 @@ export class AuditController {
     @ApiUnauthorizedResponse({ description: '未认证' })
     @ApiParam({ name: 'pageId', description: '页面 ID' })
     @ApiQuery({ name: 'limit', description: '返回条数限制', required: false })
-    @ApiResponse({ status: 200, description: '成功', schema: { properties: { data: { type: 'array', description: '审计日志列表', items: { type: 'object', properties: { action: { type: 'string', description: '操作类型' }, userId: { type: 'string', description: '操作用户ID' }, timestamp: { type: 'string', description: '操作时间' } } } }, success: { type: 'boolean', description: '是否成功' } } } })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: {
+                data: {
+                    type: 'array',
+                    description: '审计日志列表',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            action: { type: 'string', description: '操作类型' },
+                            userId: { type: 'string', description: '操作用户ID' },
+                            timestamp: { type: 'string', description: '操作时间' },
+                        },
+                    },
+                },
+                success: { type: 'boolean', description: '是否成功' },
+            },
+        },
+    })
     @Get('page/:pageId/audit_log')
     @UseGuards(AuthGuard('jwt'))
-    getPageAuditLog(@Param('pageId') pageId: string, @Query('limit') limit: number, @Request() req) {
+    getPageAuditLog(@Param('pageId') pageId: string, @Query('limit') limit: number, @Request() _req) {
         return this.auditService.findByResource('page', pageId, limit || 50)
     }
 }

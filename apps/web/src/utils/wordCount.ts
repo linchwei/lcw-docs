@@ -35,17 +35,13 @@ export function calculateWordCount(text: string): WordCountResult {
 
     const chineseChars = (text.match(CHINESE_REGEX) || []).length
     const textWithoutChinese = text.replace(CHINESE_REGEX, ' ')
-    const englishWords = textWithoutChinese
-        .split(/\s+/)
-        .filter(w => w.length > 0 && /[a-zA-Z0-9]/.test(w)).length
+    const englishWords = textWithoutChinese.split(/\s+/).filter(w => w.length > 0 && /[a-zA-Z0-9]/.test(w)).length
     const words = chineseChars + englishWords
 
-    const paragraphs = text
-        .split(/\n+/)
-        .filter(p => p.trim().length > 0).length
+    const paragraphs = text.split(/\n+/).filter(p => p.trim().length > 0).length
 
     const sentenceMatches = text.match(SENTENCE_ENDINGS)
-    const sentences = sentenceMatches ? sentenceMatches.length : (text.trim().length > 0 ? 1 : 0)
+    const sentences = sentenceMatches ? sentenceMatches.length : text.trim().length > 0 ? 1 : 0
 
     const chineseReadingTime = chineseChars / 400
     const englishReadingTime = englishWords / 200
@@ -79,9 +75,7 @@ export function calculateSelectionWordCount(text: string): SelectionWordCountRes
 
     const chineseChars = (text.match(CHINESE_REGEX) || []).length
     const textWithoutChinese = text.replace(CHINESE_REGEX, ' ')
-    const englishWords = textWithoutChinese
-        .split(/\s+/)
-        .filter(w => w.length > 0 && /[a-zA-Z0-9]/.test(w)).length
+    const englishWords = textWithoutChinese.split(/\s+/).filter(w => w.length > 0 && /[a-zA-Z0-9]/.test(w)).length
     const words = chineseChars + englishWords
 
     return { charsWithSpaces, charsWithoutSpaces, words }

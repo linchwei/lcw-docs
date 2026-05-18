@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('API Boundary - Tag', () => {
     let app: INestApplication
@@ -60,18 +60,14 @@ describe('API Boundary - Tag', () => {
                 .set('Authorization', `Bearer ${testUser.token}`)
                 .send({ pageId: createdPageId, tagId: createdTagId })
 
-            await request(app.getHttpServer())
-                .delete(`/api/tag/${createdTagId}`)
-                .set('Authorization', `Bearer ${testUser.token}`)
+            await request(app.getHttpServer()).delete(`/api/tag/${createdTagId}`).set('Authorization', `Bearer ${testUser.token}`)
 
             const res = await request(app.getHttpServer())
                 .get(`/api/page/${createdPageId}/tags`)
                 .set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
             const tags = res.body.data || []
-            const found = Array.isArray(tags) && tags.some((t: any) =>
-                (t.tagId || t.id) === createdTagId
-            )
+            const found = Array.isArray(tags) && tags.some((t: any) => (t.tagId || t.id) === createdTagId)
             expect(found).toBe(false)
         })
     })

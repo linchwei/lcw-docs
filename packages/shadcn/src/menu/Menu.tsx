@@ -28,7 +28,7 @@ const MenuTriggerWithPointerUp = (Comp: typeof ShadCNDropdownMenuTrigger) =>
     })
 
 export const Menu = (props: ComponentProps['Generic']['Menu']['Root']) => {
-    const { children, onOpenChange, position, sub, ...rest } = props
+    const { children, onOpenChange, position: _position, sub, ...rest } = props
 
     assertEmpty(rest)
 

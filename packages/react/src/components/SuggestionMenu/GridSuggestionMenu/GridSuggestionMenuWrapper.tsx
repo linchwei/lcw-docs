@@ -24,10 +24,10 @@ export function GridSuggestionMenuWrapper<Item>(props: {
     const { getItems, gridSuggestionMenuComponent, query, clearQuery, closeMenu, onItemClick, columns } = props
 
     const onItemClickCloseMenu = (item: Item) => {
-            closeMenu()
-            clearQuery()
-            onItemClick?.(item)
-        }
+        closeMenu()
+        clearQuery()
+        onItemClick?.(item)
+    }
 
     const { items, usedQuery, loadingState } = useLoadSuggestionMenuItems(query, getItems)
 

@@ -23,10 +23,10 @@ export function SuggestionMenuWrapper<Item>(props: {
     const { getItems, suggestionMenuComponent, query, clearQuery, closeMenu, onItemClick } = props
 
     const onItemClickCloseMenu = (item: Item) => {
-            closeMenu()
-            clearQuery()
-            onItemClick?.(item)
-        }
+        closeMenu()
+        clearQuery()
+        onItemClick?.(item)
+    }
 
     const { items, usedQuery, loadingState } = useLoadSuggestionMenuItems(query, getItems)
 

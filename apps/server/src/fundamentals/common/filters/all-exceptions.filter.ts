@@ -1,4 +1,4 @@
-import { Catch, ExceptionFilter, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common'
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common'
 
 import { ForbiddenError } from '../exceptions/forbidden.exception'
 
@@ -11,18 +11,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const response = ctx.getResponse()
         const request = ctx.getRequest()
 
-        const status = exception instanceof HttpException
-            ? exception.getStatus()
-            : HttpStatus.INTERNAL_SERVER_ERROR
+        const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR
 
-        const message = exception instanceof HttpException
-            ? exception.message
-            : 'Internal server error'
+        const message = exception instanceof HttpException ? exception.message : 'Internal server error'
 
         if (status >= 500) {
-            this.logger.error(
-                `${request.method} ${request.url} - ${status} - ${exception instanceof Error ? exception.stack : exception}`,
-            )
+            this.logger.error(`${request.method} ${request.url} - ${status} - ${exception instanceof Error ? exception.stack : exception}`)
         }
 
         const body: Record<string, unknown> = {

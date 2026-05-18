@@ -8,22 +8,13 @@ interface StatusBarProps {
 }
 
 export function StatusBar({ editor }: StatusBarProps) {
-    const {
-        charsWithoutSpaces,
-        words,
-        paragraphs,
-        readingTimeText,
-        hasSelection,
-        selectionChars,
-    } = useWordCount(editor)
+    const { charsWithoutSpaces, words, paragraphs, readingTimeText, hasSelection, selectionChars } = useWordCount(editor)
 
     return (
         <div className="sticky bottom-0 z-10 flex items-center justify-end h-7 px-4 border-t border-zinc-100 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/80">
             <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 {hasSelection ? (
-                    <span className="text-foreground font-medium">
-                        已选 {formatNumber(selectionChars)} 字
-                    </span>
+                    <span className="text-foreground font-medium">已选 {formatNumber(selectionChars)} 字</span>
                 ) : (
                     <>
                         <span>字数 {formatNumber(charsWithoutSpaces)}</span>

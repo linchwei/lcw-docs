@@ -1,7 +1,7 @@
-import { describe, test, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
-import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 import { blockToNode, inlineContentToNodes, tableContentToNodes } from '../../../src/api/nodeConversions/blockToNode'
+import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 
 describe('blockToNode', () => {
     let editor: LcwDocEditor
@@ -422,10 +422,7 @@ describe('blockToNode', () => {
                     id: 'table-test',
                     content: {
                         type: 'tableContent',
-                        rows: [
-                            { cells: ['Cell 1', 'Cell 2'] },
-                            { cells: ['Cell 3', 'Cell 4'] },
-                        ],
+                        rows: [{ cells: ['Cell 1', 'Cell 2'] }, { cells: ['Cell 3', 'Cell 4'] }],
                     },
                 },
                 editor.pmSchema,
@@ -477,11 +474,7 @@ describe('inlineContentToNodes', () => {
     })
 
     test('将字符串内容转换为文本节点', () => {
-        const nodes = inlineContentToNodes(
-            ['Hello'],
-            editor.pmSchema,
-            editor.schema.styleSchema
-        )
+        const nodes = inlineContentToNodes(['Hello'], editor.pmSchema, editor.schema.styleSchema)
 
         expect(nodes).toHaveLength(1)
         expect(nodes[0].type.name).toBe('text')
@@ -566,10 +559,7 @@ describe('tableContentToNodes', () => {
         const rowNodes = tableContentToNodes(
             {
                 type: 'tableContent',
-                rows: [
-                    { cells: ['Cell 1', 'Cell 2'] },
-                    { cells: ['Cell 3', 'Cell 4'] },
-                ],
+                rows: [{ cells: ['Cell 1', 'Cell 2'] }, { cells: ['Cell 3', 'Cell 4'] }],
             },
             editor.pmSchema,
             editor.schema.styleSchema
@@ -584,9 +574,7 @@ describe('tableContentToNodes', () => {
         const rowNodes = tableContentToNodes(
             {
                 type: 'tableContent',
-                rows: [
-                    { cells: ['A', 'B', 'C'] },
-                ],
+                rows: [{ cells: ['A', 'B', 'C'] }],
             },
             editor.pmSchema,
             editor.schema.styleSchema
@@ -600,9 +588,7 @@ describe('tableContentToNodes', () => {
         const rowNodes = tableContentToNodes(
             {
                 type: 'tableContent',
-                rows: [
-                    { cells: ['Hello'] },
-                ],
+                rows: [{ cells: ['Hello'] }],
             },
             editor.pmSchema,
             editor.schema.styleSchema
@@ -619,9 +605,7 @@ describe('tableContentToNodes', () => {
             {
                 type: 'tableContent',
                 columnWidths: [100, 200],
-                rows: [
-                    { cells: ['A', 'B'] },
-                ],
+                rows: [{ cells: ['A', 'B'] }],
             },
             editor.pmSchema,
             editor.schema.styleSchema

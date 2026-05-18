@@ -1,8 +1,9 @@
-import { describe, test, expect, beforeEach } from 'vitest'
 import { createChainableState } from '@tiptap/core'
-import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
+import { beforeEach, describe, expect, test } from 'vitest'
+
 import { updateBlockCommand } from '../../../src/api/blockManipulation/commands/updateBlock/updateBlock'
 import { getNodeById } from '../../../src/api/nodeUtil'
+import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 
 function applyUpdate(editor: LcwDocEditor, blockId: string, update: any) {
     const ttEditor = editor._tiptapEditor
@@ -10,7 +11,11 @@ function applyUpdate(editor: LcwDocEditor, blockId: string, update: any) {
     const chainableState = createChainableState({ state: ttEditor.state, transaction: tr })
     const { posBeforeNode } = getNodeById(blockId, chainableState.doc)
 
-    updateBlockCommand(editor, posBeforeNode, update)({
+    updateBlockCommand(
+        editor,
+        posBeforeNode,
+        update
+    )({
         state: chainableState,
         dispatch: () => {},
     })

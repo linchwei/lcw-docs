@@ -1,5 +1,5 @@
-import { inject, provide, type InjectionKey } from 'vue'
-import type { LcwDocEditor, BlockSchema, InlineContentSchema, StyleSchema } from '@lcw-doc/core'
+import type { BlockSchema, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
+import { inject, type InjectionKey, provide } from 'vue'
 
 const EDITOR_KEY: InjectionKey<LcwDocEditor<BlockSchema, InlineContentSchema, StyleSchema>> = Symbol('lcwDocEditor')
 

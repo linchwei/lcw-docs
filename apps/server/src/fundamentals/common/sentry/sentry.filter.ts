@@ -1,4 +1,4 @@
-import { Catch, ArgumentsHost } from '@nestjs/common'
+import { ArgumentsHost, Catch } from '@nestjs/common'
 import { BaseExceptionFilter } from '@nestjs/core'
 import * as Sentry from '@sentry/node'
 
@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/node'
 export class SentryFilter extends BaseExceptionFilter {
     catch(exception: unknown, host: ArgumentsHost) {
         if (exception instanceof Error) {
-            Sentry.withScope((scope) => {
+            Sentry.withScope(scope => {
                 const ctx = host.switchToHttp()
                 const request = ctx.getRequest()
                 scope.setTag('path', request.url)

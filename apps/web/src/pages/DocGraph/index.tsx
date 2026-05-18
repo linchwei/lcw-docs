@@ -2,7 +2,18 @@ import '@xyflow/react/dist/style.css'
 
 import { SidebarInset, SidebarTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
 import { useQuery } from '@tanstack/react-query'
-import { applyEdgeChanges, applyNodeChanges, Background, Controls, Edge, EdgeChange, MiniMap, Node, NodeChange, ReactFlow } from '@xyflow/react'
+import {
+    applyEdgeChanges,
+    applyNodeChanges,
+    Background,
+    Controls,
+    Edge,
+    EdgeChange,
+    MiniMap,
+    Node,
+    NodeChange,
+    ReactFlow,
+} from '@xyflow/react'
 import * as d3 from 'd3-force'
 import { FileText, GitBranch, Loader } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -158,9 +169,7 @@ export function DocGraph() {
                         <div className="w-full h-full flex justify-center items-center bg-zinc-50/30 absolute z-10">
                             <div className="flex flex-col items-center gap-2">
                                 <Loader className="w-8 h-8 animate-spin text-zinc-400" />
-                                <p className="text-sm text-zinc-400">
-                                    {isLoading ? '加载中...' : '布局计算中...'}
-                                </p>
+                                <p className="text-sm text-zinc-400">{isLoading ? '加载中...' : '布局计算中...'}</p>
                             </div>
                         </div>
                     )}
@@ -191,11 +200,7 @@ export function DocGraph() {
                             >
                                 <Background />
                                 <Controls />
-                                <MiniMap
-                                    nodeStrokeWidth={3}
-                                    pannable
-                                    zoomable
-                                />
+                                <MiniMap nodeStrokeWidth={3} pannable zoomable />
                             </ReactFlow>
                             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-zinc-500 shadow-sm">
                                 暂无文档关联，在文档中使用 @提及 其他文档来建立关联
@@ -219,11 +224,7 @@ export function DocGraph() {
                         >
                             <Background />
                             <Controls />
-                            <MiniMap
-                                nodeStrokeWidth={3}
-                                pannable
-                                zoomable
-                            />
+                            <MiniMap nodeStrokeWidth={3} pannable zoomable />
                         </ReactFlow>
                     )}
                 </div>

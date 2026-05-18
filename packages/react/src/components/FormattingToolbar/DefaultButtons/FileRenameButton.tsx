@@ -33,15 +33,15 @@ export const FileRenameButton = () => {
     })()
 
     const handleEnter = (event: KeyboardEvent) => {
-            if (fileBlock && event.key === 'Enter') {
-                event.preventDefault()
-                editor.updateBlock(fileBlock, {
-                    props: {
-                        name: currentEditingName as any,
-                    },
-                })
-            }
+        if (fileBlock && event.key === 'Enter') {
+            event.preventDefault()
+            editor.updateBlock(fileBlock, {
+                props: {
+                    name: currentEditingName as any,
+                },
+            })
         }
+    }
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => setCurrentEditingName(event.currentTarget.value)
 

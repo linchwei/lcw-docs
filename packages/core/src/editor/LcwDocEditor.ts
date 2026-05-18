@@ -6,7 +6,7 @@
  * 支持富文本样式、内联内容、协作编辑等特性。
  */
 
-// @ts-ignore
+// @ts-expect-error CSS import
 import '../style.css'
 
 import { EditorOptions, Extension, getSchema } from '@tiptap/core'

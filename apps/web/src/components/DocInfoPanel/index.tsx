@@ -94,7 +94,10 @@ export function DocInfoPanel({ editor, open, onClose }: DocInfoPanelProps) {
                         <FileText size={16} className="text-zinc-500" />
                         <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">文档信息</h2>
                     </div>
-                    <button onClick={onClose} className="p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors">
+                    <button
+                        onClick={onClose}
+                        className="p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 transition-colors"
+                    >
                         <X size={16} />
                     </button>
                 </div>

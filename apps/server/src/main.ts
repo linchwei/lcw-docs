@@ -1,11 +1,10 @@
+import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { json } from 'express'
 import helmet from 'helmet'
 import { join } from 'path'
-
-import { Logger, ValidationPipe } from '@nestjs/common'
 
 import { AppModule } from './app.module'
 import { AllExceptionsFilter } from './fundamentals/common/filters/all-exceptions.filter'
@@ -23,13 +22,13 @@ async function bootstrap() {
             contentSecurityPolicy: {
                 directives: {
                     defaultSrc: ["'self'"],
-                    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
-                    styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-                    fontSrc: ["'self'", "https://fonts.gstatic.com"],
+                    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://cdn.jsdelivr.net'],
+                    styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+                    fontSrc: ["'self'", 'https://fonts.gstatic.com'],
                     imgSrc: ["'self'", 'data:', 'blob:'],
                 },
             },
-        }),
+        })
     )
 
     app.enableCors({

@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog'
-import { AlertCircle, CheckCircle2, FileUp, Loader2, Upload, X } from 'lucide-react'
+import { AlertCircle, FileUp, Loader2, Upload, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -60,7 +60,7 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
 
         const reader = new FileReader()
 
-        reader.onprogress = (e) => {
+        reader.onprogress = e => {
             if (e.lengthComputable) {
                 setProgress(Math.round((e.loaded / e.total) * 100))
             }
@@ -133,13 +133,25 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
     const totalLines = markdownContent.split('\n').length
 
     return (
-        <Dialog.Root open={open} onOpenChange={(v) => { if (!v) resetState(); onOpenChange(v) }}>
+        <Dialog.Root
+            open={open}
+            onOpenChange={v => {
+                if (!v) resetState()
+                onOpenChange(v)
+            }}
+        >
             <Dialog.Portal>
                 <Dialog.Overlay className={styles.overlay} />
                 <Dialog.Content className={styles.content}>
                     <Dialog.Title className={styles.dialogTitle}>上传 Markdown 文档</Dialog.Title>
                     <Dialog.Description className={styles.dialogDesc}>上传 .md 文件，解析后生成协同文档</Dialog.Description>
-                    <button className={styles.closeBtn} onClick={() => { resetState(); onOpenChange(false) }}>
+                    <button
+                        className={styles.closeBtn}
+                        onClick={() => {
+                            resetState()
+                            onOpenChange(false)
+                        }}
+                    >
                         <X size={18} />
                     </button>
 
@@ -154,13 +166,7 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
                             <Upload size={40} className={styles.dropIcon} />
                             <p className={styles.dropText}>拖拽 .md 文件到此处</p>
                             <p className={styles.dropHint}>或点击选择文件（最大 5 MB）</p>
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept=".md"
-                                onChange={handleFileSelect}
-                                className={styles.fileInput}
-                            />
+                            <input ref={fileInputRef} type="file" accept=".md" onChange={handleFileSelect} className={styles.fileInput} />
                         </div>
                     )}
 
@@ -179,9 +185,7 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
                             <div className={styles.previewHeader}>
                                 <FileUp size={16} />
                                 <span className={styles.fileName}>{fileName}</span>
-                                <span className={styles.previewStats}>
-                                    {totalLines} 行
-                                </span>
+                                <span className={styles.previewStats}>{totalLines} 行</span>
                             </div>
 
                             {extractedTitle && (
@@ -192,17 +196,14 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
 
                             <div className={styles.previewList}>
                                 <pre className={styles.markdownPreview}>{previewLines.join('\n')}</pre>
-                                {totalLines > 20 && (
-                                    <p className={styles.moreLines}>... 还有 {totalLines - 20} 行</p>
-                                )}
+                                {totalLines > 20 && <p className={styles.moreLines}>... 还有 {totalLines - 20} 行</p>}
                             </div>
 
                             <div className={styles.previewActions}>
-                                <button className={styles.cancelBtn} onClick={resetState}>重新选择</button>
-                                <button
-                                    className={styles.generateBtn}
-                                    onClick={handleGenerate}
-                                >
+                                <button className={styles.cancelBtn} onClick={resetState}>
+                                    重新选择
+                                </button>
+                                <button className={styles.generateBtn} onClick={handleGenerate}>
                                     确认生成
                                 </button>
                             </div>
@@ -220,7 +221,9 @@ export function MarkdownUploadDialog({ open, onOpenChange }: MarkdownUploadDialo
                         <div className={styles.resultSection}>
                             <AlertCircle size={40} className={styles.errorIcon} />
                             <p className={styles.resultText}>{errorMessage}</p>
-                            <button className={styles.cancelBtn} onClick={resetState}>重新选择</button>
+                            <button className={styles.cancelBtn} onClick={resetState}>
+                                重新选择
+                            </button>
                         </div>
                     )}
                 </Dialog.Content>

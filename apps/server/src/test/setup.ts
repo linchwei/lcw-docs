@@ -1,4 +1,3 @@
 import { afterAll } from 'vitest'
 
-afterAll(async () => {
-})
+afterAll(async () => {})

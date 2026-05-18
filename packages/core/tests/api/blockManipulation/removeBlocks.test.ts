@@ -1,6 +1,7 @@
-import { describe, test, expect, beforeEach } from 'vitest'
-import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
+import { beforeEach, describe, expect, test } from 'vitest'
+
 import { removeBlocks, removeBlocksWithCallback } from '../../../src/api/blockManipulation/commands/removeBlocks/removeBlocks'
+import { LcwDocEditor } from '../../../src/editor/LcwDocEditor'
 
 describe('removeBlocks', () => {
     let editor: LcwDocEditor

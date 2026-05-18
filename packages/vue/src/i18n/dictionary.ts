@@ -1,5 +1,5 @@
-import { inject, provide, type InjectionKey } from 'vue'
-import { locales, type Dictionary } from '@lcw-doc/core'
+import { type Dictionary, locales } from '@lcw-doc/core'
+import { inject, type InjectionKey, provide } from 'vue'
 
 type PartialDictionary = Partial<Dictionary>
 

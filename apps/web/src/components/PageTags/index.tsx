@@ -2,9 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import * as srv from '@/services'
 import { Tag } from '@/types/api'
-import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 interface PageTagsProps {
     pageId?: string
@@ -43,8 +43,7 @@ export function PageTags({ pageId }: PageTagsProps) {
     })
 
     const removeMutation = useMutation({
-        mutationFn: ({ pageId, tagId }: { pageId: string; tagId: string }) =>
-            srv.removePageTag(pageId, tagId),
+        mutationFn: ({ pageId, tagId }: { pageId: string; tagId: string }) => srv.removePageTag(pageId, tagId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['pageTags', pageId] })
         },
@@ -78,10 +77,7 @@ export function PageTags({ pageId }: PageTagsProps) {
                     style={{ backgroundColor: tag.color + '18', color: tag.color }}
                 >
                     {tag.name}
-                    <button
-                        onClick={() => removeMutation.mutate({ pageId, tagId: tag.tagId })}
-                        className="hover:opacity-70"
-                    >
+                    <button onClick={() => removeMutation.mutate({ pageId, tagId: tag.tagId })} className="hover:opacity-70">
                         <X size={10} />
                     </button>
                 </span>
@@ -110,15 +106,12 @@ export function PageTags({ pageId }: PageTagsProps) {
                                             setShowTagPicker(false)
                                         }}
                                     >
-                                        <span
-                                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                                            style={{ backgroundColor: tag.color }}
-                                        />
+                                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: tag.color }} />
                                         {tag.name}
                                     </button>
                                     <button
                                         className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-opacity"
-                                        onClick={(e) => {
+                                        onClick={e => {
                                             e.stopPropagation()
                                             setPendingDeleteTag({ tagId: tag.tagId, tagName: tag.name })
                                             setDeleteTagDialogOpen(true)

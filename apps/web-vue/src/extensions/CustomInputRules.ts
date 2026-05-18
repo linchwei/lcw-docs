@@ -18,7 +18,7 @@ export const CustomInputRules = Extension.create({
                             updateBlockCommand(this.options.editor, blockInfo.blockContainer.beforePos, {
                                 type: 'blockquote',
                                 props: {},
-                            }),
+                            })
                         )
                         .deleteRange({ from: range.from, to: range.to })
                         .run()
@@ -33,7 +33,7 @@ export const CustomInputRules = Extension.create({
                             updateBlockCommand(this.options.editor, blockInfo.blockContainer.beforePos, {
                                 type: 'divider',
                                 props: {},
-                            }),
+                            })
                         )
                         .deleteRange({ from: range.from, to: range.to })
                         .run()
@@ -49,7 +49,7 @@ export const CustomInputRules = Extension.create({
                             updateBlockCommand(this.options.editor, blockInfo.blockContainer.beforePos, {
                                 type: 'image',
                                 props: { url: url as any },
-                            }),
+                            })
                         )
                         .deleteRange({ from: range.from, to: range.to })
                         .run()
@@ -82,7 +82,7 @@ export const CustomInputRules = Extension.create({
                             updateBlockCommand(this.options.editor, blockInfo.blockContainer.beforePos, {
                                 type: 'table',
                                 props: {},
-                            }),
+                            })
                         )
                         .deleteRange({ from: range.from, to: range.to })
                         .run()

@@ -42,16 +42,16 @@ export const TextAlignButton = (props: { textAlignment: TextAlignment }) => {
     })()
 
     const setTextAlignment = (textAlignment: TextAlignment) => {
-            editor.focus()
+        editor.focus()
 
-            for (const block of selectedBlocks) {
-                if (checkBlockTypeHasDefaultProp('textAlignment', block.type, editor)) {
-                    editor.updateBlock(block, {
-                        props: { textAlignment: textAlignment },
-                    })
-                }
+        for (const block of selectedBlocks) {
+            if (checkBlockTypeHasDefaultProp('textAlignment', block.type, editor)) {
+                editor.updateBlock(block, {
+                    props: { textAlignment: textAlignment },
+                })
             }
         }
+    }
 
     const show = !!selectedBlocks.find(block => 'textAlignment' in block.props)
 

@@ -1,18 +1,18 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { closeTestApp, createTestApp, createTestUser, cleanupAll } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
 describe('CollaboratorController', () => {
     let app: INestApplication
     let testUser: { user: any; token: string }
-    let secondUser: { user: any; token: string }
+    let _secondUser: { user: any; token: string }
     let createdPageId: string
 
     beforeAll(async () => {
         app = await createTestApp()
         testUser = await createTestUser(app, 'testcollabowner', 'testpass123')
-        secondUser = await createTestUser(app, 'testcollabguest', 'testpass123')
+        _secondUser = await createTestUser(app, 'testcollabguest', 'testpass123')
 
         const pageRes = await request(app.getHttpServer())
             .post('/api/page')

@@ -31,15 +31,17 @@ import {
     Maximize,
     MessageCircleQuestion,
     Settings,
+    Sparkles,
     Users,
     WifiOff,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, lazy, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import { WebsocketProvider } from 'y-websocket'
 import * as Y from 'yjs'
 
+const AIReadingPanel = lazy(() => import('@/components/AIReadingPanel').then(m => ({ default: m.AIReadingPanel })))
 import { BacklinksPanel } from '@/components/BacklinksPanel'
 import { CollaboratorPanel } from '@/components/CollaboratorPanel'
 import { CommentButton } from '@/components/CommentButton'
@@ -87,6 +89,7 @@ export const Doc = () => {
     const [searchBarOpen, setSearchBarOpen] = useState(false)
     const [shortcutPanelOpen, setShortcutPanelOpen] = useState(false)
     const [docInfoOpen, setDocInfoOpen] = useState(false)
+    const [aiReadingPanelOpen, setAIReadingPanelOpen] = useState(false)
     const [mode, setMode] = useState<'edit' | 'read' | 'review'>('edit')
     const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
         return localStorage.getItem('doc-outline-collapsed') === 'true'
@@ -358,7 +361,7 @@ export const Doc = () => {
     }, [pageId, provider, doc, indexeddbProvider, setGlobalEditor])
 
     return (
-        <SidebarInset className="flex flex-col h-screen">
+        <SidebarInset className="flex flex-col h-screen min-w-0">
             <header className="sticky top-0 z-10 flex flex-row justify-between items-center h-[52px] px-[16px] border-b border-b-zinc-100 backdrop-blur-md bg-white/80 dark:bg-zinc-900/80 shrink-0">
                 <div className="flex flex-row items-center gap-2">
                     <SidebarTrigger />
@@ -570,7 +573,7 @@ export const Doc = () => {
                 </div>
             </header>
             <div className="flex-1 overflow-hidden">
-                <div className="flex h-full">
+                <div className="flex h-full overflow-hidden">
                     {editorInstance && !outlineHidden && (
                         <DocOutline
                             editor={editorInstance}
@@ -771,6 +774,14 @@ export const Doc = () => {
                                                     : undefined
                                             }
                                         />
+                                        <button
+                                            onClick={() => setAIReadingPanelOpen(!aiReadingPanelOpen)}
+                                            className="shrink-0 ml-2 mt-2 inline-flex items-center gap-1 h-7 px-2.5 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                                            title="AI 阅读"
+                                        >
+                                            <Sparkles size={14} />
+                                            AI 阅读
+                                        </button>
                                     </h1>
                                     {mode === 'read' && (page?.role === 'editor' || page?.role === 'owner') && (
                                         <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
@@ -815,6 +826,11 @@ export const Doc = () => {
                     )}
                     {backlinksPanelOpen && page?.pageId && (
                         <BacklinksPanel pageId={page.pageId} onClose={() => setBacklinksPanelOpen(false)} />
+                    )}
+                    {aiReadingPanelOpen && (
+                        <Suspense fallback={null}>
+                            <AIReadingPanel onClose={() => setAIReadingPanelOpen(false)} />
+                        </Suspense>
                     )}
                 </div>
             </div>

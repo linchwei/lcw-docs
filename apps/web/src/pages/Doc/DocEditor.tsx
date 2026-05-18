@@ -35,7 +35,6 @@ import { Divider } from '@/blocks/divider'
 import { Mention } from '@/blocks/mention'
 import { BasicAIChat } from '@/components/BasicAIChat'
 import { EditorSideMenu } from '@/components/EditorSideMenu'
-import { SelectionAIMenu } from '@/components/SelectionAIMenu'
 import { CustomInputRules } from '@/extensions/CustomInputRules'
 import { Highlight, Subscript, Superscript } from '@/extensions/HighlightSupSubMarks'
 import { LinkInputRule } from '@/extensions/LinkInputRule'
@@ -263,7 +262,6 @@ export function DocEditor(props: DocEditorProps) {
                 }
             />
             <BasicAIChat editor={editor} />
-            <SelectionAIMenu editor={editor} />
         </LcwDocView>
     )
 }

@@ -1,13 +1,23 @@
 import { PartialBlock } from '@lcw-doc/core'
-import { ArrowUp, FileInput, MessageSquare, Sparkles, X } from 'lucide-react'
+import { ArrowUp, Copy, FileInput, FileText, Lightbulb, MessageSquare, PenLine, Plus, RotateCcw, Search, Sparkles, X } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useEffect, useRef, useState } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useEditorContext } from '@/context/EditorContext'
-import { ChatMessage, chatWithAI } from '@/services'
+import { ChatMessage, ChatOptions, chatWithAI } from '@/services'
 
 const SYSTEM_PROMPT =
     '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
+
+const suggestions = [
+    { icon: PenLine, label: '帮我润色这段文字', prompt: '请帮我润色以下文字，使其更加流畅专业：' },
+    { icon: FileText, label: '总结当前文档要点', prompt: '请总结当前文档的关键要点，以列表形式呈现。' },
+    { icon: Lightbulb, label: '给我一些写作灵感', prompt: '请给我一些关于当前主题的写作灵感和建议。' },
+    { icon: Search, label: '解释选中的内容', prompt: '请用通俗易懂的语言解释以下内容：' },
+]
 
 function extractTextFromBlocks(blocks: PartialBlock[]): string {
     let text = ''
@@ -47,8 +57,16 @@ export function GlobalAIChat() {
     const [messages, setMessages] = useState<ChatMessageItem[]>([])
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
     const [lastBlocks, setLastBlocks] = useState<PartialBlock[] | null>(null)
+    const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
+    const [position, setPosition] = useState({ x: 0, y: 0 })
+    const [isDragging, setIsDragging] = useState(false)
+    const dragStart = useRef({ x: 0, y: 0 })
     const abortRef = useRef<AbortController | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    useHotkeys('mod+j', () => {
+        setIsOpen(prev => !prev)
+    }, { enableOnFormTags: false })
 
     useEffect(() => {
         const styleId = 'global-ai-chat-animations'
@@ -65,22 +83,48 @@ export function GlobalAIChat() {
         }
     }, [])
 
+    useEffect(() => {
+        if (!isDragging) return
+        const handleMouseMove = (e: MouseEvent) => {
+            setPosition({
+                x: e.clientX - dragStart.current.x,
+                y: e.clientY - dragStart.current.y,
+            })
+        }
+        const handleMouseUp = () => setIsDragging(false)
+        document.addEventListener('mousemove', handleMouseMove)
+        document.addEventListener('mouseup', handleMouseUp)
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove)
+            document.removeEventListener('mouseup', handleMouseUp)
+        }
+    }, [isDragging])
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        setIsDragging(true)
+        dragStart.current = {
+            x: e.clientX - position.x,
+            y: e.clientY - position.y,
+        }
+    }
+
     const scrollToBottom = () => {
         setTimeout(() => {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         }, 50)
     }
 
-    const handleSend = async () => {
-        if (!keyword.trim() || isGenerating) return
+    const handleSend = async (overrideKeyword?: string) => {
+        const text = overrideKeyword ?? keyword
+        if (!text.trim() || isGenerating) return
 
         setIsGenerating(true)
         setStreamContent('')
         setLastBlocks(null)
 
-        const userMessage: ChatMessageItem = { role: 'user', content: keyword }
+        const userMessage: ChatMessageItem = { role: 'user', content: text }
         setMessages(prev => [...prev, userMessage])
-        setKeyword('')
+        if (!overrideKeyword) setKeyword('')
 
         const controller = new AbortController()
         abortRef.current = controller
@@ -99,10 +143,13 @@ export function GlobalAIChat() {
         const systemContent = context ? `${SYSTEM_PROMPT}\n\n当前文档内容：\n${context}` : SYSTEM_PROMPT
 
         const apiUserMessage: ChatMessage = { role: 'user', content: userMessage.content }
-        const apiMessages: ChatMessage[] = [{ role: 'system', content: systemContent }, ...chatHistory, apiUserMessage]
+        const apiMessages: ChatMessage[] = [...chatHistory, apiUserMessage]
 
         try {
-            const response = await chatWithAI(apiMessages, controller.signal)
+            const options: ChatOptions = {
+                systemPrompt: systemContent,
+            }
+            const response = await chatWithAI(apiMessages, controller.signal, options)
             if (!response.ok) {
                 throw new Error(`请求失败: ${response.status}`)
             }
@@ -200,6 +247,33 @@ export function GlobalAIChat() {
         }
     }
 
+    const handleCopy = async (content: string, idx: number) => {
+        await navigator.clipboard.writeText(content)
+        setCopiedIdx(idx)
+        setTimeout(() => setCopiedIdx(null), 1500)
+    }
+
+    const handleRegenerate = () => {
+        const lastUserIdx = [...messages].reverse().findIndex(m => m.role === 'user')
+        if (lastUserIdx === -1) return
+        const actualIdx = messages.length - 1 - lastUserIdx
+        const lastUserMsg = messages[actualIdx]
+
+        const newMessages = messages.slice(0, actualIdx)
+        setMessages(newMessages)
+        setChatHistory(prev => prev.slice(0, actualIdx))
+        setLastBlocks(null)
+
+        setTimeout(() => handleSend(lastUserMsg.content), 0)
+    }
+
+    const handleNewConversation = () => {
+        setMessages([])
+        setChatHistory([])
+        setStreamContent('')
+        setLastBlocks(null)
+    }
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
@@ -209,33 +283,53 @@ export function GlobalAIChat() {
         }
     }
 
+    const panelStyle = position.x === 0 && position.y === 0
+        ? {
+            position: 'fixed' as const,
+            bottom: '24px',
+            right: '24px',
+            width: '420px',
+            height: '560px',
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+            border: '1px solid #e9e9e7',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            zIndex: 9999,
+            overflow: 'hidden',
+        }
+        : {
+            position: 'fixed' as const,
+            bottom: '24px',
+            right: '24px',
+            width: '420px',
+            height: '560px',
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+            border: '1px solid #e9e9e7',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            zIndex: 9999,
+            overflow: 'hidden',
+            transform: `translate(${position.x}px, ${position.y}px)`,
+        }
+
     return (
         <>
             {isOpen && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        bottom: '24px',
-                        right: '24px',
-                        width: '400px',
-                        height: '520px',
-                        backgroundColor: '#fff',
-                        borderRadius: '12px',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-                        border: '1px solid #e9e9e7',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        zIndex: 9999,
-                        overflow: 'hidden',
-                    }}
-                >
+                <div style={panelStyle}>
                     <div
+                        onMouseDown={handleMouseDown}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             padding: '12px 16px',
                             borderBottom: '1px solid #f0f0ee',
+                            cursor: isDragging ? 'grabbing' : 'grab',
+                            userSelect: 'none',
                         }}
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -255,25 +349,46 @@ export function GlobalAIChat() {
                                 </span>
                             )}
                         </div>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '28px',
-                                height: '28px',
-                                borderRadius: '6px',
-                                border: 'none',
-                                backgroundColor: 'transparent',
-                                cursor: 'pointer',
-                                color: '#787774',
-                            }}
-                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f5f5f4')}
-                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-                        >
-                            <X size={16} />
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <button
+                                onClick={handleNewConversation}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    color: '#787774',
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f5f5f4')}
+                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                            >
+                                <Plus size={16} />
+                            </button>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '28px',
+                                    height: '28px',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    color: '#787774',
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f5f5f4')}
+                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
                     </div>
 
                     <div
@@ -294,20 +409,37 @@ export function GlobalAIChat() {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     height: '100%',
-                                    color: '#9b9a97',
-                                    gap: '8px',
+                                    gap: '16px',
                                 }}
                             >
-                                <MessageSquare size={32} color="#d4d4d4" />
-                                <span style={{ fontSize: '13px' }}>向 AI 助手提问，开始对话</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#9b9a97' }}>
+                                    <MessageSquare size={32} color="#d4d4d4" />
+                                    <span style={{ fontSize: '13px' }}>向 AI 助手提问，开始对话</span>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
+                                    {suggestions.map((s) => (
+                                        <div
+                                            key={s.label}
+                                            className="rounded-lg border border-zinc-200 p-3 cursor-pointer hover:border-zinc-300 hover:shadow-sm transition-all"
+                                            onClick={() => handleSend(s.prompt)}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#787774' }}>
+                                                <s.icon size={14} />
+                                                <span style={{ fontSize: '12px', color: '#37352f' }}>{s.label}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                         {messages.map((msg, i) => (
                             <div
                                 key={i}
+                                className="group"
                                 style={{
                                     display: 'flex',
-                                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                    flexDirection: 'column',
+                                    alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start',
                                 }}
                             >
                                 <div
@@ -319,12 +451,84 @@ export function GlobalAIChat() {
                                         color: msg.role === 'user' ? '#fff' : '#37352f',
                                         fontSize: '13px',
                                         lineHeight: '1.6',
-                                        whiteSpace: 'pre-wrap',
                                         wordBreak: 'break-word',
                                     }}
                                 >
-                                    {msg.content}
+                                    {msg.role === 'user' ? (
+                                        <span style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</span>
+                                    ) : (
+                                        <div className="[&_h2]:font-semibold [&_h2]:text-sm [&_h2]:mt-3 [&_h2]:mb-1 [&_h3]:font-medium [&_h3]:text-sm [&_h3]:mt-2 [&_h3]:mb-1 [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:my-1 [&_pre]:bg-black/5 [&_pre]:rounded [&_pre]:p-2 [&_pre]:my-2 [&_pre]:text-xs [&_pre]:font-mono [&_pre]:overflow-x-auto [&_code]:bg-black/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_a]:text-[#6B45FF] [&_a]:underline">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                                        </div>
+                                    )}
                                 </div>
+                                {msg.role === 'assistant' && i === messages.length - 1 && !isGenerating && (
+                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ display: 'flex', gap: '2px', marginTop: '4px' }}>
+                                        <button
+                                            onClick={() => handleCopy(msg.content, i)}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                height: '28px',
+                                                width: '28px',
+                                                padding: 0,
+                                                borderRadius: '6px',
+                                                border: 'none',
+                                                backgroundColor: 'transparent',
+                                                cursor: 'pointer',
+                                                color: '#787774',
+                                                fontSize: '11px',
+                                            }}
+                                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f5f5f4')}
+                                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                        >
+                                            {copiedIdx === i ? <span style={{ fontSize: '11px', color: '#6B45FF' }}>已复制</span> : <Copy size={14} />}
+                                        </button>
+                                        <button
+                                            onClick={handleRegenerate}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                height: '28px',
+                                                width: '28px',
+                                                padding: 0,
+                                                borderRadius: '6px',
+                                                border: 'none',
+                                                backgroundColor: 'transparent',
+                                                cursor: 'pointer',
+                                                color: '#787774',
+                                            }}
+                                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f5f5f4')}
+                                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                        >
+                                            <RotateCcw size={14} />
+                                        </button>
+                                        {editor && lastBlocks && (
+                                            <button
+                                                onClick={handleInsertToDoc}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    height: '28px',
+                                                    width: '28px',
+                                                    padding: 0,
+                                                    borderRadius: '6px',
+                                                    border: 'none',
+                                                    backgroundColor: 'transparent',
+                                                    cursor: 'pointer',
+                                                    color: '#787774',
+                                                }}
+                                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f5f5f4')}
+                                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                            >
+                                                <FileInput size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {isGenerating && !streamContent && (
@@ -366,11 +570,12 @@ export function GlobalAIChat() {
                                         color: '#37352f',
                                         fontSize: '13px',
                                         lineHeight: '1.6',
-                                        whiteSpace: 'pre-wrap',
                                         wordBreak: 'break-word',
                                     }}
                                 >
-                                    {streamContent}
+                                    <div className="[&_h2]:font-semibold [&_h2]:text-sm [&_h2]:mt-3 [&_h2]:mb-1 [&_h3]:font-medium [&_h3]:text-sm [&_h3]:mt-2 [&_h3]:mb-1 [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:my-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:my-1 [&_pre]:bg-black/5 [&_pre]:rounded [&_pre]:p-2 [&_pre]:my-2 [&_pre]:text-xs [&_pre]:font-mono [&_pre]:overflow-x-auto [&_code]:bg-black/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_a]:text-[#6B45FF] [&_a]:underline">
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamContent}</ReactMarkdown>
+                                    </div>
                                     {isGenerating && (
                                         <span
                                             style={{
@@ -385,38 +590,6 @@ export function GlobalAIChat() {
                                         />
                                     )}
                                 </div>
-                            </div>
-                        )}
-                        {lastBlocks && editor && (
-                            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                                <button
-                                    onClick={handleInsertToDoc}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
-                                        padding: '8px 14px',
-                                        borderRadius: '8px',
-                                        border: '1px solid #6B45FF',
-                                        backgroundColor: '#fff',
-                                        color: '#6B45FF',
-                                        fontSize: '13px',
-                                        fontWeight: 500,
-                                        cursor: 'pointer',
-                                        transition: 'all 0.15s',
-                                    }}
-                                    onMouseEnter={e => {
-                                        e.currentTarget.style.backgroundColor = '#6B45FF'
-                                        e.currentTarget.style.color = '#fff'
-                                    }}
-                                    onMouseLeave={e => {
-                                        e.currentTarget.style.backgroundColor = '#fff'
-                                        e.currentTarget.style.color = '#6B45FF'
-                                    }}
-                                >
-                                    <FileInput size={14} />
-                                    插入文档
-                                </button>
                             </div>
                         )}
                         <div ref={messagesEndRef} />
@@ -480,7 +653,7 @@ export function GlobalAIChat() {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={handleSend}
+                                    onClick={() => handleSend()}
                                     disabled={!keyword.trim()}
                                     style={{
                                         display: 'flex',

@@ -35,6 +35,9 @@ jobs:
       - name: Build core
         run: pnpm --filter @lcw-doc/core build
 
+      - name: Build react
+        run: pnpm --filter @lcw-doc/react build
+
       - name: TypeCheck
         run: pnpm typecheck
 

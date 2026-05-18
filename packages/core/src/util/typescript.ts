@@ -30,9 +30,9 @@ export class UnreachableCaseError extends Error {
  * @param obj - 要检查的对象
  * @param throwError - 当对象不为空时是否抛出错误，默认为 true
  */
-export function assertEmpty(obj: Record<string, never>, throwError = true) {
+export function assertEmpty(obj: object, throwError = true) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { 'data-test': dataTest, ...rest } = obj // exclude data-test
+    const { 'data-test': dataTest, ...rest } = obj as Record<string, unknown> // exclude data-test
 
     if (Object.keys(rest).length > 0 && throwError) {
         throw new Error('Object must be empty ' + JSON.stringify(obj))

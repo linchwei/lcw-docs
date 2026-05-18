@@ -1,4 +1,4 @@
-import { LcwDocEditor } from '@Lcw-doc/core'
+import { LcwDocEditor } from '@lcw-doc/core'
 import { flushSync } from 'react-dom'
 import { createRoot, Root } from 'react-dom/client'
 

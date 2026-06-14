@@ -73,9 +73,8 @@ export const createGhostTextPlugin = () => {
                 }
 
                 if (event.key === 'Escape') {
-                    event.preventDefault()
                     view.dispatch(view.state.tr.setMeta(PLUGIN_KEY, { type: 'dismiss' }))
-                    return true
+                    return false
                 }
 
                 return false

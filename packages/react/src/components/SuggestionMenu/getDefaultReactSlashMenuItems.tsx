@@ -4,6 +4,7 @@ import {
     RiEmotionFill,
     RiFile2Line,
     RiFilmLine,
+    RiFunctionLine,
     RiH1,
     RiH2,
     RiH3,
@@ -36,6 +37,7 @@ const icons = {
     file: RiFile2Line,
     emoji: RiEmotionFill,
     code_block: RiCodeBlock,
+    math_block: RiFunctionLine,
 }
 
 export function getDefaultReactSlashMenuItems<BSchema extends BlockSchema, I extends InlineContentSchema, S extends StyleSchema>(

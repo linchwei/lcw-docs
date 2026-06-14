@@ -199,6 +199,18 @@ export function getDefaultSlashMenuItems<BSchema extends BlockSchema, I extends 
         })
     }
 
+    if (checkDefaultBlockTypeInSchema('mathBlock', editor)) {
+        items.push({
+            onItemClick: () => {
+                insertOrUpdateBlock(editor, {
+                    type: 'mathBlock',
+                })
+            },
+            key: 'math_block',
+            ...editor.dictionary.slash_menu.math_block,
+        })
+    }
+
     if (checkDefaultBlockTypeInSchema('table', editor)) {
         items.push({
             onItemClick: () => {

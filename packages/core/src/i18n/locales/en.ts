@@ -66,6 +66,12 @@ export const en = {
             aliases: ['code', 'pre'],
             group: 'Basic blocks',
         },
+        math_block: {
+            title: 'Math Block',
+            subtext: 'Block-level math formula with KaTeX',
+            aliases: ['math', 'latex', 'formula', 'katex', '$$'],
+            group: 'Basic blocks',
+        },
         table: {
             title: 'Table',
             subtext: 'Table with editable cells',

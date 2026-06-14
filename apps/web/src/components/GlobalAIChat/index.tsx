@@ -1,4 +1,4 @@
-import { PartialBlock } from '@lcw-doc/core'
+import { extractTextFromBlocks, PartialBlock } from '@lcw-doc/core'
 import { ArrowUp, Copy, FileInput, FileText, Lightbulb, MessageSquare, PenLine, Plus, RotateCcw, Search, Sparkles, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -18,30 +18,6 @@ const suggestions = [
     { icon: Lightbulb, label: '给我一些写作灵感', prompt: '请给我一些关于当前主题的写作灵感和建议。' },
     { icon: Search, label: '解释选中的内容', prompt: '请用通俗易懂的语言解释以下内容：' },
 ]
-
-function extractTextFromBlocks(blocks: PartialBlock[]): string {
-    let text = ''
-    for (const block of blocks) {
-        if (block.content) {
-            if (typeof block.content === 'string') {
-                text += block.content + '\n'
-            } else if (Array.isArray(block.content)) {
-                for (const inline of block.content) {
-                    if (typeof inline === 'string') {
-                        text += inline
-                    } else if (inline.type === 'text' && inline.text) {
-                        text += inline.text
-                    }
-                }
-                text += '\n'
-            }
-        }
-        if (block.children) {
-            text += extractTextFromBlocks(block.children)
-        }
-    }
-    return text
-}
 
 interface ChatMessageItem {
     role: 'user' | 'assistant'
@@ -133,8 +109,8 @@ export function GlobalAIChat() {
         if (editor) {
             try {
                 const blocks = editor.document
-                const docText = extractTextFromBlocks(blocks as PartialBlock[])
-                context = docText.slice(0, 3000)
+                const docText = extractTextFromBlocks(blocks as PartialBlock[], 3000)
+                context = docText
             } catch {
                 void 0
             }

@@ -1,4 +1,4 @@
-import { PartialBlock } from '@lcw-doc/core'
+import { extractTextFromBlocks, PartialBlock } from '@lcw-doc/core'
 import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 import { ArrowUp, ClipboardList, Globe, ListChecks, MessageCircle, Sparkles, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -27,25 +27,6 @@ const presetActions = [
     { icon: MessageCircle, title: '智能问答', description: '基于文档内容回答提问', prompt: '我已经阅读了这篇文档，请告诉我你可以回答哪些关于这篇文档的问题？' },
     { icon: Globe, title: '内容翻译', description: '将文档翻译为指定语言', prompt: '请将这篇文档的内容翻译为英文，保持原文的语义和风格。' },
 ]
-
-function extractTextFromBlocks(blocks: any[]): string {
-    let text = ''
-    for (const block of blocks) {
-        if (block.content) {
-            if (typeof block.content === 'string') {
-                text += block.content + '\n'
-            } else if (Array.isArray(block.content)) {
-                for (const inline of block.content) {
-                    if (typeof inline === 'string') text += inline
-                    else if (inline.type === 'text' && inline.text) text += inline.text
-                }
-                text += '\n'
-            }
-        }
-        if (block.children) text += extractTextFromBlocks(block.children)
-    }
-    return text
-}
 
 export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
     const { editor } = useEditorContext()
@@ -83,8 +64,8 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
         if (!editor) return undefined
         try {
             const blocks = editor.document
-            const docText = extractTextFromBlocks(blocks as PartialBlock[])
-            return docText.slice(0, 6000)
+            const docText = extractTextFromBlocks(blocks as PartialBlock[], 6000)
+            return docText
         } catch {
             return undefined
         }

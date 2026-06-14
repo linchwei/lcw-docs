@@ -68,6 +68,12 @@ export const zh: Dictionary = {
             aliases: ['code', 'pre', '代码', '预格式'],
             group: '基础',
         },
+        math_block: {
+            title: '数学公式',
+            subtext: '使用 KaTeX 渲染的块级数学公式',
+            aliases: ['math', 'latex', '公式', '数学', 'katex', '$$'],
+            group: '基础',
+        },
         table: {
             title: '表格',
             subtext: '使用表格',

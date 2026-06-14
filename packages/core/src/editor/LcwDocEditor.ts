@@ -517,6 +517,14 @@ export class LcwDocEditor<
         }
     }
 
+    public unmount = () => {
+        this._tiptapEditor.unmount()
+    }
+
+    public destroy = () => {
+        this._tiptapEditor.destroy()
+    }
+
     /**
      * 获取 ProseMirror EditorView 实例
      */

@@ -8,7 +8,7 @@ import {
     LcwDocEditorOptions,
     StyleSchema,
 } from '@lcw-doc/core'
-import { DependencyList, useMemo } from 'react'
+import { DependencyList, useEffect, useMemo } from 'react'
 
 export const useCreateLcwDoc = <
     BSchema extends BlockSchema = DefaultBlockSchema,
@@ -18,13 +18,21 @@ export const useCreateLcwDoc = <
     options: Partial<LcwDocEditorOptions<BSchema, ISchema, SSchema>> = {},
     deps: DependencyList = []
 ) => {
-    return useMemo(() => {
+    const editor = useMemo(() => {
         const editor = LcwDocEditor.create<BSchema, ISchema, SSchema>(options)
         if (window) {
             ;(window as any).ProseMirror = editor._tiptapEditor
         }
         return editor
     }, deps)
+
+    useEffect(() => {
+        return () => {
+            editor.unmount()
+        }
+    }, [editor])
+
+    return editor
 }
 
 export const useLcwDoc = useCreateLcwDoc

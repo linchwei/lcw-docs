@@ -1,4 +1,4 @@
-import { BlockSchema, InlineContentSchema, LcwDocEditor, PartialBlock, StyleSchema } from '@lcw-doc/core'
+import { BlockSchema, InlineContentSchema, LcwDocEditor, PartialBlock, StyleSchema, extractTextFromBlocks } from '@lcw-doc/core'
 import { ArrowUp, Sparkles, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -9,30 +9,6 @@ import { ChatMessage, chatWithAI } from '@/services'
 interface BasicAIChatPanelProps<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema> {
     editor?: LcwDocEditor<BSchema, ISchema, SSchema>
     onResponse?: (response: PartialBlock<BSchema, ISchema, SSchema>[]) => void
-}
-
-function extractTextFromBlocks(blocks: PartialBlock[]): string {
-    let text = ''
-    for (const block of blocks) {
-        if (block.content) {
-            if (typeof block.content === 'string') {
-                text += block.content + '\n'
-            } else if (Array.isArray(block.content)) {
-                for (const inline of block.content) {
-                    if (typeof inline === 'string') {
-                        text += inline
-                    } else if (inline.type === 'text' && inline.text) {
-                        text += inline.text
-                    }
-                }
-                text += '\n'
-            }
-        }
-        if (block.children) {
-            text += extractTextFromBlocks(block.children)
-        }
-    }
-    return text
 }
 
 const SYSTEM_PROMPT =
@@ -60,8 +36,8 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
         if (props.editor) {
             try {
                 const blocks = props.editor.document
-                const docText = extractTextFromBlocks(blocks as PartialBlock[])
-                context = docText.slice(0, 3000)
+                const docText = extractTextFromBlocks(blocks as PartialBlock[], 3000)
+                context = docText
             } catch {
                 void 0
             }

@@ -30,6 +30,7 @@ import { CodeBlock } from './CodeBlockContent/CodeBlockContent'
 import { FileBlock } from './FileBlockContent/FileBlockContent'
 import { Heading } from './HeadingBlockContent/HeadingBlockContent'
 import { ImageBlock } from './ImageBlockContent/ImageBlockContent'
+import { MathBlock } from './MathBlockContent/MathBlockContent'
 import { BulletListItem } from './ListItemBlockContent/BulletListItemBlockContent/BulletListItemBlockContent'
 import { CheckListItem } from './ListItemBlockContent/CheckListItemBlockContent/CheckListItemBlockContent'
 import { NumberedListItem } from './ListItemBlockContent/NumberedListItemBlockContent/NumberedListItemBlockContent'
@@ -53,6 +54,7 @@ export const defaultBlockSpecs = {
     table: Table,
     file: FileBlock,
     image: ImageBlock,
+    mathBlock: MathBlock,
     video: VideoBlock,
     audio: AudioBlock,
 } satisfies BlockSpecs

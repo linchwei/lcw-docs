@@ -37,9 +37,19 @@ export function EditorContent(props: { editor: LcwDocEditor<any, any, any>; chil
             },
         }
 
-        queueMicrotask(() => {
-            props.editor._tiptapEditor.createNodeViews()
-        })
+        const editor = props.editor._tiptapEditor
+
+        const createNodeViewsWhenReady = () => {
+            if (editor.isInitialized) {
+                editor.createNodeViews()
+            } else {
+                editor.on('create', () => {
+                    editor.createNodeViews()
+                })
+            }
+        }
+
+        createNodeViewsWhenReady()
         return () => {
             props.editor._tiptapEditor.contentComponent = null
         }

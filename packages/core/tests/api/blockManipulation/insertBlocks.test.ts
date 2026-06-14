@@ -25,6 +25,7 @@ describe('insertBlocks', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
     })
 

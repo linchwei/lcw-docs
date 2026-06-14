@@ -4,9 +4,7 @@
  * 支持表格的列宽调整、单元格编辑等核心功能
  */
 import { Node } from '@tiptap/core'
-import { TableCell } from '@tiptap/extension-table-cell'
-import { TableHeader } from '@tiptap/extension-table-header'
-import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell, TableHeader, TableRow } from '@tiptap/extension-table'
 import { Node as PMNode } from 'prosemirror-model'
 import { TableView } from 'prosemirror-tables'
 import { ViewMutationRecord } from 'prosemirror-view'

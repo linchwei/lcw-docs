@@ -57,9 +57,7 @@ class SuggestionMenuView<BSchema extends BlockSchema, I extends InlineContentSch
             })
         }
 
-        this.rootEl = this.editor._tiptapEditor.view.root
-
-        this.rootEl?.addEventListener('scroll', this.handleScroll, true)
+        this.rootEl = undefined
     }
 
     /**
@@ -85,6 +83,11 @@ class SuggestionMenuView<BSchema extends BlockSchema, I extends InlineContentSch
      * 处理菜单的显示、隐藏和内容更新
      */
     update(view: EditorView, prevState: EditorState) {
+        if (!this.rootEl) {
+            this.rootEl = this.editor._tiptapEditor.view.root
+            this.rootEl?.addEventListener('scroll', this.handleScroll, true)
+        }
+
         const prev: SuggestionPluginState = suggestionMenuPluginKey.getState(prevState)
         const next: SuggestionPluginState = suggestionMenuPluginKey.getState(view.state)
         const started = prev === undefined && next !== undefined

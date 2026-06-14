@@ -25,6 +25,7 @@ describe('replaceBlocks', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
     })
 

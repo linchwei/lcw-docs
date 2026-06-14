@@ -76,8 +76,8 @@ export class LcwDocTipTapEditor extends TiptapEditor {
      * @param styleSchema - 样式 Schema
      */
     protected constructor(options: LcwDocTipTapEditorOptions, styleSchema: StyleSchema) {
-        // 传递 content: undefined 给父类，因为我们会在之后手动创建文档
-        super({ ...options, content: undefined })
+        // v3: 传递 content: undefined 和 element: undefined 防止自动挂载和创建默认内容
+        super({ ...options, content: undefined, element: undefined })
 
         const schema = this.schema
         let cache: any
@@ -124,10 +124,11 @@ export class LcwDocTipTapEditor extends TiptapEditor {
             throw new Error('Error creating document from blocks passed as `initialContent`:\n' + +JSON.stringify(options.content))
         }
 
-        // 创建编辑器状态
+        // 创建编辑器状态（包含扩展插件）
         this._state = EditorState.create({
             doc,
             schema: this.schema,
+            plugins: this.extensionManager.plugins,
         })
     }
 
@@ -138,8 +139,10 @@ export class LcwDocTipTapEditor extends TiptapEditor {
      * 否则返回内部维护的状态。
      */
     get state() {
-        if (this.view) {
-            this._state = this.view.state
+        // @ts-expect-error v3 中 editorView 为 private 字段，view getter 返回 Proxy（始终 truthy）
+        if (this.editorView) {
+            // @ts-expect-error v3 中 editorView 为 private 字段
+            this._state = this.editorView.state
         }
         return this._state
     }
@@ -150,8 +153,10 @@ export class LcwDocTipTapEditor extends TiptapEditor {
      * @param tr - 要分发的 TipTap 事务
      */
     dispatch(tr: Transaction) {
-        if (this.view) {
-            this.view.dispatch(tr)
+        // @ts-expect-error v3 中 editorView 为 private 字段，view getter 返回 Proxy（始终 truthy）
+        if (this.editorView) {
+            // @ts-expect-error v3 中 editorView 为 private 字段
+            this.editorView.dispatch(tr)
         } else {
             this._state = this.state.apply(tr)
         }
@@ -161,62 +166,62 @@ export class LcwDocTipTapEditor extends TiptapEditor {
      * 创建编辑器视图的替代方法
      *
      * 使用 queueMicrotask 延迟创建视图，以确保所有扩展都已初始化。
-     * 该方法创建 EditorView 并配置状态、插件和节点视图。
+     * v3 中 view 为只读 getter，通过设置私有 editorView 字段实现。
      */
     private createViewAlternative() {
-        queueMicrotask(() => {
-            this.view = new EditorView(
-                { mount: this.options.element as any },
-                {
-                    ...this.options.editorProps,
+        let view: EditorView
 
-                    // 绑定事务分发方法
-                    // @ts-expect-error dispatchTransaction 在 Editor 基类中是私有的，但我们需要绑定它
-                    dispatchTransaction: this.dispatchTransaction.bind(this),
-                    state: this.state,
-                }
-            )
+        view = new EditorView(
+            { mount: this.options.element as any },
+            {
+                ...this.options.editorProps,
+                state: this.state,
+                dispatchTransaction: (tr: Transaction) => {
+                    const newState = this.state.apply(tr)
+                    this._state = newState
+                    if (view) {
+                        view.updateState(newState)
+                    }
 
-            // 重新配置状态以包含扩展管理器创建的插件
-            const newState = this.state.reconfigure({
-                plugins: this.extensionManager.plugins,
-            })
+                    this.emit('transaction', { editor: this, transaction: tr, appendedTransactions: [] })
+                    if (tr.docChanged) {
+                        this.emit('update', { editor: this, transaction: tr, appendedTransactions: [] })
+                    }
+                    if (tr.selectionSet) {
+                        this.emit('selectionUpdate', { editor: this, transaction: tr })
+                    }
+                },
+            }
+        )
 
-            this.view.updateState(newState)
+        // v3: view 是只读 getter，通过设置私有 editorView 字段绕过
+        // @ts-expect-error v3 中 editorView 为 private 字段
+        this.editorView = view
 
-            // 创建节点视图
-            this.createNodeViews()
-
-            // 根据配置决定是否自动聚焦
-            this.commands.focus(this.options.autofocus)
-
-            // 触发创建事件
-            this.emit('create', { editor: this })
-            this.isInitialized = true
+        // 重新配置状态以包含扩展管理器创建的插件
+        const newState = this.state.reconfigure({
+            plugins: this.extensionManager.plugins,
         })
+
+        view.updateState(newState)
+
+        // createNodeViews 由 EditorContent 在设置 contentComponent 后调用
+
+        // 根据配置决定是否自动聚焦
+        this.commands.focus(this.options.autofocus)
+
+        // 触发创建事件
+        this.emit('create', { editor: this })
+        this.isInitialized = true
     }
 
     /**
      * 将编辑器挂载到指定元素
      *
-     * @param element - 要挂载的 DOM 元素，如果为 null 则销毁编辑器
+     * @param element - 要挂载的 DOM 元素
      */
-    public mount = (element?: HTMLElement | null) => {
-        if (!element) {
-            this.destroy()
-        } else {
-            this.options.element = element
-            this.createViewAlternative()
-        }
+    public mount = (element: NonNullable<EditorOptions['element']> & {}) => {
+        this.options.element = element
+        this.createViewAlternative()
     }
-}
-
-/**
- * 覆盖 TipTap 编辑器的 createView 方法
- *
- * 此覆盖禁用了默认的粘贴和拖拽处理，
- * 因为我们使用自定义的扩展来处理这些功能。
- */
-;(LcwDocTipTapEditor.prototype as any).createView = function () {
-    this.options.onPaste = this.options.onDrop = () => false
 }

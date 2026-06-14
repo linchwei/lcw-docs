@@ -129,10 +129,15 @@ export function createInlineContentSpec<T extends CustomInlineContentConfig, S e
                             return
                         }
 
+                        const pos = getPos()
+                        if (pos === undefined) {
+                            return
+                        }
+
                         const content = inlineContentToNodes([update], editor._tiptapEditor.schema, editor.schema.styleSchema)
 
                         editor._tiptapEditor.view.dispatch(
-                            editor._tiptapEditor.view.state.tr.replaceWith(getPos(), getPos() + node.nodeSize, content)
+                            editor._tiptapEditor.view.state.tr.replaceWith(pos, pos + node.nodeSize, content)
                         )
                     },
                     editor

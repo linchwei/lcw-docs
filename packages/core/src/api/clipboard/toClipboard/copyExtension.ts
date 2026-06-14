@@ -99,7 +99,7 @@ export function selectedFragmentToHTML<BSchema extends BlockSchema, I extends In
         )
     }
 
-    const clipboardHTML: string = (pmView as any).__serializeForClipboard(view, view.state.selection.content()).dom.innerHTML
+    const clipboardHTML: string = view.serializeForClipboard(view.state.selection.content()).dom.innerHTML
 
     const selectedFragment = view.state.selection.content().content
 

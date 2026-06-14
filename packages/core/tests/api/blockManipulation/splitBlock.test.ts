@@ -43,6 +43,7 @@ describe('splitBlockCommand', () => {
                     content: 'Second',
                 },
             ],
+            trailingBlock: false,
         })
     })
 
@@ -63,6 +64,7 @@ describe('splitBlockCommand', () => {
                     content: 'Heading Text',
                 },
             ],
+            trailingBlock: false,
         })
 
         applySplit(editor, 'heading-1', 7)
@@ -83,6 +85,7 @@ describe('splitBlockCommand', () => {
                     content: 'Heading Text',
                 },
             ],
+            trailingBlock: false,
         })
 
         applySplit(editor, 'heading-1', 7, true)
@@ -120,6 +123,7 @@ describe('splitBlockCommand', () => {
                     content: 'Centered Text',
                 },
             ],
+            trailingBlock: false,
         })
 
         applySplit(editor, 'block-1', 7, false, true)

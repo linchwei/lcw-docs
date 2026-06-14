@@ -188,7 +188,7 @@ describe('LcwDocExtensions', () => {
 
             const extensionNames = extensions.map(ext => ext.name)
             expect(extensionNames).toContain('collaboration')
-            expect(extensionNames).toContain('collaborationCursor')
+            expect(extensionNames).toContain('collaborationCaret')
         })
 
         test('协作模式：带有 awareness 的 provider 应添加 CollaborationCursor', () => {
@@ -212,7 +212,7 @@ describe('LcwDocExtensions', () => {
             })
 
             const extensionNames = extensions.map(ext => ext.name)
-            expect(extensionNames).toContain('collaborationCursor')
+            expect(extensionNames).toContain('collaborationCaret')
         })
 
         test('协作模式：不带 awareness 的 provider 不应添加 CollaborationCursor', () => {
@@ -236,7 +236,7 @@ describe('LcwDocExtensions', () => {
             })
 
             const extensionNames = extensions.map(ext => ext.name)
-            expect(extensionNames).not.toContain('collaborationCursor')
+            expect(extensionNames).not.toContain('collaborationCaret')
         })
 
         test('协作模式：不应包含 History 扩展', () => {
@@ -260,7 +260,7 @@ describe('LcwDocExtensions', () => {
             })
 
             const extensionNames = extensions.map(ext => ext.name)
-            expect(extensionNames).not.toContain('history')
+            expect(extensionNames).not.toContain('undoRedo')
         })
 
         test('非协作模式：应包含 History 扩展', () => {
@@ -276,7 +276,7 @@ describe('LcwDocExtensions', () => {
             })
 
             const extensionNames = extensions.map(ext => ext.name)
-            expect(extensionNames).toContain('history')
+            expect(extensionNames).toContain('undoRedo')
         })
     })
 

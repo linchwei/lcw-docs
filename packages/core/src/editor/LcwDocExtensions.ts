@@ -6,13 +6,11 @@
  * 样式扩展（文本颜色、背景色等）以及协作编辑扩展。
  */
 
-import { Extension, Extensions } from '@tiptap/core'
+import { Extension } from '@tiptap/core'
 import Collaboration from '@tiptap/extension-collaboration'
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
-import { Dropcursor } from '@tiptap/extension-dropcursor'
-import { Gapcursor } from '@tiptap/extension-gapcursor'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
+import { Dropcursor, Gapcursor, UndoRedo } from '@tiptap/extensions'
 import { HardBreak } from '@tiptap/extension-hard-break'
-import { History } from '@tiptap/extension-history'
 import { Link } from '@tiptap/extension-link'
 import { Text } from '@tiptap/extension-text'
 import * as Y from 'yjs'
@@ -75,7 +73,7 @@ export const getLcwDocExtensions = <BSchema extends BlockSchema, I extends Inlin
     setIdAttribute?: boolean
 }) => {
     // 基础扩展列表
-    const ret: Extensions = [
+    const ret = [
         Gapcursor,
         // 唯一 ID 扩展，为 blockContainer 节点生成唯一 ID
         UniqueID.configure({
@@ -214,7 +212,7 @@ export const getLcwDocExtensions = <BSchema extends BlockSchema, I extends Inlin
 
             // 添加协作光标扩展
             ret.push(
-                CollaborationCursor.configure({
+                CollaborationCaret.configure({
                     user: opts.collaboration.user,
                     render: opts.collaboration.renderCursor || defaultRender,
                     provider: opts.collaboration.provider,
@@ -223,7 +221,7 @@ export const getLcwDocExtensions = <BSchema extends BlockSchema, I extends Inlin
         }
     } else {
         // 非协作模式下，添加历史扩展（支持撤销/重做）
-        ret.push(History)
+        ret.push(UndoRedo)
     }
 
     // 过滤掉需要禁用的扩展

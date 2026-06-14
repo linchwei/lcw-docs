@@ -28,57 +28,55 @@ export const PlaceholderPlugin = (editor: LcwDocEditor<any, any, any>, placehold
     return new Plugin({
         key: PLUGIN_KEY,
         view: () => {
-            const styleEl = document.createElement('style')
-            const nonce = editor._tiptapEditor.options.injectNonce
-            if (nonce) {
-                styleEl.setAttribute('nonce', nonce)
-            }
-            if (editor._tiptapEditor.view.root instanceof ShadowRoot) {
-                editor._tiptapEditor.view.root.append(styleEl)
-            } else {
-                editor._tiptapEditor.view.root.head.appendChild(styleEl)
-            }
+            let styleEl: HTMLStyleElement | undefined
 
-            const styleSheet = styleEl.sheet!
+            const ensureStyleEl = () => {
+                if (styleEl) return
 
-            /**
-             * 获取基础CSS选择器
-             *
-             * 选择器匹配包含单个trailingBreak的inline-content元素
-             */
-            const getBaseSelector = (additionalSelectors = '') =>
-                `.bn-block-content${additionalSelectors} .bn-inline-content:has(> .ProseMirror-trailingBreak:only-child):before`
-
-            /**
-             * 获取特定块类型的占位符选择器
-             *
-             * @param blockType - 块类型名称
-             * @param mustBeFocused - 是否必须在获得焦点状态
-             * @returns 完整的CSS选择器
-             */
-            const getSelector = (blockType: string | 'default', mustBeFocused = true) => {
-                const mustBeFocusedSelector = mustBeFocused ? `[data-is-empty-and-focused]` : ``
-
-                if (blockType === 'default') {
-                    return getBaseSelector(mustBeFocusedSelector)
+                styleEl = document.createElement('style')
+                const nonce = editor._tiptapEditor.options.injectNonce
+                if (nonce) {
+                    styleEl.setAttribute('nonce', nonce)
+                }
+                if (editor._tiptapEditor.view.root instanceof ShadowRoot) {
+                    editor._tiptapEditor.view.root.append(styleEl)
+                } else {
+                    editor._tiptapEditor.view.root.head.appendChild(styleEl)
                 }
 
-                const blockTypeSelector = `[data-content-type="${blockType}"]`
-                return getBaseSelector(mustBeFocusedSelector + blockTypeSelector)
-            }
+                const styleSheet = styleEl.sheet!
 
-            for (const [blockType, placeholder] of Object.entries(placeholders)) {
-                const mustBeFocused = blockType === 'default'
+                const getBaseSelector = (additionalSelectors = '') =>
+                    `.bn-block-content${additionalSelectors} .bn-inline-content:has(> .ProseMirror-trailingBreak:only-child):before`
 
-                styleSheet.insertRule(`${getSelector(blockType, mustBeFocused)}{ content: ${JSON.stringify(placeholder)}; }`)
+                const getSelector = (blockType: string | 'default', mustBeFocused = true) => {
+                    const mustBeFocusedSelector = mustBeFocused ? `[data-is-empty-and-focused]` : ``
 
-                if (!mustBeFocused) {
-                    styleSheet.insertRule(`${getSelector(blockType, true)}{ content: ${JSON.stringify(placeholder)}; }`)
+                    if (blockType === 'default') {
+                        return getBaseSelector(mustBeFocusedSelector)
+                    }
+
+                    const blockTypeSelector = `[data-content-type="${blockType}"]`
+                    return getBaseSelector(mustBeFocusedSelector + blockTypeSelector)
+                }
+
+                for (const [blockType, placeholder] of Object.entries(placeholders)) {
+                    const mustBeFocused = blockType === 'default'
+
+                    styleSheet.insertRule(`${getSelector(blockType, mustBeFocused)}{ content: ${JSON.stringify(placeholder)}; }`)
+
+                    if (!mustBeFocused) {
+                        styleSheet.insertRule(`${getSelector(blockType, true)}{ content: ${JSON.stringify(placeholder)}; }`)
+                    }
                 }
             }
 
             return {
+                update: () => {
+                    ensureStyleEl()
+                },
                 destroy: () => {
+                    if (!styleEl) return
                     if (editor._tiptapEditor.view.root instanceof ShadowRoot) {
                         editor._tiptapEditor.view.root.removeChild(styleEl)
                     } else {

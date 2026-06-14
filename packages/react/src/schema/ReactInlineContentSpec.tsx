@@ -130,6 +130,9 @@ export function createReactInlineContentSpec<T extends CustomInlineContentConfig
                                         ) as any as InlineContentFromConfig<T, S>
                                     }
                                     updateInlineContent={update => {
+                                        const pos = props.getPos()
+                                        if (pos === undefined) return
+
                                         const content = inlineContentToNodes(
                                             [update],
                                             editor._tiptapEditor.schema,
@@ -138,8 +141,8 @@ export function createReactInlineContentSpec<T extends CustomInlineContentConfig
 
                                         editor._tiptapEditor.view.dispatch(
                                             editor._tiptapEditor.view.state.tr.replaceWith(
-                                                props.getPos(),
-                                                props.getPos() + props.node.nodeSize,
+                                                pos,
+                                                pos + props.node.nodeSize,
                                                 content
                                             )
                                         )

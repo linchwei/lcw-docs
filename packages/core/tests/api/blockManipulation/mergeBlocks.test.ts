@@ -26,6 +26,7 @@ describe('mergeBlocksCommand', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
     })
 
@@ -146,6 +147,7 @@ describe('getPrevBlockPos', () => {
                     content: 'Second',
                 },
             ],
+            trailingBlock: false,
         })
     })
 

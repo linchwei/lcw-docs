@@ -643,6 +643,7 @@ describe('insertOrUpdateBlock', () => {
             block: { type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] },
             nextBlock: { type: 'paragraph', content: [] },
         })
+        editor.updateBlock.mockImplementation(() => { throw new Error('Cannot update block type') })
         editor.insertBlocks.mockReturnValue([{ type: 'heading', content: [] }])
         editor.schema.blockSchema['paragraph'] = { content: 'inline*' }
 

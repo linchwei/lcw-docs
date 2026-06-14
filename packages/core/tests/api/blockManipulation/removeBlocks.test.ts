@@ -25,6 +25,7 @@ describe('removeBlocks', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
     })
 
@@ -124,6 +125,7 @@ describe('removeBlocksWithCallback', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
     })
 

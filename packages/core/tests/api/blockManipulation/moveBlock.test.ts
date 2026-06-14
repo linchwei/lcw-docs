@@ -25,7 +25,7 @@ function setupEditorWithView(editor: LcwDocEditor) {
         ;(ttEditor as any)._state = newState
         mockView.state = newState
     }
-    ;(ttEditor as any).view = mockView
+    ;(ttEditor as any).editorView = mockView
 }
 
 function setCursorToBlock(editor: LcwDocEditor, blockId: string) {
@@ -59,6 +59,7 @@ describe('moveBlockUp', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
         setupEditorWithView(editor)
     })
@@ -116,6 +117,7 @@ describe('moveBlockDown', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
         setupEditorWithView(editor)
     })
@@ -173,6 +175,7 @@ describe('moveSelectedBlockAndSelection', () => {
                     content: 'Third',
                 },
             ],
+            trailingBlock: false,
         })
         setupEditorWithView(editor)
     })

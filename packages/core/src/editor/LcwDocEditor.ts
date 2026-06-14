@@ -469,7 +469,7 @@ export class LcwDocEditor<
         const tiptapOptions: LcwDocTipTapEditorOptions = {
             ...newOptions._tiptapOptions,
             content: initialContent,
-            extensions: [...(newOptions._tiptapOptions?.extensions || []), ...extensions],
+            extensions: [...(newOptions._tiptapOptions?.extensions || []), ...extensions] as any,
             editorProps: {
                 ...newOptions._tiptapOptions?.editorProps,
                 attributes: {
@@ -512,7 +512,9 @@ export class LcwDocEditor<
      * @param parentElement - 父 DOM 元素，编辑器将挂载到此元素内
      */
     public mount = (parentElement?: HTMLElement | null) => {
-        this._tiptapEditor.mount(parentElement)
+        if (parentElement) {
+            this._tiptapEditor.mount(parentElement)
+        }
     }
 
     /**

@@ -233,7 +233,9 @@ const checkListItemBlockContent = createStronglyTypedTiptapNode({
                 }
 
                 if (typeof getPos !== 'boolean') {
-                    const beforeBlockContainerPos = getNearestBlockContainerPos(editor.state.doc, getPos())
+                    const pos = getPos()
+                    if (pos === undefined) return
+                    const beforeBlockContainerPos = getNearestBlockContainerPos(editor.state.doc, pos)
                     this.editor.commands.command(
                         updateBlockCommand(this.options.editor, beforeBlockContainerPos.posBeforeNode, {
                             type: 'checkListItem',
@@ -257,10 +259,13 @@ const checkListItemBlockContent = createStronglyTypedTiptapNode({
             )
 
             if (typeof getPos !== 'boolean') {
-                const blockID = this.editor.state.doc.resolve(getPos()).node().attrs.id
-                const label = 'label-' + blockID
-                checkbox.setAttribute('aria-labelledby', label)
-                contentDOM.id = label
+                const pos = getPos()
+                if (pos !== undefined) {
+                    const blockID = this.editor.state.doc.resolve(pos).node().attrs.id
+                    const label = 'label-' + blockID
+                    checkbox.setAttribute('aria-labelledby', label)
+                    contentDOM.id = label
+                }
             }
 
             dom.removeChild(contentDOM)

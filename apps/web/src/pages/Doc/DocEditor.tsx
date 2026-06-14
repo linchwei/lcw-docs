@@ -18,6 +18,7 @@ import {
     SideMenuController,
     SuggestionMenuController,
     useCreateLcwDoc,
+    useGhostText,
 } from '@lcw-doc/react'
 import { LcwDocView } from '@lcw-doc/shadcn'
 import { useQuery } from '@tanstack/react-query'
@@ -39,6 +40,7 @@ import { CustomInputRules } from '@/extensions/CustomInputRules'
 import { Highlight, Subscript, Superscript } from '@/extensions/HighlightSupSubMarks'
 import { LinkInputRule } from '@/extensions/LinkInputRule'
 import * as srv from '@/services'
+import { chatWithAI } from '@/services/ai'
 import { User } from '@/types/api'
 
 import { cursorRender } from './cursorRender'
@@ -233,6 +235,8 @@ export function DocEditor(props: DocEditorProps) {
             onEditorReady(editor)
         }
     }, [editor, onEditorReady])
+
+    useGhostText(editor, chatWithAI)
 
     return (
         <LcwDocView editor={editor} editable={editable} theme={isDark ? 'dark' : 'light'} slashMenu={false} sideMenu={false}>

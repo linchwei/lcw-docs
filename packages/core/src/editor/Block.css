@@ -655,3 +655,10 @@ NESTED BLOCKS
     justify-content: flex-start;
     text-align: justify;
 }
+
+/* GHOST TEXT */
+.bn-ghost-text {
+    color: rgba(128, 128, 128, 0.4);
+    pointer-events: none;
+    font-style: italic;
+}

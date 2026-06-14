@@ -19,6 +19,8 @@ import { createDropFileExtension } from '../api/clipboard/fromClipboard/fileDrop
 import { createPasteFromClipboardExtension } from '../api/clipboard/fromClipboard/pasteExtension'
 import { createCopyToClipboardExtension } from '../api/clipboard/toClipboard/copyExtension'
 import { BackgroundColorExtension } from '../extensions/BackgroundColor/BackgroundColorExtension'
+import { GhostTextExtension } from '../extensions/GhostText/GhostTextExtension'
+import { ghostTextPluginKey } from '../extensions/GhostText/GhostTextPlugin'
 import { KeyboardShortcutsExtension } from '../extensions/KeyboardShortcuts/KeyboardShortcutsExtension'
 import { TextAlignmentExtension } from '../extensions/TextAlignment/TextAlignmentExtension'
 import { TextColorExtension } from '../extensions/TextColor/TextColorExtension'
@@ -105,6 +107,8 @@ export const getLcwDocExtensions = <BSchema extends BlockSchema, I extends Inlin
 
         // 背景颜色扩展
         BackgroundColorExtension,
+        // Ghost Text AI 自动补全扩展
+        GhostTextExtension,
         // 文本对齐扩展
         TextAlignmentExtension,
         // ESC 键覆盖扩展，用于关闭建议菜单
@@ -113,8 +117,10 @@ export const getLcwDocExtensions = <BSchema extends BlockSchema, I extends Inlin
             addKeyboardShortcuts() {
                 return {
                     Escape: () => {
-                        // 如果建议菜单显示中，则不处理 ESC 事件
                         if (opts.editor.suggestionMenus.shown) {
+                            return false
+                        }
+                        if (ghostTextPluginKey.getState(this.editor.state)) {
                             return false
                         }
                         return this.editor.commands.blur()

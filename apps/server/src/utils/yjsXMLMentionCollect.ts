@@ -10,7 +10,6 @@ export const yjsXmlMentionCollect = (xml: YjsXML) => {
     }
 
     /**
-     * 妙-码
      * 1. 从 docObject 中提取出所有 mention 的 id
      */
 

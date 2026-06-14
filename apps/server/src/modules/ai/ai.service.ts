@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import type { ChatMessage } from './ai.dto'
 
-export interface ChatMessage {
-    role: 'system' | 'user' | 'assistant'
-    content: string
-}
+const DEFAULT_MODEL = 'deepseek-v4-flash'
 
 @Injectable()
 export class AiService {
@@ -16,6 +14,8 @@ export class AiService {
             throw new Error('DEEPSEEK_API_KEY is not configured')
         }
 
+        const model = this.configService.get<string>('DEEPSEEK_MODEL') ?? DEFAULT_MODEL
+
         const response = await fetch('https://api.deepseek.com/chat/completions', {
             method: 'POST',
             headers: {
@@ -23,7 +23,7 @@ export class AiService {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'deepseek-v4-flash',
+                model,
                 messages,
                 stream: true,
             }),

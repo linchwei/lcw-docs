@@ -45,7 +45,7 @@ export class AiController {
     })
     @Post('chat')
     async chat(@Body(new ZodValidationPipe(chatSchema)) body: ChatDto, @Request() req, @Res() res: Response) {
-        const upstream = await this.aiService.chatStream(body.messages as import('./ai.service').ChatMessage[])
+        const upstream = await this.aiService.chatStream(body.messages)
 
         res.setHeader('Content-Type', 'text/event-stream')
         res.setHeader('Cache-Control', 'no-cache')

@@ -65,6 +65,7 @@ const CalloutBlockContent = createStronglyTypedTiptapNode({
         wrapper.style.backgroundColor = config.bg
         wrapper.style.borderRadius = '4px'
         wrapper.style.border = `1px solid ${config.color}22`
+        wrapper.style.width = '100%'
 
         const iconSpan = document.createElement('span')
         iconSpan.textContent = config.icon
@@ -107,6 +108,7 @@ const CalloutBlockContent = createStronglyTypedTiptapNode({
             wrapper.style.borderRadius = '4px'
             wrapper.style.border = `1px solid ${config.color}22`
             wrapper.style.position = 'relative'
+            wrapper.style.width = '100%'
 
             const iconSpan = document.createElement('span')
             iconSpan.textContent = config.icon

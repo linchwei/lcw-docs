@@ -5,6 +5,30 @@ BASIC STYLES
 .bn-block-outer {
     line-height: 1.6;
     transition: margin 0.2s;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.bn-block-outer:first-child {
+    margin-top: 0;
+}
+
+.bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type='heading']) {
+    margin-top: 26px;
+    margin-bottom: 10px;
+}
+
+.bn-block-outer:first-child:has(> .bn-block > .bn-block-content[data-content-type='heading']) {
+    margin-top: 0;
+}
+
+.bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type='table']) {
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.bn-block-outer:first-child:has(> .bn-block > .bn-block-content[data-content-type='table']) {
+    margin-top: 0;
 }
 
 /*Ensures blocks & block content spans editor width*/

@@ -199,6 +199,19 @@ export function getDefaultSlashMenuItems<BSchema extends BlockSchema, I extends 
         })
     }
 
+    if (checkDefaultBlockTypeInSchema('callout', editor)) {
+        items.push({
+            onItemClick: () => {
+                insertOrUpdateBlock(editor, {
+                    type: 'callout',
+                    props: { calloutType: 'info' },
+                })
+            },
+            key: 'callout',
+            ...editor.dictionary.slash_menu.callout,
+        })
+    }
+
     if (checkDefaultBlockTypeInSchema('mathBlock', editor)) {
         items.push({
             onItemClick: () => {
@@ -208,6 +221,30 @@ export function getDefaultSlashMenuItems<BSchema extends BlockSchema, I extends 
             },
             key: 'math_block',
             ...editor.dictionary.slash_menu.math_block,
+        })
+    }
+
+    if (checkDefaultBlockTypeInSchema('divider', editor)) {
+        items.push({
+            onItemClick: () => {
+                insertOrUpdateBlock(editor, {
+                    type: 'divider',
+                })
+            },
+            key: 'divider',
+            ...editor.dictionary.slash_menu.divider,
+        })
+    }
+
+    if (checkDefaultBlockTypeInSchema('blockquote', editor)) {
+        items.push({
+            onItemClick: () => {
+                insertOrUpdateBlock(editor, {
+                    type: 'blockquote',
+                })
+            },
+            key: 'blockquote',
+            ...editor.dictionary.slash_menu.blockquote,
         })
     }
 

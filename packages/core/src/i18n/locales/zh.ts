@@ -68,6 +68,12 @@ export const zh: Dictionary = {
             aliases: ['code', 'pre', '代码', '预格式'],
             group: '基础',
         },
+        callout: {
+            title: '提示框',
+            subtext: '突出显示的信息提示',
+            aliases: ['callout', 'alert', 'notice', '提示框', '警告'],
+            group: '基础',
+        },
         math_block: {
             title: '数学公式',
             subtext: '使用 KaTeX 渲染的块级数学公式',
@@ -109,6 +115,18 @@ export const zh: Dictionary = {
             subtext: '用于插入表情符号',
             aliases: ['表情符号', 'emoji', 'face', 'emote', '表情', '表情表达', '表情'],
             group: '其他',
+        },
+        divider: {
+            title: '分割线',
+            subtext: '水平分割线',
+            aliases: ['divider', 'hr', '分割线', '水平线'],
+            group: '基础',
+        },
+        blockquote: {
+            title: '引用',
+            subtext: '引用一段文字',
+            aliases: ['blockquote', 'quote', '引用'],
+            group: '基础',
         },
     },
     placeholders: {

@@ -66,6 +66,12 @@ export const en = {
             aliases: ['code', 'pre'],
             group: 'Basic blocks',
         },
+        callout: {
+            title: 'Callout',
+            subtext: 'Highlight information with a callout',
+            aliases: ['callout', 'alert', 'notice', 'info', 'warning'],
+            group: 'Basic blocks',
+        },
         math_block: {
             title: 'Math Block',
             subtext: 'Block-level math formula with KaTeX',
@@ -107,6 +113,18 @@ export const en = {
             subtext: 'Search for and insert an emoji',
             aliases: ['emoji', 'emote', 'emotion', 'face'],
             group: 'Others',
+        },
+        divider: {
+            title: 'Divider',
+            subtext: 'Horizontal divider line',
+            aliases: ['divider', 'hr', 'horizontal rule'],
+            group: 'Basic blocks',
+        },
+        blockquote: {
+            title: 'Block Quote',
+            subtext: 'Quote a block of text',
+            aliases: ['blockquote', 'quote', 'block quote'],
+            group: 'Basic blocks',
         },
     },
     placeholders: {

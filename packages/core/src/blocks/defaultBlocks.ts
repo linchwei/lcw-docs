@@ -26,7 +26,9 @@ import {
     StyleSpecs,
 } from '../schema/index'
 import { AudioBlock } from './AudioBlockContent/AudioBlockContent'
+import { Callout } from './CalloutBlockContent/CalloutBlockContent'
 import { CodeBlock } from './CodeBlockContent/CodeBlockContent'
+import { Divider } from './DividerBlockContent/DividerBlockContent'
 import { FileBlock } from './FileBlockContent/FileBlockContent'
 import { Heading } from './HeadingBlockContent/HeadingBlockContent'
 import { ImageBlock } from './ImageBlockContent/ImageBlockContent'
@@ -34,6 +36,7 @@ import { MathBlock } from './MathBlockContent/MathBlockContent'
 import { BulletListItem } from './ListItemBlockContent/BulletListItemBlockContent/BulletListItemBlockContent'
 import { CheckListItem } from './ListItemBlockContent/CheckListItemBlockContent/CheckListItemBlockContent'
 import { NumberedListItem } from './ListItemBlockContent/NumberedListItemBlockContent/NumberedListItemBlockContent'
+import { Blockquote } from './BlockquoteBlockContent/BlockquoteBlockContent'
 import { Paragraph } from './ParagraphBlockContent/ParagraphBlockContent'
 import { Table } from './TableBlockContent/TableBlockContent'
 import { VideoBlock } from './VideoBlockContent/VideoBlockContent'
@@ -47,6 +50,7 @@ export { customizeCodeBlock } from './CodeBlockContent/CodeBlockContent'
 export const defaultBlockSpecs = {
     paragraph: Paragraph,
     heading: Heading,
+    callout: Callout,
     codeBlock: CodeBlock,
     bulletListItem: BulletListItem,
     numberedListItem: NumberedListItem,
@@ -57,6 +61,8 @@ export const defaultBlockSpecs = {
     mathBlock: MathBlock,
     video: VideoBlock,
     audio: AudioBlock,
+    divider: Divider,
+    blockquote: Blockquote,
 } satisfies BlockSpecs
 
 /**

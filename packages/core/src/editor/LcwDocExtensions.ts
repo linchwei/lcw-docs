@@ -21,6 +21,7 @@ import { createCopyToClipboardExtension } from '../api/clipboard/toClipboard/cop
 import { BackgroundColorExtension } from '../extensions/BackgroundColor/BackgroundColorExtension'
 import { GhostTextExtension } from '../extensions/GhostText/GhostTextExtension'
 import { KeyboardShortcutsExtension } from '../extensions/KeyboardShortcuts/KeyboardShortcutsExtension'
+import { OutlineExtension } from '../extensions/Outline/OutlineExtension'
 import { TextAlignmentExtension } from '../extensions/TextAlignment/TextAlignmentExtension'
 import { TextColorExtension } from '../extensions/TextColor/TextColorExtension'
 import { TrailingNode } from '../extensions/TrailingNode/TrailingNodeExtension'
@@ -108,6 +109,8 @@ export const getLcwDocExtensions = <BSchema extends BlockSchema, I extends Inlin
         BackgroundColorExtension,
         // Ghost Text AI 自动补全扩展
         GhostTextExtension,
+        // 目录大纲扩展
+        OutlineExtension,
         // 文本对齐扩展
         TextAlignmentExtension,
         // ESC 键覆盖扩展，用于关闭建议菜单

@@ -1,6 +1,8 @@
 import { BlockSchema, getDefaultSlashMenuItems, InlineContentSchema, LcwDocEditor, StyleSchema } from '@lcw-doc/core'
 import {
+    RiAlertLine,
     RiCodeBlock,
+    RiDoubleQuotesL,
     RiEmotionFill,
     RiFile2Line,
     RiFilmLine,
@@ -12,6 +14,7 @@ import {
     RiListCheck3,
     RiListOrdered,
     RiListUnordered,
+    RiSeparator,
     RiTable2,
     RiText,
     RiVolumeUpFill,
@@ -37,7 +40,10 @@ const icons = {
     file: RiFile2Line,
     emoji: RiEmotionFill,
     code_block: RiCodeBlock,
+    callout: RiAlertLine,
     math_block: RiFunctionLine,
+    divider: RiSeparator,
+    blockquote: RiDoubleQuotesL,
 }
 
 export function getDefaultReactSlashMenuItems<BSchema extends BlockSchema, I extends InlineContentSchema, S extends StyleSchema>(

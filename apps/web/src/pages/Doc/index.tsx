@@ -581,10 +581,10 @@ export const Doc = () => {
                             onToggleCollapse={() => setOutlineCollapsed(!outlineCollapsed)}
                         />
                     )}
-                    <div className="flex-1 min-w-0 overflow-auto">
+                    <div className="flex-1 min-w-0 overflow-auto scroll-smooth relative">
                         <SearchBar editor={editorInstance} open={searchBarOpen} onClose={() => setSearchBarOpen(false)} />
                         <div
-                            className={`w-full ${pageWidth === 'default' ? 'max-w-[820px]' : pageWidth === 'wide' ? 'max-w-[1100px]' : 'max-w-none'} pl-6 pr-6 lg:pr-24 pt-24`}
+                            className={`w-full ${pageWidth === 'default' ? 'max-w-[820px]' : pageWidth === 'wide' ? 'max-w-[1100px]' : 'max-w-none'} pl-6 pr-6 lg:pr-24 pt-14`}
                         >
                             {isLoading ? (
                                 <div className="flex items-center justify-center py-20">

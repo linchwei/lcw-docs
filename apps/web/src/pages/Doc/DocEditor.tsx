@@ -6,13 +6,13 @@ import {
     defaultInlineContentSpecs,
     defaultStyleSpecs,
     filterSuggestionItems,
-    insertOrUpdateBlock,
     LcwDocEditor,
     LcwDocSchema,
     locales,
     PartialBlock,
 } from '@lcw-doc/core'
 import {
+    createAISlashMenuItem,
     DefaultReactSuggestionItem,
     getDefaultReactSlashMenuItems,
     SideMenuController,
@@ -22,17 +22,13 @@ import {
 } from '@lcw-doc/react'
 import { LcwDocView } from '@lcw-doc/shadcn'
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, Minus, Sparkles, Table as TableIcon, TextQuote } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import PubSub from 'pubsub-js'
 import { useEffect, useMemo, useState } from 'react'
-// import { yXmlFragmentToProseMirrorFragment, yXmlFragmentToProseMirrorRootNode } from 'y-prosemirror'
 import { WebsocketProvider } from 'y-websocket'
 import * as Y from 'yjs'
 
 import { AI } from '@/blocks/ai'
-import { Blockquote } from '@/blocks/blockquote'
-import { Callout } from '@/blocks/callout'
-import { Divider } from '@/blocks/divider'
 import { Mention } from '@/blocks/mention'
 import { BasicAIChat } from '@/components/BasicAIChat'
 import { EditorSideMenu } from '@/components/EditorSideMenu'
@@ -62,9 +58,6 @@ const schema = LcwDocSchema.create({
     blockSpecs: {
         ...defaultBlockSpecs,
         ai: AI,
-        blockquote: Blockquote,
-        divider: Divider,
-        callout: Callout,
     },
     styleSpecs: {
         ...defaultStyleSpecs,
@@ -106,67 +99,12 @@ const getMentionMenuItems = async (editor: typeof schema.LcwDocEditor, pageId?: 
     return items
 }
 
-// Slash menu item to insert an Alert block
-const insertAI = (editor: typeof schema.LcwDocEditor) => ({
-    title: 'AI',
-    subtext: 'AI，让进取的人更具职业价值',
-    onItemClick: () => {
-        const aiAnchorBlock = insertOrUpdateBlock(editor, {
-            type: 'paragraph',
-        })
-        const { id: aiAnchorBlockId } = aiAnchorBlock
-
-        PubSub.publishSync('ai-inserted', aiAnchorBlockId)
-    },
-    aliases: ['alert', 'notification', 'emphasize', 'warning', 'error', 'info', 'success'],
-    icon: <Sparkles color="#6B45FF" size={18} />,
-})
-
-const insertBlockquote = (editor: typeof schema.LcwDocEditor) => ({
-    title: '引用',
-    subtext: '引用一段文字',
-    onItemClick: () => {
-        insertOrUpdateBlock(editor, { type: 'blockquote' })
-    },
-    aliases: ['blockquote', 'quote', '引用'],
-    icon: <TextQuote size={18} />,
-})
-
-const insertDivider = (editor: typeof schema.LcwDocEditor) => ({
-    title: '分割线',
-    subtext: '水平分割线',
-    onItemClick: () => {
-        insertOrUpdateBlock(editor, { type: 'divider' })
-    },
-    aliases: ['divider', 'hr', '分割线', '水平线'],
-    icon: <Minus size={18} />,
-})
-
-const insertCallout = (editor: typeof schema.LcwDocEditor) => ({
-    title: '提示框',
-    subtext: '突出显示的信息提示',
-    onItemClick: () => {
-        insertOrUpdateBlock(editor, { type: 'callout', props: { calloutType: 'info' } })
-    },
-    aliases: ['callout', 'alert', 'notice', '提示框', '警告'],
-    icon: <AlertCircle size={18} />,
-})
-
-const insertTable = (editor: typeof schema.LcwDocEditor) => ({
-    title: '表格',
-    subtext: '插入可编辑的表格',
-    onItemClick: () => {
-        insertOrUpdateBlock(editor, {
-            type: 'table',
-            content: {
-                type: 'tableContent',
-                rows: [{ cells: ['', '', ''] }, { cells: ['', '', ''] }],
-            },
-        })
-    },
-    aliases: ['table', '表格'],
-    icon: <TableIcon size={18} />,
-})
+// Slash menu item to insert an AI block
+const aiMenuItem = (editor: typeof schema.LcwDocEditor) =>
+    createAISlashMenuItem(editor, {
+        onInsert: blockId => PubSub.publishSync('ai-inserted', blockId),
+        icon: <Sparkles color="#6B45FF" size={18} />,
+    })
 
 export function DocEditor(props: DocEditorProps) {
     const { pageId, doc, provider, onEditorReady, editable = true } = props
@@ -251,19 +189,7 @@ export function DocEditor(props: DocEditorProps) {
             {/* Replaces the default Slash Menu. */}
             <SuggestionMenuController
                 triggerCharacter="/"
-                getItems={async query =>
-                    filterSuggestionItems(
-                        [
-                            insertAI(editor),
-                            insertBlockquote(editor),
-                            insertDivider(editor),
-                            insertCallout(editor),
-                            insertTable(editor),
-                            ...getDefaultReactSlashMenuItems(editor).filter(item => item.title !== '表格'),
-                        ],
-                        query
-                    )
-                }
+                getItems={async query => filterSuggestionItems([aiMenuItem(editor), ...getDefaultReactSlashMenuItems(editor)], query)}
             />
             <BasicAIChat editor={editor} />
         </LcwDocView>

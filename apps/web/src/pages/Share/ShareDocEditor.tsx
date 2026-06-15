@@ -9,9 +9,6 @@ import { WebsocketProvider } from 'y-websocket'
 import * as Y from 'yjs'
 
 import { AI } from '@/blocks/ai'
-import { Blockquote } from '@/blocks/blockquote'
-import { Callout } from '@/blocks/callout'
-import { Divider } from '@/blocks/divider'
 import { Mention } from '@/blocks/mention'
 
 const schema = LcwDocSchema.create({
@@ -22,9 +19,6 @@ const schema = LcwDocSchema.create({
     blockSpecs: {
         ...defaultBlockSpecs,
         ai: AI,
-        blockquote: Blockquote,
-        divider: Divider,
-        callout: Callout,
     },
 })
 

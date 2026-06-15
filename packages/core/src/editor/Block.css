@@ -662,3 +662,19 @@ NESTED BLOCKS
     pointer-events: none;
     font-style: italic;
 }
+
+/* HEADING HIGHLIGHT ANIMATION */
+@keyframes headingHighlight {
+    0% { background-color: rgba(59, 130, 246, 0.15); }
+    100% { background-color: transparent; }
+}
+
+.bn-heading-highlight-overlay {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    animation: headingHighlight 2s ease-out forwards;
+    border-radius: 4px;
+    z-index: 1;
+}

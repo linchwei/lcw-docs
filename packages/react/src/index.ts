@@ -86,9 +86,12 @@ export * from './hooks/useCreateLcwDoc'
 export * from './hooks/useEditorChange'
 export * from './hooks/useEditorContentOrSelectionChange'
 export * from './hooks/useEditorSelectionChange'
+export * from './hooks/useDocOutline'
 export * from './hooks/useGhostText'
 export * from './hooks/usePrefersColorScheme'
 export * from './hooks/useSelectedBlocks'
+
+export * from './helpers/createAISlashMenuItem'
 
 export * from './schema/ReactBlockSpec'
 export * from './schema/ReactInlineContentSpec'

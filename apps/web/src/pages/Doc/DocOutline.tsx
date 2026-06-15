@@ -1,7 +1,5 @@
-import { LcwDocEditor } from '@lcw-doc/core'
+import { LcwDocEditor, useDocOutline } from '@lcw-doc/react'
 import { ChevronLeft, FileText, List } from 'lucide-react'
-
-import { useDocOutline } from './useDocOutline'
 
 interface DocOutlineProps {
     editor: LcwDocEditor
@@ -10,7 +8,7 @@ interface DocOutlineProps {
 }
 
 export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlineProps) {
-    const { headings, activeHeadingId } = useDocOutline(editor)
+    const { headings, activeHeadingId, scrollToHeading } = useDocOutline(editor)
 
     if (collapsed) {
         return (
@@ -38,11 +36,6 @@ export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlinePr
                 </button>
             </div>
         )
-    }
-
-    const handleClick = (blockId: string) => {
-        editor.setTextCursorPosition(blockId, 'start')
-        editor.focus()
     }
 
     const getIndentClass = (level: number) => {
@@ -89,7 +82,7 @@ export function DocOutline({ editor, collapsed, onToggleCollapse }: DocOutlinePr
                                 <li key={heading.id}>
                                     <button
                                         type="button"
-                                        onClick={() => handleClick(heading.id)}
+                                        onClick={() => scrollToHeading(heading.id)}
                                         className={`
                                             block w-full text-left text-[13px] leading-relaxed py-1 px-2 rounded-md
                                             transition-colors duration-150 truncate

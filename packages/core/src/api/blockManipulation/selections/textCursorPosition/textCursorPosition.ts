@@ -110,15 +110,31 @@ export function setTextCursorPosition<BSchema extends BlockSchema, I extends Inl
 
     if (contentType === 'inline') {
         if (placement === 'start') {
-            editor._tiptapEditor.commands.setTextSelection(blockContent.beforePos + 1)
+            editor._tiptapEditor
+                .chain()
+                .setTextSelection(blockContent.beforePos + 1)
+                .scrollIntoView()
+                .run()
         } else {
-            editor._tiptapEditor.commands.setTextSelection(blockContent.afterPos - 1)
+            editor._tiptapEditor
+                .chain()
+                .setTextSelection(blockContent.afterPos - 1)
+                .scrollIntoView()
+                .run()
         }
     } else if (contentType === 'table') {
         if (placement === 'start') {
-            editor._tiptapEditor.commands.setTextSelection(blockContent.beforePos + 4)
+            editor._tiptapEditor
+                .chain()
+                .setTextSelection(blockContent.beforePos + 4)
+                .scrollIntoView()
+                .run()
         } else {
-            editor._tiptapEditor.commands.setTextSelection(blockContent.afterPos - 4)
+            editor._tiptapEditor
+                .chain()
+                .setTextSelection(blockContent.afterPos - 4)
+                .scrollIntoView()
+                .run()
         }
     } else {
         throw new UnreachableCaseError(contentType)

@@ -83,6 +83,61 @@ function createGroups(element: HTMLElement) {
 }
 
 /**
+ * 将 blockquote 转换为编辑器可识别的结构
+ *
+ * ProseMirror DOMParser 无法正确判断 <blockquote> 的 blockGroup 边界，
+ * 会导致 blockquote 后续的所有内容被错误归入 blockquote 的 blockGroup。
+ * 此函数将 <blockquote> 包装在 div[data-node-type=blockContainer] 中，
+ * 并将其内部块级子元素的文本提取为内联内容。
+ */
+function transformBlockquotes(element: HTMLElement) {
+    // 从内到外处理嵌套 blockquote
+    const blockquotes = Array.from(element.querySelectorAll('blockquote')).reverse()
+
+    for (const bq of blockquotes) {
+        // 提取 blockquote 内部块级元素的文本，合并为内联内容
+        const textParts: string[] = []
+        const blockChildren: Element[] = []
+
+        Array.from(bq.children).forEach(child => {
+            if (child.nodeName === 'P' || /^H[1-6]$/.test(child.nodeName)) {
+                const text = child.textContent?.trim()
+                if (text) textParts.push(text)
+            } else {
+                blockChildren.push(child)
+            }
+        })
+
+        // 创建 blockContainer 包装
+        const blockContainer = document.createElement('div')
+        blockContainer.setAttribute('data-node-type', 'blockContainer')
+        bq.insertAdjacentElement('beforebegin', blockContainer)
+
+        // 使用 div[data-content-type=blockquote] 替代 <blockquote>，
+        // 直接放入文本节点作为内联内容（blockquote content 是 inline*）
+        const newBq = document.createElement('div')
+        newBq.setAttribute('data-content-type', 'blockquote')
+        if (textParts.length > 0) {
+            newBq.textContent = textParts.join('\n')
+        }
+
+        blockContainer.appendChild(newBq)
+
+        // 如果有块级子元素（如列表、代码块等），创建 blockGroup
+        if (blockChildren.length > 0) {
+            const blockGroup = document.createElement('div')
+            blockGroup.setAttribute('data-node-type', 'blockGroup')
+            blockChildren.forEach(child => {
+                blockGroup.appendChild(child)
+            })
+            blockContainer.appendChild(blockGroup)
+        }
+
+        bq.remove()
+    }
+}
+
+/**
  * 创建分离的 HTML 文档
  *
  * 创建一个不连接到活跃文档的 HTML 文档，
@@ -109,5 +164,6 @@ export function nestedListsToLcwDocStructure(elementOrHTML: HTMLElement | string
     }
     liftNestedListsToParent(elementOrHTML)
     createGroups(elementOrHTML)
+    transformBlockquotes(elementOrHTML)
     return elementOrHTML
 }

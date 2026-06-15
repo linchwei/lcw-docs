@@ -1,6 +1,8 @@
 import { InputRule, isTextSelection } from '@tiptap/core'
-import { TextSelection } from '@tiptap/pm/state'
-import { createHighlightPlugin, withLineNumbers } from 'prosemirror-highlight'
+import { Node as ProseMirrorNode } from '@tiptap/pm/model'
+import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
+import { Decoration, DecorationSet } from '@tiptap/pm/view'
+import { DecorationCache, withLineNumbers } from 'prosemirror-highlight'
 import { createParser } from 'prosemirror-highlight/refractor'
 import { refractor } from 'refractor'
 
@@ -211,6 +213,7 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
 
     addProseMirrorPlugins() {
         const baseParser = createParser(refractor)
+        const nodeTypeName = this.name
 
         const safeParser = (options: Parameters<typeof baseParser>[0]) => {
             const lang = options.language
@@ -225,14 +228,114 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
         }
 
         const parserWithLineNumbers = withLineNumbers(safeParser)
+        const pluginKey = new PluginKey('code-highlight')
 
-        const refractorPlugin = createHighlightPlugin({
-            parser: parserWithLineNumbers,
-            languageExtractor: node => node.attrs.language,
-            nodeTypes: [this.name],
-        })
+        function calculateDecorations(
+            doc: ProseMirrorNode,
+            parser: typeof parserWithLineNumbers,
+            nodeTypes: string[],
+            cache: DecorationCache,
+        ): [DecorationSet | undefined, Promise<void>[]] {
+            const allDecorations: Decoration[][] = []
+            const promises: Promise<void>[] = []
 
-        return [refractorPlugin]
+            doc.descendants((node: ProseMirrorNode, pos: number) => {
+                if (!node.type.isTextblock || !nodeTypes.includes(node.type.name)) return
+
+                const cached = cache.get(pos)
+                if (cached) {
+                    const [, decorations] = cached
+                    if (decorations.length > 0) allDecorations.push(decorations)
+                } else {
+                    let text = ''
+                    node.forEach(child => {
+                        if (child.isText) {
+                            text += child.text
+                        } else if (child.type.name === 'hardBreak') {
+                            text += '\n'
+                        }
+                    })
+
+                    const parsed = parser({
+                        content: text,
+                        language: node.attrs.language || undefined,
+                        pos,
+                        size: node.nodeSize,
+                    })
+
+                    if (parsed && Array.isArray(parsed)) {
+                        cache.set(pos, node, parsed)
+                        if (parsed.length > 0) allDecorations.push(parsed)
+                    } else if (parsed instanceof Promise) {
+                        cache.remove(pos)
+                        promises.push(parsed)
+                    }
+                }
+            })
+
+            return [
+                allDecorations.length > 0
+                    ? DecorationSet.create(doc, allDecorations.flat())
+                    : undefined,
+                promises,
+            ]
+        }
+
+        return [new Plugin({
+            key: pluginKey,
+            state: {
+                init(_, instance) {
+                    const cache = new DecorationCache()
+                    const [decorations, promises] = calculateDecorations(
+                        instance.doc, parserWithLineNumbers, [nodeTypeName], cache,
+                    )
+                    return { cache, decorations, promises }
+                },
+                apply: (tr, data) => {
+                    const cache = data.cache.invalidate(tr)
+                    const refresh = !!tr.getMeta('prosemirror-highlight-refresh')
+                    if (!tr.docChanged && !refresh) {
+                        return {
+                            cache,
+                            decorations: data.decorations?.map(tr.mapping, tr.doc),
+                            promises: data.promises,
+                        }
+                    }
+                    const [decorations, promises] = calculateDecorations(
+                        tr.doc, parserWithLineNumbers, [nodeTypeName], cache,
+                    )
+                    return { cache, decorations, promises }
+                },
+            },
+            view: (view) => {
+                const pendingPromises = new Set<Promise<void>>()
+                const refresh = () => {
+                    if (pendingPromises.size > 0) return
+                    const tr = view.state.tr.setMeta('prosemirror-highlight-refresh', true)
+                    view.dispatch(tr)
+                }
+                const check = () => {
+                    const state = pluginKey.getState(view.state)
+                    for (const promise of state?.promises ?? []) {
+                        pendingPromises.add(promise)
+                        promise.then(() => {
+                            pendingPromises.delete(promise)
+                            refresh()
+                        }).catch((error: unknown) => {
+                            console.error('[code-highlight] Error resolving parser:', error)
+                            pendingPromises.delete(promise)
+                        })
+                    }
+                }
+                check()
+                return { update: () => { check() } }
+            },
+            props: {
+                decorations(state) {
+                    return this.getState(state)?.decorations
+                },
+            },
+        })]
     },
 
     addInputRules() {

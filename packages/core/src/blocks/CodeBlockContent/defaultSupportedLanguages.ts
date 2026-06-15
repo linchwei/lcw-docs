@@ -8,6 +8,7 @@ import latex from 'refractor/latex'
 import scala from 'refractor/scala'
 import toml from 'refractor/toml'
 import tsx from 'refractor/tsx'
+import typescript from 'refractor/typescript'
 
 refractor.register(docker)
 refractor.register(git)
@@ -18,6 +19,7 @@ refractor.register(toml)
 refractor.register(tsx)
 refractor.register(jsx)
 refractor.register(scala)
+refractor.register(typescript)
 
 export type SupportedLanguageConfig = {
     id: string

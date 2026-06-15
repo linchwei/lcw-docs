@@ -174,15 +174,6 @@ export function Aside() {
         <>
             <Sidebar variant="inset" collapsible="offcanvas">
                 <SidebarHeader>
-                    <div className="flex h-14 items-center px-4 lg:h-[60px] border-b border-sidebar-border">
-                        <a href="/" className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-md bg-[#6B45FF] flex items-center justify-center relative overflow-hidden">
-                                <div className="absolute w-3.5 h-4 rounded-[2px] bg-white/90 top-1.5 left-1.5" />
-                                <div className="absolute w-3.5 h-4 rounded-[2px] bg-white/60 bottom-1 right-1" />
-                                <div className="absolute w-1 h-1 rounded-full bg-white top-2 right-2" />
-                            </div>
-                        </a>
-                    </div>
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton

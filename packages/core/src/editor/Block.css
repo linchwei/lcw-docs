@@ -84,6 +84,16 @@ NESTED BLOCKS
     transition: all 0.2s 0.1s;
 }
 
+/* Hide indent line for blockquote children */
+.bn-block-content[data-content-type='blockquote'] ~ .bn-block-group > .bn-block-outer::before {
+    display: none !important;
+}
+
+/* Remove indent for blockquote children */
+.bn-block-content[data-content-type='blockquote'] ~ .bn-block-group {
+    margin-left: 0;
+}
+
 .bn-block-group .bn-block-group > .bn-block-outer[data-prev-depth-change='-2']::before {
     height: 0;
 }

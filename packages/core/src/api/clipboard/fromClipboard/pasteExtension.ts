@@ -13,6 +13,7 @@ import { nestedListsToLcwDocStructure } from '../../parsers/html/util/nestedList
 import { acceptedMIMETypes } from './acceptedMIMETypes'
 import { handleFileInsertion } from './handleFileInsertion'
 import { handleVSCodePaste } from './handleVSCodePaste'
+import { looksLikeMarkdown } from './isMarkdown'
 
 /**
  * 创建剪贴板粘贴扩展
@@ -75,7 +76,20 @@ export const createPasteFromClipboardExtension = <BSchema extends BlockSchema, I
                                     return true
                                 }
 
-                                editor._tiptapEditor.view.pasteText(data)
+                                if (looksLikeMarkdown(data)) {
+                                    const anchorBlock = editor.getTextCursorPosition().block
+                                    editor.tryParseMarkdownToBlocks(data).then(blocks => {
+                                        if (blocks.length > 0) {
+                                            editor.insertBlocks(blocks, anchorBlock, 'after')
+                                        } else {
+                                            editor._tiptapEditor.view.pasteText(data)
+                                        }
+                                    }).catch(() => {
+                                        editor._tiptapEditor.view.pasteText(data)
+                                    })
+                                } else {
+                                    editor._tiptapEditor.view.pasteText(data)
+                                }
 
                                 return true
                             },

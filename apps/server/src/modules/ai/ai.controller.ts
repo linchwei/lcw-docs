@@ -23,23 +23,31 @@ import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
 import {
     ChatDto,
     chatSchema,
+    IndexDocumentDto,
+    indexDocumentSchema,
     OutlineDto,
     outlineSchema,
     ResumeDto,
     resumeSchema,
     RewriteDto,
     rewriteSchema,
+    SemanticSearchDto,
+    semanticSearchSchema,
     SummaryDto,
     summarySchema,
 } from './ai.dto'
 import { AiService } from './ai.service'
+import { RagService } from './rag/rag.service'
 
 @ApiTags('AI 助手')
 @ApiBearerAuth('jwt')
 @Controller('ai')
 @UseGuards(AuthGuard('jwt'))
 export class AiController {
-    constructor(private readonly aiService: AiService) {}
+    constructor(
+        private readonly aiService: AiService,
+        private readonly ragService: RagService,
+    ) {}
 
     /**
      * 通用对话（带文档工具的 Agent）
@@ -159,6 +167,52 @@ export class AiController {
         }
 
         res.end()
+    }
+
+    /**
+     * RAG 文档索引
+     *
+     * 将文档内容分块、生成嵌入向量并存储到 pgvector。
+     * 前端在文档保存后调用此端点触发异步索引。
+     * 索引是幂等的：重复调用会先删除旧分块再重新索引。
+     */
+    @Post('rag/index')
+    async indexDocument(
+        @Body(new ZodValidationPipe(indexDocumentSchema)) body: IndexDocumentDto,
+    ) {
+        if (!this.ragService.isAvailable()) {
+            return { success: false, message: 'RAG 服务不可用（Embedding API 或 pgvector 未配置）' }
+        }
+
+        // 异步索引，不阻塞响应
+        this.ragService.indexDocument(body.pageId, body.blocks).catch(() => {
+            // 索引失败已在 RagService 内部记录日志
+        })
+
+        return { success: true, message: '文档索引已触发' }
+    }
+
+    /**
+     * RAG 语义搜索
+     *
+     * 基于向量相似度的语义搜索，可找到意思相近但用词不同的内容。
+     * 返回按相似度降序排列的文档分块列表。
+     */
+    @Post('rag/search')
+    async semanticSearch(
+        @Body(new ZodValidationPipe(semanticSearchSchema)) body: SemanticSearchDto,
+    ) {
+        if (!this.ragService.isAvailable()) {
+            return { success: false, message: 'RAG 服务不可用', results: [] }
+        }
+
+        const results = await this.ragService.retrieve(body.query, {
+            topK: body.topK ?? 5,
+            minScore: body.minScore ?? 0.5,
+            pageId: body.pageId,
+        })
+
+        return { success: true, results }
     }
 
     /**

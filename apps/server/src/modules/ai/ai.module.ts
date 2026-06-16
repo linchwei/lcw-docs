@@ -11,6 +11,9 @@
  * Controllers：
  * - AiController: AI 端点（chat/summary/outline/rewrite/resume）
  *
+ * Imports：
+ * - RagModule: RAG 检索增强生成（语义搜索）
+ *
  * Exports：
  * - AiService: 供其他模块调用 AI 功能
  * - LlmFactory: 供其他模块创建 LLM 实例
@@ -24,9 +27,10 @@ import { PostgresCheckpointerService } from './checkpointer/postgres.checkpointe
 import { LlmFactory } from './llm/llm.factory'
 import { AiController } from './ai.controller'
 import { AiService } from './ai.service'
+import { RagModule } from './rag/rag.module'
 
 @Module({
-    imports: [ConfigModule],
+    imports: [ConfigModule, RagModule],
     controllers: [AiController],
     providers: [
         AiService,

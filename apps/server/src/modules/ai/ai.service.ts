@@ -31,6 +31,7 @@ import { createOutlineGraph } from './graphs/outline.graph'
 import { createRewriteGraph } from './graphs/rewrite.graph'
 import { createSummaryGraph } from './graphs/summary.graph'
 import { LlmFactory } from './llm/llm.factory'
+import { RagService } from './rag/rag.service'
 import {
     formatAgentStatusEvent,
     formatContentEvent,
@@ -48,6 +49,7 @@ export class AiService {
         private readonly configService: ConfigService,
         private readonly llmFactory: LlmFactory,
         private readonly checkpointerService: PostgresCheckpointerService,
+        private readonly ragService: RagService,
     ) {}
 
     /**
@@ -61,10 +63,11 @@ export class AiService {
      * @returns AsyncGenerator，每次 yield 一段 SSE 格式的文本
      */
     async *chatStream(dto: ChatDto): AsyncGenerator<string> {
-        // 构建 configurable，包含文档上下文和线程 ID
+        // 构建 configurable，包含文档上下文、线程 ID 和 RAG 服务
         // PostgresSaver 要求 thread_id 不能为 null，未提供时自动生成
         const configurable: Record<string, any> = {
             thread_id: dto.threadId || `thread-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            ragService: this.ragService,
         }
         if (dto.context) {
             configurable.context = dto.context

@@ -204,17 +204,51 @@ export const getSelectedContent = tool(
 /**
  * 语义搜索文档
  *
- * 当前实现为关键词匹配（大小写不敏感），
- * 后续可升级为向量 RAG 语义搜索。
+ * 支持两种搜索模式：
+ *   1. 语义搜索（默认）：通过 RAG 向量检索，理解查询语义，找到相关内容
+ *   2. 关键词搜索：精确匹配关键词，作为语义搜索不可用时的降级方案
+ *
+ * 语义搜索通过 config.configurable.ragService 获取 RagService 实例，
+ * 如果 RagService 不可用（未配置 Embedding API Key 或 pgvector 未就绪），
+ * 自动降级为关键词搜索。
  */
 export const searchDocument = tool(
-    async ({ query }, config) => {
+    async ({ query, useSemanticSearch }, config) => {
         const ctx = getDocumentContext(config as any)
         if (!ctx) {
             return '错误：无法获取文档上下文'
         }
 
-        // 关键词匹配搜索（大小写不敏感）
+        // 语义搜索路径（RAG）
+        if (useSemanticSearch) {
+            const ragService = (config as any)?.configurable?.ragService
+            if (ragService && ragService.isAvailable()) {
+                try {
+                    const results = await ragService.retrieve(query, {
+                        topK: 5,
+                        minScore: 0.5,
+                    })
+
+                    if (results.length === 0) {
+                        return `语义搜索未找到与 "${query}" 相关的内容`
+                    }
+
+                    return results
+                        .map((r: any, i: number) => {
+                            const scoreStr = r.score.toFixed(2)
+                            const preview = r.content.length > 300
+                                ? r.content.slice(0, 300) + '...'
+                                : r.content
+                            return `[相关内容 ${i + 1}] (相似度: ${scoreStr}, 文档: ${r.pageId})\n${preview}`
+                        })
+                        .join('\n\n')
+                } catch (error) {
+                    // 语义搜索失败，降级为关键词搜索
+                }
+            }
+        }
+
+        // 关键词回退路径（原有逻辑）
         const lowerQuery = query.toLowerCase()
         const matches = ctx.blocks.filter(
             block => block.content.toLowerCase().includes(lowerQuery),
@@ -234,9 +268,10 @@ export const searchDocument = tool(
     },
     {
         name: 'search_document',
-        description: '在文档中搜索包含特定关键词的内容，返回匹配的 block 列表',
+        description: '在文档中搜索内容。支持语义搜索（理解含义，默认）和关键词搜索（精确匹配）。语义搜索可找到意思相近但用词不同的内容。',
         schema: z.object({
-            query: z.string().describe('搜索关键词'),
+            query: z.string().describe('搜索查询'),
+            useSemanticSearch: z.boolean().default(true).describe('是否使用语义搜索（默认 true）。语义搜索不可用时自动降级为关键词搜索'),
         }),
     },
 )

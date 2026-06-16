@@ -6,6 +6,7 @@ import { PostgresqlPersistence } from 'y-postgresql'
 import { CollaboratorEntity } from '../../entities/collaborator.entity'
 import { PageEntity } from '../../entities/page.entity'
 import { ForbiddenCode, ForbiddenError } from '../../fundamentals/common/exceptions/forbidden.exception'
+import { RagService } from '../ai/rag/rag.service'
 import { yjsXmlMentionCollect } from '../../utils/yjsXMLMentionCollect'
 import { yjsXmlToText } from '../../utils/yjsXmlToText'
 
@@ -16,7 +17,8 @@ export class PageService {
         private readonly pageRepository: Repository<PageEntity>,
         @InjectRepository(CollaboratorEntity)
         private readonly collaboratorRepository: Repository<CollaboratorEntity>,
-        @Inject('YJS_POSTGRESQL_ADAPTER') private readonly yjsPostgresqlAdapter: PostgresqlPersistence
+        @Inject('YJS_POSTGRESQL_ADAPTER') private readonly yjsPostgresqlAdapter: PostgresqlPersistence,
+        private readonly ragService: RagService,
     ) {}
 
     async create(payload) {
@@ -227,10 +229,77 @@ export class PageService {
         return withLinksPages
     }
 
+    /**
+     * 搜索文档
+     *
+     * 优先使用 RAG 语义搜索（理解查询含义），
+     * 不可用时降级为关键词匹配搜索（精确匹配）。
+     *
+     * 语义搜索优势：
+     * - 可找到意思相近但用词不同的内容
+     * - 基于 pgvector 向量检索，性能远优于全扫描
+     * - 返回相似度分数，结果更精准
+     */
     async search(params: { query: string; userId: number }) {
         const keyword = params.query.toLowerCase().trim()
         if (!keyword) return []
 
+        // 语义搜索路径（RAG）
+        if (this.ragService.isAvailable()) {
+            try {
+                const ragResults = await this.ragService.retrieve(params.query, {
+                    topK: 20,
+                    minScore: 0.3,
+                })
+
+                if (ragResults.length > 0) {
+                    // 获取用户有权限的文档列表
+                    const userPages = await this.pageRepository.find({
+                        where: { user: { id: params.userId }, isDeleted: false },
+                    })
+                    const userPageIds = new Set(userPages.map(p => p.pageId))
+
+                    // 按文档分组，去重
+                    const pageScoreMap = new Map<string, { pageId: string; maxScore: number; bestContent: string }>()
+                    for (const r of ragResults) {
+                        if (!userPageIds.has(r.pageId)) continue
+                        const existing = pageScoreMap.get(r.pageId)
+                        if (!existing || r.score > existing.maxScore) {
+                            pageScoreMap.set(r.pageId, {
+                                pageId: r.pageId,
+                                maxScore: r.score,
+                                bestContent: r.content,
+                            })
+                        }
+                    }
+
+                    // 获取匹配文档的元数据
+                    const matchedPageIds = Array.from(pageScoreMap.keys())
+                    if (matchedPageIds.length === 0) return []
+
+                    const pages = await this.pageRepository.find({
+                        where: matchedPageIds.map(pageId => ({ pageId, isDeleted: false })),
+                    })
+
+                    return pages.map(page => {
+                        const match = pageScoreMap.get(page.pageId)!
+                        return {
+                            pageId: page.pageId,
+                            emoji: page.emoji,
+                            title: page.title,
+                            snippet: match.bestContent.slice(0, 150),
+                            updatedAt: page.updatedAt,
+                            matchType: 'semantic' as const,
+                            score: match.maxScore,
+                        }
+                    }).sort((a, b) => (b.score || 0) - (a.score || 0))
+                }
+            } catch {
+                // 语义搜索失败，降级为关键词搜索
+            }
+        }
+
+        // 关键词回退路径（原有逻辑）
         const pages = await this.pageRepository.find({
             where: { user: { id: params.userId }, isDeleted: false },
         })

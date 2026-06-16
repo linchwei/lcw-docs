@@ -31,7 +31,7 @@ interface EditorSideMenuProps {
     unfreezeMenu: () => void
 }
 
-export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, blockDragEnd, freezeMenu }: EditorSideMenuProps) {
+export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, blockDragEnd, freezeMenu, unfreezeMenu }: EditorSideMenuProps) {
     const blockIcon = getBlockTypeIcon(block)
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
@@ -49,6 +49,7 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
 
     const handleCopy = useCallback(async () => {
         setMenuOpen(false)
+        unfreezeMenu()
         const text = extractBlockText(block)
         try {
             await navigator.clipboard.writeText(text)
@@ -64,6 +65,7 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
 
     const handleCut = useCallback(async () => {
         setMenuOpen(false)
+        unfreezeMenu()
         const text = extractBlockText(block)
         try {
             await navigator.clipboard.writeText(text)
@@ -80,6 +82,7 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
 
     const handleDelete = useCallback(() => {
         setMenuOpen(false)
+        unfreezeMenu()
         editor.removeBlocks([block])
     }, [editor, block])
 
@@ -90,6 +93,7 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
 
     const handleAddBelow = useCallback(() => {
         setMenuOpen(false)
+        unfreezeMenu()
         const insertedBlock = editor.insertBlocks([{ type: 'paragraph' }], block, 'after')[0]
         editor.setTextCursorPosition(insertedBlock)
         editor.openSuggestionMenu('/')
@@ -100,10 +104,14 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
         const handleClickOutside = (e: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
                 setMenuOpen(false)
+                unfreezeMenu()
             }
         }
         const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setMenuOpen(false)
+            if (e.key === 'Escape') {
+                setMenuOpen(false)
+                unfreezeMenu()
+            }
         }
         document.addEventListener('mousedown', handleClickOutside)
         document.addEventListener('keydown', handleEscape)
@@ -128,7 +136,7 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
                     <button
                         draggable={true}
                         onDragStart={blockDragStart}
-                        onDragEnd={blockDragEnd}
+                        onDragEnd={() => { blockDragEnd(); unfreezeMenu() }}
                         onMouseDown={freezeMenu}
                         onMouseEnter={handleHoverInsert}
                         className="flex items-center justify-center w-6 h-6 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors cursor-grab"
@@ -137,7 +145,15 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
                         {blockIcon}
                     </button>
                     <button
-                        onClick={() => setMenuOpen(!menuOpen)}
+                        onClick={() => {
+                            if (menuOpen) {
+                                setMenuOpen(false)
+                                unfreezeMenu()
+                            } else {
+                                setMenuOpen(true)
+                                freezeMenu()
+                            }
+                        }}
                         className="flex items-center justify-center w-5 h-6 rounded-md text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 transition-colors"
                         title="更多操作"
                     >

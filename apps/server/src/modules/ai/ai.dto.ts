@@ -137,6 +137,26 @@ export const resumeSchema = z.object({
     modifications: z.any().optional(),
 })
 
+/** RAG 文档索引 schema */
+export const indexDocumentSchema = z.object({
+    /** 文档 pageId */
+    pageId: z.string(),
+    /** 文档 block 列表（与 StructuredContext.blocks 格式一致） */
+    blocks: z.array(blockItemSchema),
+})
+
+/** RAG 语义搜索 schema */
+export const semanticSearchSchema = z.object({
+    /** 搜索查询 */
+    query: z.string(),
+    /** 返回结果数量上限，默认 5 */
+    topK: z.number().optional(),
+    /** 最低相似度阈值 (0-1)，默认 0.5 */
+    minScore: z.number().optional(),
+    /** 限定搜索范围到特定文档，不传则搜索所有文档 */
+    pageId: z.string().optional(),
+})
+
 // ─── 类型导出 ───
 
 export type ChatMessage = z.infer<typeof chatMessageSchema>
@@ -146,3 +166,5 @@ export type OutlineDto = z.infer<typeof outlineSchema>
 export type RewriteDto = z.infer<typeof rewriteSchema>
 export type ResumeDto = z.infer<typeof resumeSchema>
 export type StructuredContextDto = z.infer<typeof structuredContextSchema>
+export type IndexDocumentDto = z.infer<typeof indexDocumentSchema>
+export type SemanticSearchDto = z.infer<typeof semanticSearchSchema>

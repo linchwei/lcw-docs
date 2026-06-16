@@ -57,21 +57,32 @@ export function useGhostText(
                     const reader = response.body.getReader()
                     const decoder = new TextDecoder()
                     let accumulated = ''
+                    let buffer = ''
 
                     while (true) {
                         const { done, value } = await reader.read()
                         if (done) break
 
-                        const chunk = decoder.decode(value, { stream: true })
-                        const lines = chunk.split('\n')
+                        buffer += decoder.decode(value, { stream: true })
+                        const lines = buffer.split('\n')
+                        // 最后一行可能不完整（跨 chunk 分片），保留到下次处理
+                        buffer = lines.pop() || ''
 
                         for (const line of lines) {
-                            if (line.startsWith('data: ')) {
-                                const data = line.slice(6).trim()
+                            const trimmed = line.trim()
+
+                            // 跳过空行和 event: 行（LangGraph Agent 会推送 agent_status 等事件类型）
+                            if (!trimmed || trimmed.startsWith('event:')) continue
+
+                            if (trimmed.startsWith('data:')) {
+                                const data = trimmed.slice(5).trim()
                                 if (data === '[DONE]') continue
                                 try {
                                     const parsed = JSON.parse(data)
+                                    // 兼容两种格式：DeepSeek 格式和标准 SSE 格式
                                     const content = parsed.choices?.[0]?.delta?.content
+                                        || parsed.content
+                                        || ''
                                     if (content) {
                                         accumulated += content
                                         if (!ghostTextPluginKey.getState(editor._tiptapEditor.state)) {
@@ -81,7 +92,7 @@ export function useGhostText(
                                         }
                                     }
                                 } catch {
-                                    // skip non-JSON lines
+                                    // 跳过非 JSON 行
                                 }
                             }
                         }

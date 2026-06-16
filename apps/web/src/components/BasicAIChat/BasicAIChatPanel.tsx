@@ -1,10 +1,11 @@
-import { BlockSchema, InlineContentSchema, LcwDocEditor, PartialBlock, StyleSchema, extractTextFromBlocks } from '@lcw-doc/core'
+import { BlockSchema, InlineContentSchema, LcwDocEditor, PartialBlock, StyleSchema } from '@lcw-doc/core'
 import { ArrowUp, Sparkles, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import TextareaAutosize from 'react-textarea-autosize'
 
-import { ChatMessage, chatWithAI } from '@/services'
+import { ChatMessage, StructuredContext, chatWithAgent, extractStructuredContextFromEditor } from '@/services'
+import { useAIStream } from '@/hooks/useAIStream'
 
 interface BasicAIChatPanelProps<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema> {
     editor?: LcwDocEditor<BSchema, ISchema, SSchema>
@@ -18,94 +19,50 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
     props: BasicAIChatPanelProps<BSchema, ISchema, SSchema>
 ) {
     const [keyword, setKeyword] = useState('')
-    const [isGenerating, setIsGenerating] = useState(false)
-    const [streamContent, setStreamContent] = useState('')
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
-    const abortRef = useRef<AbortController | null>(null)
+
+    // 使用统一的 AI 流式 Hook
+    const { content: streamContent, isGenerating, startStream, cancel } = useAIStream()
 
     const handleSend = async () => {
         if (!keyword.trim() || isGenerating) return
 
-        setIsGenerating(true)
-        setStreamContent('')
-
-        const controller = new AbortController()
-        abortRef.current = controller
-
-        let context: string | undefined
+        // 提取编辑器结构化上下文
+        let context: StructuredContext | undefined
         if (props.editor) {
             try {
-                const blocks = props.editor.document
-                const docText = extractTextFromBlocks(blocks as PartialBlock[], 3000)
-                context = docText
+                const blocks = props.editor.document as any[]
+                context = extractStructuredContextFromEditor(blocks)
             } catch {
                 void 0
             }
         }
 
-        const systemContent = context ? `${SYSTEM_PROMPT}\n\n当前文档内容：\n${context}` : SYSTEM_PROMPT
-
         const userMessage: ChatMessage = { role: 'user', content: keyword }
-        const messages: ChatMessage[] = [{ role: 'system', content: systemContent }, ...chatHistory, userMessage]
+        const systemMessage: ChatMessage = { role: 'system', content: SYSTEM_PROMPT }
+        const messages: ChatMessage[] = [systemMessage, ...chatHistory, userMessage]
 
-        try {
-            const response = await chatWithAI(messages, controller.signal)
-            if (!response.ok) {
-                throw new Error(`请求失败: ${response.status}`)
-            }
+        // startStream 返回累积的完整内容，避免闭包陷阱
+        const result = await startStream(async (signal) => {
+            return chatWithAgent(messages, context, undefined, signal)
+        })
 
-            const reader = response.body?.getReader()
-            if (!reader) throw new Error('无法读取响应流')
+        setKeyword('')
 
-            const decoder = new TextDecoder()
-            let accumulated = ''
-            let sseBuffer = ''
+        // 使用返回值更新消息历史
+        if (result) {
+            setChatHistory(prev => [...prev, userMessage, { role: 'assistant', content: result }])
 
-            while (true) {
-                const { done, value } = await reader.read()
-                if (done) break
-
-                sseBuffer += decoder.decode(value, { stream: true })
-                const lines = sseBuffer.split('\n')
-                sseBuffer = lines.pop() || ''
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const dataStr = line.slice(6).trim()
-                        if (dataStr === '[DONE]') continue
-                        try {
-                            const data = JSON.parse(dataStr)
-                            if (data.base_resp?.status_code && data.base_resp.status_code !== 0) {
-                                throw new Error(data.base_resp.status_msg || 'AI 服务错误')
-                            }
-                            const content = data.choices?.[0]?.delta?.content
-                            if (content) {
-                                accumulated += content
-                                setStreamContent(accumulated)
-                            }
-                        } catch (e: any) {
-                            if (e.message && !e.message.includes('JSON')) {
-                                throw e
-                            }
-                        }
-                    }
-                }
-            }
-
-            setIsGenerating(false)
-            setKeyword('')
-
-            setChatHistory(prev => [...prev, userMessage, { role: 'assistant', content: accumulated }])
-
+            // 解析为 Block 并回调
             let blocks: PartialBlock<BSchema, ISchema, SSchema>[]
             try {
                 if (props.editor) {
-                    blocks = (await props.editor.tryParseMarkdownToBlocks(accumulated)) as PartialBlock<BSchema, ISchema, SSchema>[]
+                    blocks = (await props.editor.tryParseMarkdownToBlocks(result)) as PartialBlock<BSchema, ISchema, SSchema>[]
                 } else {
                     blocks = [
                         {
                             type: 'paragraph',
-                            content: [{ type: 'text', text: accumulated, styles: {} }],
+                            content: [{ type: 'text', text: result, styles: {} }],
                         },
                     ] as PartialBlock<BSchema, ISchema, SSchema>[]
                 }
@@ -113,7 +70,7 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
                 blocks = [
                     {
                         type: 'paragraph',
-                        content: [{ type: 'text', text: accumulated, styles: {} }],
+                        content: [{ type: 'text', text: result, styles: {} }],
                     },
                 ] as PartialBlock<BSchema, ISchema, SSchema>[]
             }
@@ -121,17 +78,11 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
             if (props.onResponse) {
                 props.onResponse(blocks)
             }
-        } catch (err: any) {
-            if (err.name !== 'AbortError') {
-                console.error('AI chat error:', err)
-            }
-            setIsGenerating(false)
         }
     }
 
     const handleCancel = () => {
-        abortRef.current?.abort()
-        setIsGenerating(false)
+        cancel()
     }
 
     const ref = useHotkeys(

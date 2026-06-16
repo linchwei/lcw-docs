@@ -7,7 +7,9 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 import { useEditorContext } from '@/context/EditorContext'
-import { ChatMessage, ChatOptions, chatWithAI } from '@/services'
+import { ChatMessage, StructuredContext, chatWithAgent, extractStructuredContextFromEditor } from '@/services'
+import { useAIStream } from '@/hooks/useAIStream'
+import { AIDiffPreview } from '@/components/AIDiffPreview'
 
 const SYSTEM_PROMPT =
     '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
@@ -28,8 +30,6 @@ export function GlobalAIChat() {
     const { editor } = useEditorContext()
     const [isOpen, setIsOpen] = useState(false)
     const [keyword, setKeyword] = useState('')
-    const [isGenerating, setIsGenerating] = useState(false)
-    const [streamContent, setStreamContent] = useState('')
     const [messages, setMessages] = useState<ChatMessageItem[]>([])
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
     const [lastBlocks, setLastBlocks] = useState<PartialBlock[] | null>(null)
@@ -37,8 +37,15 @@ export function GlobalAIChat() {
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [isDragging, setIsDragging] = useState(false)
     const dragStart = useRef({ x: 0, y: 0 })
-    const abortRef = useRef<AbortController | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    // 使用统一的 AI 流式 Hook
+    const { content: streamContent, isGenerating, interrupt, diffs, startStream, cancel, reset } = useAIStream()
+
+    // 流式内容更新时自动滚动到底部
+    useEffect(() => {
+        if (streamContent) scrollToBottom()
+    }, [streamContent])
 
     useHotkeys('mod+j', () => {
         setIsOpen(prev => !prev)
@@ -94,120 +101,59 @@ export function GlobalAIChat() {
         const text = overrideKeyword ?? keyword
         if (!text.trim() || isGenerating) return
 
-        setIsGenerating(true)
-        setStreamContent('')
-        setLastBlocks(null)
-
         const userMessage: ChatMessageItem = { role: 'user', content: text }
         setMessages(prev => [...prev, userMessage])
         if (!overrideKeyword) setKeyword('')
+        setLastBlocks(null)
 
-        const controller = new AbortController()
-        abortRef.current = controller
-
-        let context: string | undefined
+        // 提取编辑器结构化上下文
+        let context: StructuredContext | undefined
         if (editor) {
             try {
-                const blocks = editor.document
-                const docText = extractTextFromBlocks(blocks as PartialBlock[], 3000)
-                context = docText
+                const blocks = editor.document as any[]
+                context = extractStructuredContextFromEditor(blocks)
             } catch {
                 void 0
             }
         }
 
-        const systemContent = context ? `${SYSTEM_PROMPT}\n\n当前文档内容：\n${context}` : SYSTEM_PROMPT
-
         const apiUserMessage: ChatMessage = { role: 'user', content: userMessage.content }
-        const apiMessages: ChatMessage[] = [...chatHistory, apiUserMessage]
+        const systemMessage: ChatMessage = { role: 'system', content: SYSTEM_PROMPT }
+        const apiMessages: ChatMessage[] = [systemMessage, ...chatHistory, apiUserMessage]
 
-        try {
-            const options: ChatOptions = {
-                systemPrompt: systemContent,
-            }
-            const response = await chatWithAI(apiMessages, controller.signal, options)
-            if (!response.ok) {
-                throw new Error(`请求失败: ${response.status}`)
-            }
+        // startStream 返回累积的完整内容，避免闭包陷阱
+        const result = await startStream(async (signal) => {
+            return chatWithAgent(apiMessages, context, undefined, signal)
+        })
 
-            const reader = response.body?.getReader()
-            if (!reader) throw new Error('无法读取响应流')
-
-            const decoder = new TextDecoder()
-            let accumulated = ''
-            let sseBuffer = ''
-
-            while (true) {
-                const { done, value } = await reader.read()
-                if (done) break
-
-                sseBuffer += decoder.decode(value, { stream: true })
-                const lines = sseBuffer.split('\n')
-                sseBuffer = lines.pop() || ''
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const dataStr = line.slice(6).trim()
-                        if (dataStr === '[DONE]') continue
-                        try {
-                            const data = JSON.parse(dataStr)
-                            if (data.base_resp?.status_code && data.base_resp.status_code !== 0) {
-                                throw new Error(data.base_resp.status_msg || 'AI 服务错误')
-                            }
-                            const content = data.choices?.[0]?.delta?.content
-                            if (content) {
-                                accumulated += content
-                                setStreamContent(accumulated)
-                                scrollToBottom()
-                            }
-                        } catch (e: any) {
-                            if (e.message && !e.message.includes('JSON')) {
-                                throw e
-                            }
-                        }
-                    }
-                }
-            }
-
-            setIsGenerating(false)
-
-            const assistantMessage: ChatMessageItem = { role: 'assistant', content: accumulated }
+        // 使用返回值更新消息历史（而非读取 streamContent 状态）
+        if (result) {
+            setChatHistory(prev => [...prev, apiUserMessage, { role: 'assistant', content: result }])
+            const assistantMessage: ChatMessageItem = { role: 'assistant', content: result }
             setMessages(prev => [...prev, assistantMessage])
-            setStreamContent('')
 
-            setChatHistory(prev => [...prev, apiUserMessage, { role: 'assistant', content: accumulated }])
-
-            if (editor && accumulated) {
+            // 如果有内容，尝试解析为 Block
+            if (editor) {
                 try {
-                    const blocks = await editor.tryParseMarkdownToBlocks(accumulated)
+                    const blocks = await editor.tryParseMarkdownToBlocks(result)
                     setLastBlocks(blocks as PartialBlock[])
                 } catch {
                     setLastBlocks([
                         {
                             type: 'paragraph',
-                            content: [{ type: 'text', text: accumulated, styles: {} }],
+                            content: [{ type: 'text', text: result, styles: {} }],
                         },
                     ])
                 }
             }
-        } catch (err: any) {
-            if (err.name !== 'AbortError') {
-                console.error('AI chat error:', err)
-                const errorMessage: ChatMessageItem = { role: 'assistant', content: `出错了：${err.message}` }
-                setMessages(prev => [...prev, errorMessage])
-                setStreamContent('')
-            }
-            setIsGenerating(false)
         }
     }
 
     const handleCancel = () => {
-        abortRef.current?.abort()
-        setIsGenerating(false)
+        cancel()
         if (streamContent) {
             const assistantMessage: ChatMessageItem = { role: 'assistant', content: streamContent }
             setMessages(prev => [...prev, assistantMessage])
-            setStreamContent('')
         }
     }
 
@@ -246,8 +192,8 @@ export function GlobalAIChat() {
     const handleNewConversation = () => {
         setMessages([])
         setChatHistory([])
-        setStreamContent('')
         setLastBlocks(null)
+        reset()
     }
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -566,6 +512,46 @@ export function GlobalAIChat() {
                                         />
                                     )}
                                 </div>
+                            </div>
+                        )}
+                        {/* Diff 预览：当 Agent 生成文档修改建议时展示 */}
+                        {diffs.length > 0 && (
+                            <div style={{ marginTop: '8px' }}>
+                                <AIDiffPreview
+                                    diffs={diffs}
+                                    onAccept={(diff) => {
+                                        // TODO: 将 diff 操作应用到编辑器
+                                        console.log('Accept diff:', diff)
+                                    }}
+                                    onReject={(diff) => {
+                                        console.log('Reject diff:', diff)
+                                    }}
+                                    onAcceptAll={(allDiffs) => {
+                                        console.log('Accept all diffs:', allDiffs)
+                                    }}
+                                    onRejectAll={(allDiffs) => {
+                                        console.log('Reject all diffs:', allDiffs)
+                                    }}
+                                    onClose={() => {
+                                        // 关闭 Diff 预览后继续对话
+                                    }}
+                                />
+                            </div>
+                        )}
+                        {/* 中断事件提示：当 Agent 需要用户审批时展示 */}
+                        {interrupt && (
+                            <div
+                                style={{
+                                    padding: '8px 12px',
+                                    backgroundColor: '#fef3c7',
+                                    borderRadius: '8px',
+                                    fontSize: '12px',
+                                    color: '#92400e',
+                                    marginTop: '8px',
+                                }}
+                            >
+                                Agent 请求审批：{interrupt.step === 'approveOutline' ? '大纲生成' : '文档改写'}
+                                （threadId: {interrupt.threadId?.slice(0, 8)}...）
                             </div>
                         )}
                         <div ref={messagesEndRef} />

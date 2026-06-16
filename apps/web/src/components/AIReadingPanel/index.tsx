@@ -7,7 +7,8 @@ import remarkGfm from 'remark-gfm'
 import TextareaAutosize from 'react-textarea-autosize'
 
 import { useEditorContext } from '@/context/EditorContext'
-import { ChatMessage, chatWithAI } from '@/services'
+import { ChatMessage, StructuredContext, chatWithAgent, extractStructuredContextFromEditor } from '@/services'
+import { useAIStream } from '@/hooks/useAIStream'
 
 interface AIReadingPanelProps {
     onClose: () => void
@@ -31,13 +32,18 @@ const presetActions = [
 export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
     const { editor } = useEditorContext()
     const [input, setInput] = useState('')
-    const [isGenerating, setIsGenerating] = useState(false)
-    const [streamContent, setStreamContent] = useState('')
     const [messages, setMessages] = useState<ChatMessageItem[]>([])
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
-    const abortRef = useRef<AbortController | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+    // 使用统一的 AI 流式 Hook
+    const { content: streamContent, isGenerating, startStream, cancel } = useAIStream()
+
+    // 流式内容更新时自动滚动到底部
+    useEffect(() => {
+        if (streamContent) scrollToBottom()
+    }, [streamContent])
 
     useEffect(() => {
         const styleId = 'ai-reading-panel-animations'
@@ -78,88 +84,40 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
         const userMessage: ChatMessageItem = { role: 'user', content }
         setMessages(prev => [...prev, userMessage])
         setInput('')
-        setIsGenerating(true)
-        setStreamContent('')
 
-        const controller = new AbortController()
-        abortRef.current = controller
+        // 提取编辑器结构化上下文
+        let context: StructuredContext | undefined
+        if (editor) {
+            try {
+                const blocks = editor.document as any[]
+                context = extractStructuredContextFromEditor(blocks)
+            } catch {
+                void 0
+            }
+        }
 
-        const context = getDocumentContext()
         const apiUserMessage: ChatMessage = { role: 'user', content }
-        const apiMessages: ChatMessage[] = [...chatHistory, apiUserMessage]
+        const systemMessage: ChatMessage = { role: 'system', content: SYSTEM_PROMPT }
+        const apiMessages: ChatMessage[] = [systemMessage, ...chatHistory, apiUserMessage]
 
-        try {
-            const response = await chatWithAI(apiMessages, controller.signal, {
-                systemPrompt: SYSTEM_PROMPT,
-                context,
-            })
+        // startStream 返回累积的完整内容，避免闭包陷阱
+        const result = await startStream(async (signal) => {
+            return chatWithAgent(apiMessages, context, undefined, signal)
+        })
 
-            if (!response.ok) {
-                throw new Error(`请求失败: ${response.status}`)
-            }
-
-            const reader = response.body?.getReader()
-            if (!reader) throw new Error('无法读取响应流')
-
-            const decoder = new TextDecoder()
-            let accumulated = ''
-            let sseBuffer = ''
-
-            while (true) {
-                const { done, value } = await reader.read()
-                if (done) break
-
-                sseBuffer += decoder.decode(value, { stream: true })
-                const lines = sseBuffer.split('\n')
-                sseBuffer = lines.pop() || ''
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const dataStr = line.slice(6).trim()
-                        if (dataStr === '[DONE]') continue
-                        try {
-                            const data = JSON.parse(dataStr)
-                            if (data.base_resp?.status_code && data.base_resp.status_code !== 0) {
-                                throw new Error(data.base_resp.status_msg || 'AI 服务错误')
-                            }
-                            const delta = data.choices?.[0]?.delta?.content
-                            if (delta) {
-                                accumulated += delta
-                                setStreamContent(accumulated)
-                                scrollToBottom()
-                            }
-                        } catch (e: any) {
-                            if (e.message && !e.message.includes('JSON')) {
-                                throw e
-                            }
-                        }
-                    }
-                }
-            }
-
-            setIsGenerating(false)
-            const assistantMessage: ChatMessageItem = { role: 'assistant', content: accumulated }
+        // 使用返回值更新消息历史
+        if (result) {
+            setChatHistory(prev => [...prev, apiUserMessage, { role: 'assistant', content: result }])
+            const assistantMessage: ChatMessageItem = { role: 'assistant', content: result }
             setMessages(prev => [...prev, assistantMessage])
-            setStreamContent('')
-            setChatHistory(prev => [...prev, apiUserMessage, { role: 'assistant', content: accumulated }])
-        } catch (err: any) {
-            if (err.name !== 'AbortError') {
-                console.error('AI reading error:', err)
-                const errorMessage: ChatMessageItem = { role: 'assistant', content: `出错了：${err.message}` }
-                setMessages(prev => [...prev, errorMessage])
-                setStreamContent('')
-            }
-            setIsGenerating(false)
         }
     }
 
     const handleCancel = () => {
-        abortRef.current?.abort()
-        setIsGenerating(false)
+        cancel()
         if (streamContent) {
             const assistantMessage: ChatMessageItem = { role: 'assistant', content: streamContent }
             setMessages(prev => [...prev, assistantMessage])
-            setStreamContent('')
         }
     }
 

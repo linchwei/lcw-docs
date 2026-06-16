@@ -1,8 +1,9 @@
 import { createReactBlockSpec } from '@lcw-doc/react'
 import { AlertTriangle, Check, RotateCcw, Send, Sparkles, X } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useState, useRef } from 'react'
 
-import { ChatMessage, chatWithAI } from '@/services'
+import { ChatMessage, chatWithAgent } from '@/services'
+import { useAIStream } from '@/hooks/useAIStream'
 
 export const AI = createReactBlockSpec(
     {
@@ -35,90 +36,49 @@ function AIBlockContent({
     prompt: string
 }) {
     const [inputValue, setInputValue] = useState('')
-    const [streamContent, setStreamContent] = useState('')
     const [error, setError] = useState('')
-    const abortRef = useRef<AbortController | null>(null)
+
+    // 使用统一的 AI 流式 Hook
+    const { content: streamContent, isGenerating, startStream, cancel } = useAIStream()
+    // 保存 startStream 返回值到 ref，避免 handleAccept 闭包陷阱
+    const resultRef = useRef<string>('')
 
     const handleGenerate = async (promptText: string) => {
         if (!promptText.trim()) return
 
         editor.updateBlock(blockId, { type: 'ai', props: { status: 'generating', prompt: promptText } })
-        setStreamContent('')
         setError('')
 
-        const abortController = new AbortController()
-        abortRef.current = abortController
+        const messages: ChatMessage[] = [
+            {
+                role: 'system',
+                content: '你是一个专业的文档编辑助手。请根据用户的要求处理文本内容，直接输出处理结果，不要添加多余的解释。',
+            },
+            { role: 'user', content: promptText },
+        ]
 
         try {
-            const messages: ChatMessage[] = [
-                {
-                    role: 'system',
-                    content: '你是一个专业的文档编辑助手。请根据用户的要求处理文本内容，直接输出处理结果，不要添加多余的解释。',
-                },
-                { role: 'user', content: promptText },
-            ]
-
-            const response = await chatWithAI(messages, abortController.signal)
-            if (!response.ok) {
-                throw new Error(`AI 请求失败: ${response.status}`)
-            }
-
-            const reader = response.body?.getReader()
-            if (!reader) throw new Error('无法读取响应流')
-
-            const decoder = new TextDecoder()
-            let accumulated = ''
-            let sseBuffer = ''
-
-            while (true) {
-                const { done, value } = await reader.read()
-                if (done) break
-
-                sseBuffer += decoder.decode(value, { stream: true })
-                const lines = sseBuffer.split('\n')
-                sseBuffer = lines.pop() || ''
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const dataStr = line.slice(6).trim()
-                        if (dataStr === '[DONE]') continue
-                        try {
-                            const data = JSON.parse(dataStr)
-                            if (data.base_resp?.status_code && data.base_resp.status_code !== 0) {
-                                throw new Error(data.base_resp.status_msg || 'AI 服务错误')
-                            }
-                            const content = data.choices?.[0]?.delta?.content
-                            if (content) {
-                                accumulated += content
-                                setStreamContent(accumulated)
-                            }
-                        } catch (e: any) {
-                            if (e.message && !e.message.includes('JSON')) {
-                                throw e
-                            }
-                        }
-                    }
-                }
-            }
+            const result = await startStream(async (signal) => {
+                return chatWithAgent(messages, undefined, undefined, signal)
+            })
+            resultRef.current = result || ''
 
             editor.updateBlock(blockId, { type: 'ai', props: { status: 'done', prompt: promptText } })
-        } catch (err: any) {
-            if (err.name !== 'AbortError') {
+        } catch (err: unknown) {
+            if (err instanceof Error && err.name !== 'AbortError') {
                 setError(err.message || 'AI 生成失败')
                 editor.updateBlock(blockId, { type: 'ai', props: { status: 'error', prompt: promptText } })
             }
-        } finally {
-            abortRef.current = null
         }
     }
 
     const handleStop = () => {
-        abortRef.current?.abort()
+        cancel()
         editor.updateBlock(blockId, { type: 'ai', props: { status: 'done' } })
     }
 
     const handleAccept = async () => {
-        const content = streamContent || ''
+        const content = resultRef.current || streamContent || ''
         try {
             const blocks = await editor.tryParseMarkdownToBlocks(content)
             editor.replaceBlocks([blockId], blocks)
@@ -140,13 +100,11 @@ function AIBlockContent({
     }
 
     const handleRegenerate = () => {
-        setStreamContent('')
         setError('')
         editor.updateBlock(blockId, { type: 'ai', props: { status: 'idle' } })
     }
 
     const handleRetry = () => {
-        setStreamContent('')
         setError('')
         if (initialPrompt) {
             handleGenerate(initialPrompt)

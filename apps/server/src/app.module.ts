@@ -25,6 +25,7 @@ import { PageModule } from './modules/page/page.module'
 import { ShareModule } from './modules/share/share.module'
 import { SyncModule } from './modules/sync/sync.module'
 import { TagModule } from './modules/tag/tag.module'
+import { TemplateModule } from './modules/template/template.module'
 import { UploadModule } from './modules/upload/upload.module'
 import { UserModule } from './modules/user/user.module'
 import { VersionModule } from './modules/version/version.module'
@@ -72,6 +73,7 @@ import { VersionModule } from './modules/version/version.module'
         CommentModule,
         ShareModule,
         TagModule,
+        TemplateModule,
         UploadModule,
         AiModule,
         VersionModule,

@@ -45,6 +45,22 @@ export const permanentDeletePage = async (pageId: string) => {
     return await request.delete(`/page/${pageId}/permanent`)
 }
 
+export const batchRemovePages = async (pageIds: string[]) => {
+    return await request.delete('/page/batch', { data: { pageIds } })
+}
+
+export const batchRestorePages = async (pageIds: string[]) => {
+    return await request.post('/page/batch-restore', { pageIds })
+}
+
+export const batchPermanentDeletePages = async (pageIds: string[]) => {
+    return await request.delete('/page/batch-permanent', { data: { pageIds } })
+}
+
+export const clearTrash = async () => {
+    return await request.delete('/page/trash')
+}
+
 export const fetchRecentPages = async () => {
     return await request.get('/page/recent')
 }

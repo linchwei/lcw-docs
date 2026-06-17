@@ -14,6 +14,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNowStrict } from 'date-fns'
 import {
     ArrowUpRight,
+    CheckSquare,
     Eye,
     FileUp,
     Image,
@@ -22,12 +23,14 @@ import {
     MoreVertical,
     Plus,
     Shield,
+    Square,
     Star,
+    StarOff,
     Tag,
     Trash2,
     X,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -66,6 +69,9 @@ export function DocList() {
     const [pendingDeleteTag, setPendingDeleteTag] = useState<{ tagId: string; tagName: string } | null>(null)
     const [newTagName, setNewTagName] = useState('')
     const [newTagColor, setNewTagColor] = useState(TAG_COLORS[0])
+    const [selectionMode, setSelectionMode] = useState(false)
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+    const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false)
 
     const { data: pages, refetch } = useQuery({
         queryKey: ['pages'],
@@ -177,6 +183,41 @@ export function DocList() {
         setPendingDeleteTag(null)
     }
 
+    const toggleSelect = useCallback((pageId: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev)
+            if (next.has(pageId)) {
+                next.delete(pageId)
+            } else {
+                next.add(pageId)
+            }
+            return next
+        })
+    }, [])
+
+    const toggleSelectAll = useCallback(() => {
+        if (!pages) return
+        if (selectedIds.size === pages.length) {
+            setSelectedIds(new Set())
+        } else {
+            setSelectedIds(new Set(pages.map(p => p.pageId)))
+        }
+    }, [pages, selectedIds.size, setSelectedIds])
+
+    const handleBatchDelete = async () => {
+        if (selectedIds.size === 0) return
+        await srv.batchRemovePages(Array.from(selectedIds))
+        setSelectedIds(new Set())
+        setSelectionMode(false)
+        queryClient.invalidateQueries({ queryKey: ['pages'] })
+        queryClient.invalidateQueries({ queryKey: ['trash'] })
+    }
+
+    const exitSelectionMode = () => {
+        setSelectionMode(false)
+        setSelectedIds(new Set())
+    }
+
     const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -216,7 +257,7 @@ export function DocList() {
         }
     }
 
-    const renderCardMenu = (pageId: string, isOwner: boolean) => (
+    const renderCardMenu = (pageId: string, isOwner: boolean, isFavorite: boolean = false) => (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
@@ -235,8 +276,17 @@ export function DocList() {
                 {isOwner && (
                     <>
                         <DropdownMenuItem onClick={() => handleToggleFavorite(pageId)}>
-                            <Star className="text-muted-foreground" />
-                            <span>收藏</span>
+                            {isFavorite ? (
+                                <>
+                                    <StarOff className="text-muted-foreground" />
+                                    <span>取消收藏</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Star className="text-muted-foreground" />
+                                    <span>收藏</span>
+                                </>
+                            )}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                     </>
@@ -391,18 +441,55 @@ export function DocList() {
                         </h1>
                     </div>
                     <div className={styles.toolbarRight}>
-                        <Button size="sm" variant="outline" onClick={() => setMdDialogOpen(true)}>
-                            <FileUp size={16} />
-                            上传 Markdown
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setTemplateOpen(true)}>
-                            <LayoutTemplate size={16} />
-                            从模板创建
-                        </Button>
-                        <Button size="sm" onClick={handleCreate} style={{ background: '#097fe8' }}>
-                            <Plus size={16} />
-                            新建文档
-                        </Button>
+                        {selectionMode ? (
+                            <>
+                                <Button size="sm" variant="outline" onClick={toggleSelectAll}>
+                                    {pages && selectedIds.size === pages.length ? (
+                                        <>
+                                            <CheckSquare size={16} />
+                                            取消全选
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Square size={16} />
+                                            全选
+                                        </>
+                                    )}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-destructive hover:text-destructive"
+                                    onClick={() => setBatchDeleteDialogOpen(true)}
+                                    disabled={selectedIds.size === 0}
+                                >
+                                    <Trash2 size={16} />
+                                    删除所选（{selectedIds.size}）
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={exitSelectionMode}>
+                                    取消
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button size="sm" variant="outline" onClick={() => setSelectionMode(true)}>
+                                    <CheckSquare size={16} />
+                                    批量管理
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => setMdDialogOpen(true)}>
+                                    <FileUp size={16} />
+                                    上传 Markdown
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => setTemplateOpen(true)}>
+                                    <LayoutTemplate size={16} />
+                                    从模板创建
+                                </Button>
+                                <Button size="sm" onClick={handleCreate} style={{ background: '#097fe8' }}>
+                                    <Plus size={16} />
+                                    新建文档
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div
@@ -428,8 +515,11 @@ export function DocList() {
                                     index={index}
                                     allTags={allTags}
                                     onRemoveTag={handleRemoveTag}
-                                    menu={renderCardMenu(page.pageId, true)}
+                                    menu={renderCardMenu(page.pageId, true, page.isFavorite)}
                                     pageTags={batchPageTags[page.pageId] || []}
+                                    selectionMode={selectionMode}
+                                    selected={selectedIds.has(page.pageId)}
+                                    onToggleSelect={toggleSelect}
                                 />
                             ))}
                         </div>
@@ -452,7 +542,7 @@ export function DocList() {
                                         index={index}
                                         allTags={allTags}
                                         onRemoveTag={handleRemoveTag}
-                                        menu={renderCardMenu(page.pageId, page.role === 'owner' || page.role === 'editor')}
+                                        menu={renderCardMenu(page.pageId, page.role === 'owner' || page.role === 'editor', page.isFavorite)}
                                         pageTags={batchPageTags[page.pageId] || []}
                                     />
                                 ))}
@@ -472,6 +562,15 @@ export function DocList() {
                 onConfirm={confirmDeleteTag}
                 variant="destructive"
             />
+            <ConfirmDialog
+                open={batchDeleteDialogOpen}
+                onOpenChange={setBatchDeleteDialogOpen}
+                title="批量删除"
+                description={`确定将选中的 ${selectedIds.size} 个文档移至回收站？`}
+                confirmText="删除"
+                onConfirm={handleBatchDelete}
+                variant="destructive"
+            />
         </SidebarInset>
     )
 }
@@ -483,6 +582,9 @@ function PageCard({
     onRemoveTag: _onRemoveTag,
     menu,
     pageTags,
+    selectionMode,
+    selected,
+    onToggleSelect,
 }: {
     page: any
     index: number
@@ -490,9 +592,28 @@ function PageCard({
     onRemoveTag: (pageId: string, tagId: string) => void
     menu: React.ReactNode
     pageTags: TagType[]
+    selectionMode: boolean
+    selected: boolean
+    onToggleSelect: (pageId: string) => void
 }) {
-    return (
-        <Link to={`/doc/${page.pageId}`} className={styles.card} style={{ animationDelay: `${index * 60}ms` }}>
+    const content = (
+        <>
+            {selectionMode && (
+                <div
+                    className="absolute top-2 left-2 z-10"
+                    onClick={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onToggleSelect(page.pageId)
+                    }}
+                >
+                    {selected ? (
+                        <CheckSquare size={20} className="text-primary" />
+                    ) : (
+                        <Square size={20} className="text-muted-foreground" />
+                    )}
+                </div>
+            )}
             {page.coverImage ? (
                 <div className={styles.cardCover}>
                     <img src={page.coverImage} alt="" />
@@ -521,6 +642,24 @@ function PageCard({
                 </div>
             </div>
             <div className={styles.cardActions}>{menu}</div>
+        </>
+    )
+
+    if (selectionMode) {
+        return (
+            <div
+                className={`${styles.card} ${selected ? 'ring-2 ring-primary' : ''}`}
+                style={{ animationDelay: `${index * 60}ms`, position: 'relative', cursor: 'pointer' }}
+                onClick={() => onToggleSelect(page.pageId)}
+            >
+                {content}
+            </div>
+        )
+    }
+
+    return (
+        <Link to={`/doc/${page.pageId}`} className={styles.card} style={{ animationDelay: `${index * 60}ms` }}>
+            {content}
         </Link>
     )
 }

@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { cleanupUsers, closeTestApp, createTestApp } from '../../test/helpers'
+import { cleanupUsers, closeTestApp, createTestApp } from '../../helpers'
 
 describe('UserController', () => {
     let app: INestApplication

@@ -22,13 +22,24 @@ import {
 
 import { DefaultReactSuggestionItem } from './types'
 
-const icons = {
+const HeadingIcon = ({ level }: { level: number }) => <span style={{ fontWeight: 700, fontSize: '14px', lineHeight: 1 }}>H{level}</span>
+
+const icons: Record<string, React.ComponentType<{ size?: number }>> = {
     heading: RiH1,
     heading_2: RiH2,
     heading_3: RiH3,
-    heading_4: RiH3,
-    heading_5: RiH3,
-    heading_6: RiH3,
+    heading_4: (() => {
+        const H = () => <HeadingIcon level={4} />
+        return H as any
+    })(),
+    heading_5: (() => {
+        const H = () => <HeadingIcon level={5} />
+        return H as any
+    })(),
+    heading_6: (() => {
+        const H = () => <HeadingIcon level={6} />
+        return H as any
+    })(),
     numbered_list: RiListOrdered,
     bullet_list: RiListUnordered,
     check_list: RiListCheck3,

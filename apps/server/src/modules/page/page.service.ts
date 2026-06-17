@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { Repository, In } from 'typeorm'
 import { PostgresqlPersistence } from 'y-postgresql'
 
 import { CollaboratorEntity } from '../../entities/collaborator.entity'
@@ -203,6 +203,43 @@ export class PageService {
         }
 
         return { success: true }
+    }
+
+    async batchSoftDelete(params: { pageIds: string[]; userId: number }) {
+        const res = await this.pageRepository.update(
+            { pageId: In(params.pageIds), user: { id: params.userId }, isDeleted: false },
+            { isDeleted: true, deletedAt: new Date() }
+        )
+
+        return { success: true, affected: res.affected }
+    }
+
+    async batchRestore(params: { pageIds: string[]; userId: number }) {
+        const res = await this.pageRepository.update(
+            { pageId: In(params.pageIds), user: { id: params.userId }, isDeleted: true },
+            { isDeleted: false, deletedAt: null }
+        )
+
+        return { success: true, affected: res.affected }
+    }
+
+    async batchPermanentDelete(params: { pageIds: string[]; userId: number }) {
+        const res = await this.pageRepository.delete({
+            pageId: In(params.pageIds),
+            user: { id: params.userId },
+            isDeleted: true,
+        })
+
+        return { success: true, affected: res.affected }
+    }
+
+    async clearTrash(params: { userId: number }) {
+        const res = await this.pageRepository.delete({
+            user: { id: params.userId },
+            isDeleted: true,
+        })
+
+        return { success: true, affected: res.affected }
     }
 
     async graph(params: { userId: number }) {

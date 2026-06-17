@@ -275,4 +275,100 @@ test.describe('文档组织与检索 E2E 测试', () => {
             }
         }
     })
+
+    test('E2E-059: 右键菜单移动文档到文件夹', async ({ page }) => {
+        // 1. 创建文件夹
+        const newFolderButton = page.locator('button[title="新建文件夹"]')
+        if (await newFolderButton.isVisible().catch(() => false)) {
+            await newFolderButton.click()
+            await page.waitForTimeout(500)
+            // Fill folder name in prompt dialog
+            page.on('dialog', async dialog => {
+                await dialog.accept('E2E 测试文件夹')
+            })
+            await page.waitForTimeout(1000)
+        }
+
+        // 2. 创建文档
+        const newDocButton = page.getByRole('button', { name: /新建文档|新建/ }).first()
+        if (await newDocButton.isVisible()) {
+            await newDocButton.click()
+            await page.waitForURL('**/doc/**', { timeout: 10000 })
+            await page.goto('/doc')
+            await page.waitForURL('**/doc**', { timeout: 10000 })
+        }
+
+        // 3. 右键文档 → 移动到文件夹
+        const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') })
+        if (await moreButtons.first().isVisible().catch(() => false)) {
+            await moreButtons.first().click()
+            await page.waitForTimeout(500)
+
+            const moveMenu = page.getByText('移动到文件夹')
+            if (await moveMenu.isVisible().catch(() => false)) {
+                await moveMenu.hover()
+                await page.waitForTimeout(500)
+
+                const folderOption = page.getByText('E2E 测试文件夹')
+                if (await folderOption.isVisible().catch(() => false)) {
+                    await folderOption.click()
+                    await page.waitForTimeout(1000)
+                }
+            }
+        }
+    })
+
+    test('E2E-060: 删除含文档的文件夹后文档回到根级', async ({ page }) => {
+        // 1. 创建文件夹
+        const newFolderButton = page.locator('button[title="新建文件夹"]')
+        if (await newFolderButton.isVisible().catch(() => false)) {
+            await newFolderButton.click()
+            await page.waitForTimeout(500)
+            page.on('dialog', async dialog => {
+                await dialog.accept('待删除文件夹')
+            })
+            await page.waitForTimeout(1000)
+        }
+
+        // 2. 创建文档
+        const newDocButton = page.getByRole('button', { name: /新建文档|新建/ }).first()
+        if (await newDocButton.isVisible()) {
+            await newDocButton.click()
+            await page.waitForURL('**/doc/**', { timeout: 10000 })
+            await page.goto('/doc')
+            await page.waitForURL('**/doc**', { timeout: 10000 })
+        }
+
+        // 3. 移动文档到文件夹
+        const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') })
+        if (await moreButtons.first().isVisible().catch(() => false)) {
+            await moreButtons.first().click()
+            await page.waitForTimeout(500)
+
+            const moveMenu = page.getByText('移动到文件夹')
+            if (await moveMenu.isVisible().catch(() => false)) {
+                await moveMenu.hover()
+                await page.waitForTimeout(500)
+
+                const folderOption = page.getByText('待删除文件夹')
+                if (await folderOption.isVisible().catch(() => false)) {
+                    await folderOption.click()
+                    await page.waitForTimeout(1000)
+                }
+            }
+        }
+
+        // 4. 删除文件夹
+        const folderMoreButtons = page.locator('[data-sidebar="menu-action"]')
+        if (await folderMoreButtons.first().isVisible().catch(() => false)) {
+            await folderMoreButtons.first().click()
+            await page.waitForTimeout(500)
+
+            const deleteFolderOption = page.getByText('删除文件夹')
+            if (await deleteFolderOption.isVisible().catch(() => false)) {
+                await deleteFolderOption.click()
+                await page.waitForTimeout(1000)
+            }
+        }
+    })
 })

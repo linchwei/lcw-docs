@@ -34,3 +34,21 @@ export const updatePageSchema = z
     .required({ pageId: true })
 
 export type UpdatePageDto = z.infer<typeof updatePageSchema>
+
+export const batchDeletePageSchema = z.object({
+    pageIds: z.array(z.string()).min(1).max(50),
+})
+
+export type BatchDeletePageDto = z.infer<typeof batchDeletePageSchema>
+
+export const batchRestorePageSchema = z.object({
+    pageIds: z.array(z.string()).min(1).max(50),
+})
+
+export type BatchRestorePageDto = z.infer<typeof batchRestorePageSchema>
+
+export const batchPermanentDeletePageSchema = z.object({
+    pageIds: z.array(z.string()).min(1).max(50),
+})
+
+export type BatchPermanentDeletePageDto = z.infer<typeof batchPermanentDeletePageSchema>

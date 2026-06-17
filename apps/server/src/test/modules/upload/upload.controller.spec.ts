@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as request from 'supertest'
 
-import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../helpers'
 
 describe('UploadController', () => {
     let app: INestApplication

@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 
-import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
+import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../helpers'
 
 describe('CollaboratorController', () => {
     let app: INestApplication

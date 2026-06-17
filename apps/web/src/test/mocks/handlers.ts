@@ -60,6 +60,7 @@ export const handlers = [
                         emoji: '📄',
                         isFavorite: false,
                         isDeleted: false,
+                        folderId: null,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
                     },
@@ -69,12 +70,23 @@ export const handlers = [
                         emoji: '📝',
                         isFavorite: true,
                         isDeleted: false,
+                        folderId: null,
                         coverImage: 'https://example.com/cover.jpg',
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
                     },
+                    {
+                        pageId: 'page3',
+                        title: 'Folder Page',
+                        emoji: '📂',
+                        isFavorite: false,
+                        isDeleted: false,
+                        folderId: 'folder1',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                    },
                 ],
-                count: 2,
+                count: 3,
             },
             success: true,
         })
@@ -197,7 +209,12 @@ export const handlers = [
     }),
 
     http.get(`${API_BASE}/folder`, () => {
-        return HttpResponse.json({ data: [], success: true })
+        return HttpResponse.json({
+            data: [
+                { folderId: 'folder1', name: '测试文件夹', parentId: null, sortOrder: 0 },
+            ],
+            success: true,
+        })
     }),
 
     http.post(`${API_BASE}/folder`, async () => {
@@ -208,6 +225,17 @@ export const handlers = [
             },
             { status: 201 }
         )
+    }),
+
+    http.put(`${API_BASE}/folder`, async () => {
+        return HttpResponse.json({
+            data: { folderId: 'folder1', name: 'Updated Folder' },
+            success: true,
+        })
+    }),
+
+    http.delete(`${API_BASE}/folder/:folderId`, () => {
+        return HttpResponse.json({ data: { success: true }, success: true })
     }),
 
     http.get(`${API_BASE}/notification`, () => {

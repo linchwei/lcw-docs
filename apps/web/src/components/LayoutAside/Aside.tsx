@@ -4,6 +4,9 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
     DropdownMenuTrigger,
 } from '@lcw-doc/shadcn-shared-ui/components/ui/dropdown-menu'
 import {
@@ -24,8 +27,10 @@ import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import {
     ArrowUpRight,
+    CheckSquare,
     Clock,
     FileStack,
+    FolderInput,
     FolderPlus,
     LayoutTemplate,
     LogOut,
@@ -36,14 +41,18 @@ import {
     Search,
     Settings,
     Share2,
+    Square,
     Star,
+    StarOff,
     Trash2,
     Waypoints,
+    X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { NavLink, useMatch, useNavigate } from 'react-router-dom'
 
 import { TemplateDialog } from '@/components/TemplateDialog'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Template } from '@/data/templates'
 import * as srv from '@/services'
 import { Folder } from '@/types/api'
@@ -52,8 +61,11 @@ import { queryClient } from '@/utils/query-client'
 import { randomEmoji } from '@/utils/randomEmoji'
 
 import { AboutDialog } from './AboutDialog'
+import { DroppableFolderItem } from './DroppableFolderItem'
 import { SearchDialog } from './SearchDialog'
 import { SettingsDialog } from './SettingsDialog'
+import { SidebarDndContext } from './SidebarDndContext'
+import { SortablePageItem } from './SortablePageItem'
 
 export function Aside() {
     const [searchOpen, setSearchOpen] = useState(false)
@@ -61,6 +73,10 @@ export function Aside() {
     const [aboutOpen, setAboutOpen] = useState(false)
     const [showTrash, setShowTrash] = useState(false)
     const [templateOpen, setTemplateOpen] = useState(false)
+    const [trashSelectionMode, setTrashSelectionMode] = useState(false)
+    const [trashSelectedIds, setTrashSelectedIds] = useState<Set<string>>(new Set())
+    const [clearTrashDialogOpen, setClearTrashDialogOpen] = useState(false)
+    const [batchPermanentDeleteDialogOpen, setBatchPermanentDeleteDialogOpen] = useState(false)
     const { data: pages, refetch } = useQuery({
         queryKey: ['pages'],
         queryFn: async () => {
@@ -159,6 +175,59 @@ export function Aside() {
         toast({ title: '文档已永久删除' })
     }
 
+    const toggleTrashSelect = useCallback((pageId: string) => {
+        setTrashSelectedIds(prev => {
+            const next = new Set(prev)
+            if (next.has(pageId)) {
+                next.delete(pageId)
+            } else {
+                next.add(pageId)
+            }
+            return next
+        })
+    }, [])
+
+    const toggleTrashSelectAll = useCallback(() => {
+        if (!trashPages) return
+        if (trashSelectedIds.size === trashPages.length) {
+            setTrashSelectedIds(new Set())
+        } else {
+            setTrashSelectedIds(new Set(trashPages.map((p: Page) => p.pageId)))
+        }
+    }, [trashPages, trashSelectedIds.size, setTrashSelectedIds])
+
+    const handleBatchRestore = async () => {
+        if (trashSelectedIds.size === 0) return
+        await srv.batchRestorePages(Array.from(trashSelectedIds))
+        setTrashSelectedIds(new Set())
+        setTrashSelectionMode(false)
+        queryClient.invalidateQueries({ queryKey: ['pages'] })
+        queryClient.invalidateQueries({ queryKey: ['trash'] })
+        toast({ title: `已恢复 ${trashSelectedIds.size} 个文档` })
+    }
+
+    const handleBatchPermanentDelete = async () => {
+        if (trashSelectedIds.size === 0) return
+        await srv.batchPermanentDeletePages(Array.from(trashSelectedIds))
+        setTrashSelectedIds(new Set())
+        setTrashSelectionMode(false)
+        queryClient.invalidateQueries({ queryKey: ['trash'] })
+        toast({ title: `已永久删除 ${trashSelectedIds.size} 个文档` })
+    }
+
+    const handleClearTrash = async () => {
+        await srv.clearTrash()
+        setTrashSelectedIds(new Set())
+        setTrashSelectionMode(false)
+        queryClient.invalidateQueries({ queryKey: ['trash'] })
+        toast({ title: '回收站已清空' })
+    }
+
+    const exitTrashSelectionMode = () => {
+        setTrashSelectionMode(false)
+        setTrashSelectedIds(new Set())
+    }
+
     const handleLogout = () => {
         toast({ title: '退出登录' })
         localStorage.removeItem('token')
@@ -253,9 +322,19 @@ export function Aside() {
                                                 <span className="text-[13px] text-ellipsis overflow-hidden whitespace-nowrap">
                                                     {item.title}
                                                 </span>
-                                                <Star className="ml-auto h-3 w-3 text-amber-400 fill-amber-400" />
                                             </NavLink>
                                         </SidebarMenuButton>
+                                        <button
+                                            onClick={e => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                handleToggleFavorite(item.pageId)
+                                            }}
+                                            title="取消收藏"
+                                            className="ml-auto peer-menu-button shrink-0 h-5 w-5 flex items-center justify-center rounded-md text-amber-400 hover:bg-sidebar-accent transition-colors"
+                                        >
+                                            <Star className="h-3.5 w-3.5 fill-amber-400" />
+                                        </button>
                                     </SidebarMenuItem>
                                 ))}
                             </SidebarMenu>
@@ -289,122 +368,267 @@ export function Aside() {
                                 </button>
                             </div>
                         </SidebarGroupLabel>
-                        <SidebarMenu>
-                            {folderList.map((folder: Folder) => {
-                                const folderPages = normalPages.filter(p => p.folderId === folder.folderId)
-                                return (
-                                    <Collapsible key={folder.folderId}>
-                                        <SidebarMenuItem>
-                                            <CollapsibleTrigger asChild>
-                                                <SidebarMenuButton className="transition-colors duration-150 hover:bg-sidebar-accent">
-                                                    <span className="text-base leading-none">📁</span>
-                                                    <span className="text-[13px] text-ellipsis overflow-hidden whitespace-nowrap">
-                                                        {folder.name}
-                                                    </span>
-                                                    <span className="ml-auto text-[10px] text-muted-foreground">{folderPages.length}</span>
-                                                </SidebarMenuButton>
-                                            </CollapsibleTrigger>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <SidebarMenuAction showOnHover>
-                                                        <MoreHorizontal />
-                                                    </SidebarMenuAction>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent className="w-48 rounded-lg" side="right" align="start">
-                                                    <DropdownMenuItem
-                                                        className="data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground"
-                                                        onClick={async () => {
-                                                            await srv.deleteFolder(folder.folderId)
-                                                            queryClient.invalidateQueries({ queryKey: ['folders'] })
-                                                            queryClient.invalidateQueries({ queryKey: ['pages'] })
-                                                            toast({ title: '文件夹已删除' })
-                                                        }}
-                                                    >
-                                                        <Trash2 />
-                                                        <span>删除文件夹</span>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                            <CollapsibleContent>
-                                                {folderPages.map(item => (
-                                                    <SidebarMenuButton
-                                                        key={item.pageId}
-                                                        asChild
-                                                        className={cn(
-                                                            'transition-colors duration-150 hover:bg-sidebar-accent pl-8',
-                                                            activeDocParams?.id === item.pageId &&
-                                                                'bg-sidebar-accent font-semibold text-sidebar-foreground'
-                                                        )}
-                                                    >
-                                                        <NavLink to={`/doc/${item.pageId}`} title={item.title}>
-                                                            <span className="text-base leading-none">{item.emoji}</span>
+                        <SidebarDndContext>
+                            <SidebarMenu>
+                                {folderList.map((folder: Folder) => {
+                                    const folderPages = normalPages.filter(p => p.folderId === folder.folderId)
+                                    return (
+                                        <DroppableFolderItem key={folder.folderId} folderId={folder.folderId}>
+                                            <Collapsible>
+                                                <SidebarMenuItem>
+                                                    <CollapsibleTrigger asChild>
+                                                        <SidebarMenuButton className="transition-colors duration-150 hover:bg-sidebar-accent">
+                                                            <span className="text-base leading-none">📁</span>
                                                             <span className="text-[13px] text-ellipsis overflow-hidden whitespace-nowrap">
-                                                                {item.title}
+                                                                {folder.name}
                                                             </span>
-                                                        </NavLink>
-                                                    </SidebarMenuButton>
-                                                ))}
-                                            </CollapsibleContent>
-                                        </SidebarMenuItem>
-                                    </Collapsible>
-                                )
-                            })}
-                            {rootPages?.map(item => (
-                                <Collapsible key={item.pageId}>
-                                    <SidebarMenuItem key={item.pageId}>
-                                        <SidebarMenuButton
-                                            asChild
-                                            className={cn(
-                                                'transition-colors duration-150 hover:bg-sidebar-accent',
-                                                activeDocParams?.id === item.pageId &&
-                                                    'bg-sidebar-accent font-semibold text-sidebar-foreground'
-                                            )}
-                                        >
-                                            <NavLink key={`/doc/${item.pageId}`} to={`/doc/${item.pageId}`} title={item.title}>
-                                                <span className="text-base leading-none">{item.emoji}</span>
-                                                <span className="text-[13px] text-ellipsis overflow-hidden whitespace-nowrap">
-                                                    {item.title}
-                                                </span>
-                                            </NavLink>
-                                        </SidebarMenuButton>
-
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <SidebarMenuAction showOnHover>
-                                                    <MoreHorizontal />
-                                                    <span className="sr-only">More</span>
-                                                </SidebarMenuAction>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent
-                                                className="w-56 rounded-lg"
-                                                side={isMobile ? 'bottom' : 'right'}
-                                                align={isMobile ? 'end' : 'start'}
-                                            >
-                                                <DropdownMenuItem onClick={() => handleToggleFavorite(item.pageId)}>
-                                                    <Star className="text-muted-foreground" />
-                                                    <span>收藏</span>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem asChild>
-                                                    <NavLink to={`/doc/${item.pageId}`} target="_blank">
-                                                        <ArrowUpRight className="text-muted-foreground" />
-                                                        <span>新标签打开</span>
-                                                    </NavLink>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    className="data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground"
-                                                    onClick={() => handleDelete(item.pageId)}
+                                                            <span className="ml-auto text-[10px] text-muted-foreground">
+                                                                {folderPages.length}
+                                                            </span>
+                                                        </SidebarMenuButton>
+                                                    </CollapsibleTrigger>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <SidebarMenuAction showOnHover>
+                                                                <MoreHorizontal />
+                                                            </SidebarMenuAction>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-48 rounded-lg" side="right" align="start">
+                                                            <DropdownMenuItem
+                                                                className="data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground"
+                                                                onClick={async () => {
+                                                                    await srv.deleteFolder(folder.folderId)
+                                                                    queryClient.invalidateQueries({ queryKey: ['folders'] })
+                                                                    queryClient.invalidateQueries({ queryKey: ['pages'] })
+                                                                    toast({ title: '文件夹已删除' })
+                                                                }}
+                                                            >
+                                                                <Trash2 />
+                                                                <span>删除文件夹</span>
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                    <CollapsibleContent>
+                                                        {folderPages.map(item => (
+                                                            <SortablePageItem key={item.pageId} id={item.pageId}>
+                                                                <SidebarMenuItem>
+                                                                    <SidebarMenuButton
+                                                                        asChild
+                                                                        className={cn(
+                                                                            'transition-colors duration-150 hover:bg-sidebar-accent pl-8',
+                                                                            activeDocParams?.id === item.pageId &&
+                                                                                'bg-sidebar-accent font-semibold text-sidebar-foreground'
+                                                                        )}
+                                                                    >
+                                                                        <NavLink to={`/doc/${item.pageId}`} title={item.title}>
+                                                                            <span className="text-base leading-none">{item.emoji}</span>
+                                                                            <span className="text-[13px] text-ellipsis overflow-hidden whitespace-nowrap">
+                                                                                {item.title}
+                                                                            </span>
+                                                                        </NavLink>
+                                                                    </SidebarMenuButton>
+                                                                    <DropdownMenu>
+                                                                        <DropdownMenuTrigger asChild>
+                                                                            <SidebarMenuAction showOnHover>
+                                                                                <MoreHorizontal />
+                                                                            </SidebarMenuAction>
+                                                                        </DropdownMenuTrigger>
+                                                                        <DropdownMenuContent
+                                                                            className="w-56 rounded-lg"
+                                                                            side={isMobile ? 'bottom' : 'right'}
+                                                                            align={isMobile ? 'end' : 'start'}
+                                                                        >
+                                                                            <DropdownMenuItem
+                                                                                onClick={() => handleToggleFavorite(item.pageId)}
+                                                                            >
+                                                                                {item.isFavorite ? (
+                                                                                    <>
+                                                                                        <StarOff className="text-muted-foreground" />
+                                                                                        <span>取消收藏</span>
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <Star className="text-muted-foreground" />
+                                                                                        <span>收藏</span>
+                                                                                    </>
+                                                                                )}
+                                                                            </DropdownMenuItem>
+                                                                            {folderList.length > 0 && (
+                                                                                <DropdownMenuSub>
+                                                                                    <DropdownMenuSubTrigger>
+                                                                                        <FolderInput className="text-muted-foreground" />
+                                                                                        <span>移动到文件夹</span>
+                                                                                    </DropdownMenuSubTrigger>
+                                                                                    <DropdownMenuSubContent className="w-48">
+                                                                                        <DropdownMenuItem
+                                                                                            onClick={async () => {
+                                                                                                await srv.updatePage({
+                                                                                                    pageId: item.pageId,
+                                                                                                    folderId: null,
+                                                                                                })
+                                                                                                queryClient.invalidateQueries({
+                                                                                                    queryKey: ['pages'],
+                                                                                                })
+                                                                                            }}
+                                                                                        >
+                                                                                            <span>移出文件夹</span>
+                                                                                        </DropdownMenuItem>
+                                                                                        {folderList.map((f: Folder) => (
+                                                                                            <DropdownMenuItem
+                                                                                                key={f.folderId}
+                                                                                                onClick={async () => {
+                                                                                                    await srv.updatePage({
+                                                                                                        pageId: item.pageId,
+                                                                                                        folderId: f.folderId,
+                                                                                                    })
+                                                                                                    queryClient.invalidateQueries({
+                                                                                                        queryKey: ['pages'],
+                                                                                                    })
+                                                                                                }}
+                                                                                            >
+                                                                                                <span>📁 {f.name}</span>
+                                                                                                {item.folderId === f.folderId && (
+                                                                                                    <span className="ml-auto">✓</span>
+                                                                                                )}
+                                                                                            </DropdownMenuItem>
+                                                                                        ))}
+                                                                                    </DropdownMenuSubContent>
+                                                                                </DropdownMenuSub>
+                                                                            )}
+                                                                            <DropdownMenuSeparator />
+                                                                            <DropdownMenuItem asChild>
+                                                                                <NavLink to={`/doc/${item.pageId}`} target="_blank">
+                                                                                    <ArrowUpRight className="text-muted-foreground" />
+                                                                                    <span>新标签打开</span>
+                                                                                </NavLink>
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuSeparator />
+                                                                            <DropdownMenuItem
+                                                                                className="data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground"
+                                                                                onClick={() => handleDelete(item.pageId)}
+                                                                            >
+                                                                                <Trash2 />
+                                                                                <span>删除</span>
+                                                                            </DropdownMenuItem>
+                                                                        </DropdownMenuContent>
+                                                                    </DropdownMenu>
+                                                                </SidebarMenuItem>
+                                                            </SortablePageItem>
+                                                        ))}
+                                                    </CollapsibleContent>
+                                                </SidebarMenuItem>
+                                            </Collapsible>
+                                        </DroppableFolderItem>
+                                    )
+                                })}
+                                {rootPages?.map(item => (
+                                    <SortablePageItem key={item.pageId} id={item.pageId}>
+                                        <Collapsible>
+                                            <SidebarMenuItem key={item.pageId}>
+                                                <SidebarMenuButton
+                                                    asChild
+                                                    className={cn(
+                                                        'transition-colors duration-150 hover:bg-sidebar-accent',
+                                                        activeDocParams?.id === item.pageId &&
+                                                            'bg-sidebar-accent font-semibold text-sidebar-foreground'
+                                                    )}
                                                 >
-                                                    <Trash2 />
-                                                    <span>删除</span>
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </SidebarMenuItem>
-                                </Collapsible>
-                            ))}
-                        </SidebarMenu>
+                                                    <NavLink key={`/doc/${item.pageId}`} to={`/doc/${item.pageId}`} title={item.title}>
+                                                        <span className="text-base leading-none">{item.emoji}</span>
+                                                        <span className="text-[13px] text-ellipsis overflow-hidden whitespace-nowrap">
+                                                            {item.title}
+                                                        </span>
+                                                    </NavLink>
+                                                </SidebarMenuButton>
+
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <SidebarMenuAction showOnHover>
+                                                            <MoreHorizontal />
+                                                            <span className="sr-only">More</span>
+                                                        </SidebarMenuAction>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent
+                                                        className="w-56 rounded-lg"
+                                                        side={isMobile ? 'bottom' : 'right'}
+                                                        align={isMobile ? 'end' : 'start'}
+                                                    >
+                                                        <DropdownMenuItem onClick={() => handleToggleFavorite(item.pageId)}>
+                                                            {item.isFavorite ? (
+                                                                <>
+                                                                    <StarOff className="text-muted-foreground" />
+                                                                    <span>取消收藏</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Star className="text-muted-foreground" />
+                                                                    <span>收藏</span>
+                                                                </>
+                                                            )}
+                                                        </DropdownMenuItem>
+                                                        {folderList.length > 0 && (
+                                                            <DropdownMenuSub>
+                                                                <DropdownMenuSubTrigger>
+                                                                    <FolderInput className="text-muted-foreground" />
+                                                                    <span>移动到文件夹</span>
+                                                                </DropdownMenuSubTrigger>
+                                                                <DropdownMenuSubContent className="w-48">
+                                                                    {item.folderId && (
+                                                                        <DropdownMenuItem
+                                                                            onClick={async () => {
+                                                                                await srv.updatePage({
+                                                                                    pageId: item.pageId,
+                                                                                    folderId: null,
+                                                                                })
+                                                                                queryClient.invalidateQueries({ queryKey: ['pages'] })
+                                                                            }}
+                                                                        >
+                                                                            <span>移出文件夹</span>
+                                                                        </DropdownMenuItem>
+                                                                    )}
+                                                                    {folderList.map((folder: Folder) => (
+                                                                        <DropdownMenuItem
+                                                                            key={folder.folderId}
+                                                                            onClick={async () => {
+                                                                                await srv.updatePage({
+                                                                                    pageId: item.pageId,
+                                                                                    folderId: folder.folderId,
+                                                                                })
+                                                                                queryClient.invalidateQueries({ queryKey: ['pages'] })
+                                                                            }}
+                                                                        >
+                                                                            <span>📁 {folder.name}</span>
+                                                                            {item.folderId === folder.folderId && (
+                                                                                <span className="ml-auto">✓</span>
+                                                                            )}
+                                                                        </DropdownMenuItem>
+                                                                    ))}
+                                                                </DropdownMenuSubContent>
+                                                            </DropdownMenuSub>
+                                                        )}
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem asChild>
+                                                            <NavLink to={`/doc/${item.pageId}`} target="_blank">
+                                                                <ArrowUpRight className="text-muted-foreground" />
+                                                                <span>新标签打开</span>
+                                                            </NavLink>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            className="data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground"
+                                                            onClick={() => handleDelete(item.pageId)}
+                                                        >
+                                                            <Trash2 />
+                                                            <span>删除</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </SidebarMenuItem>
+                                        </Collapsible>
+                                    </SortablePageItem>
+                                ))}
+                            </SidebarMenu>
+                        </SidebarDndContext>
                     </SidebarGroup>
 
                     {sharedPages && sharedPages.length > 0 && (
@@ -447,38 +671,111 @@ export function Aside() {
                                         )}
                                     </button>
                                 </CollapsibleTrigger>
+                                {trashPages && trashPages.length > 0 && (
+                                    <div className="flex items-center gap-1">
+                                        {trashSelectionMode ? (
+                                            <>
+                                                <button
+                                                    onClick={toggleTrashSelectAll}
+                                                    title="全选"
+                                                    className="h-5 w-5 flex items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                                                >
+                                                    {trashPages && trashSelectedIds.size === trashPages.length ? (
+                                                        <CheckSquare className="h-3.5 w-3.5 text-primary" />
+                                                    ) : (
+                                                        <Square className="h-3.5 w-3.5" />
+                                                    )}
+                                                </button>
+                                                <button
+                                                    onClick={() => setBatchPermanentDeleteDialogOpen(true)}
+                                                    title="批量永久删除"
+                                                    className="h-5 w-5 flex items-center justify-center rounded-md text-destructive hover:bg-sidebar-accent transition-colors"
+                                                    disabled={trashSelectedIds.size === 0}
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </button>
+                                                <button
+                                                    onClick={handleBatchRestore}
+                                                    title="批量恢复"
+                                                    className="h-5 w-5 flex items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                                                    disabled={trashSelectedIds.size === 0}
+                                                >
+                                                    <RotateCcw className="h-3.5 w-3.5" />
+                                                </button>
+                                                <button
+                                                    onClick={exitTrashSelectionMode}
+                                                    title="取消"
+                                                    className="h-5 w-5 flex items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                                                >
+                                                    <X className="h-3.5 w-3.5" />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={() => setTrashSelectionMode(true)}
+                                                    title="批量管理"
+                                                    className="h-5 w-5 flex items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                                                >
+                                                    <CheckSquare className="h-3.5 w-3.5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setClearTrashDialogOpen(true)}
+                                                    title="清空回收站"
+                                                    className="h-5 w-5 flex items-center justify-center rounded-md text-destructive hover:bg-sidebar-accent transition-colors"
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </SidebarGroupLabel>
                             <CollapsibleContent>
                                 <SidebarMenu>
                                     {trashPages?.map((item: Page) => (
                                         <SidebarMenuItem key={item.pageId}>
-                                            <SidebarMenuButton className="opacity-60">
+                                            <SidebarMenuButton
+                                                className="opacity-60"
+                                                onClick={trashSelectionMode ? () => toggleTrashSelect(item.pageId) : undefined}
+                                            >
+                                                {trashSelectionMode && (
+                                                    <span className="shrink-0">
+                                                        {trashSelectedIds.has(item.pageId) ? (
+                                                            <CheckSquare size={14} className="text-primary" />
+                                                        ) : (
+                                                            <Square size={14} className="text-muted-foreground" />
+                                                        )}
+                                                    </span>
+                                                )}
                                                 <span className="text-base leading-none">{item.emoji}</span>
                                                 <span className="text-[13px] text-ellipsis overflow-hidden whitespace-nowrap">
                                                     {item.title}
                                                 </span>
                                             </SidebarMenuButton>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <SidebarMenuAction showOnHover>
-                                                        <MoreHorizontal />
-                                                    </SidebarMenuAction>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent className="w-48 rounded-lg" side="right" align="start">
-                                                    <DropdownMenuItem onClick={() => handleRestore(item.pageId)}>
-                                                        <RotateCcw className="text-muted-foreground" />
-                                                        <span>恢复</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        className="data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground"
-                                                        onClick={() => handlePermanentDelete(item.pageId)}
-                                                    >
-                                                        <Trash2 />
-                                                        <span>永久删除</span>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                            {!trashSelectionMode && (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <SidebarMenuAction showOnHover>
+                                                            <MoreHorizontal />
+                                                        </SidebarMenuAction>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent className="w-48 rounded-lg" side="right" align="start">
+                                                        <DropdownMenuItem onClick={() => handleRestore(item.pageId)}>
+                                                            <RotateCcw className="text-muted-foreground" />
+                                                            <span>恢复</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            className="data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground"
+                                                            onClick={() => handlePermanentDelete(item.pageId)}
+                                                        >
+                                                            <Trash2 />
+                                                            <span>永久删除</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            )}
                                         </SidebarMenuItem>
                                     ))}
                                     {(!trashPages || trashPages.length === 0) && (
@@ -531,6 +828,24 @@ export function Aside() {
             <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} username={currentUser?.username} />
             <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
             <TemplateDialog open={templateOpen} onOpenChange={setTemplateOpen} onSelectTemplate={handleSelectTemplate} />
+            <ConfirmDialog
+                open={clearTrashDialogOpen}
+                onOpenChange={setClearTrashDialogOpen}
+                title="清空回收站"
+                description="确定清空回收站？所有文档将被永久删除，此操作不可恢复。"
+                confirmText="清空"
+                onConfirm={handleClearTrash}
+                variant="destructive"
+            />
+            <ConfirmDialog
+                open={batchPermanentDeleteDialogOpen}
+                onOpenChange={setBatchPermanentDeleteDialogOpen}
+                title="批量永久删除"
+                description={`确定永久删除选中的 ${trashSelectedIds.size} 个文档？此操作不可恢复。`}
+                confirmText="删除"
+                onConfirm={handleBatchPermanentDelete}
+                variant="destructive"
+            />
         </>
     )
 }

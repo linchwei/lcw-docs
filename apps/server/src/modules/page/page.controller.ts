@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid'
 import { PageEntity } from '../../entities/page.entity'
 import { UserEntity } from '../../entities/user.entity'
 import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
-import { CreatePageDto, createPageSchema, DeletePageDto, deletePageSchema, UpdatePageDto, updatePageSchema } from './page.dto'
+import { CreatePageDto, createPageSchema, DeletePageDto, deletePageSchema, UpdatePageDto, updatePageSchema, BatchDeletePageDto, batchDeletePageSchema, BatchRestorePageDto, batchRestorePageSchema, BatchPermanentDeletePageDto, batchPermanentDeletePageSchema } from './page.dto'
 import { PageService } from './page.service'
 
 @ApiTags('页面')
@@ -87,6 +87,83 @@ export class PageController {
     async trash(@Request() req) {
         const data = await this.pageService.trash({ userId: req.user.id })
         return { data, success: true }
+    }
+
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: ['pageIds'],
+            properties: { pageIds: { type: 'array', items: { type: 'string' }, description: '页面ID列表' } },
+        },
+    })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
+    @ApiOperation({ summary: '批量软删除页面', description: '将多个页面移入回收站' })
+    @Delete('batch')
+    async batchDelete(@Body(new ZodValidationPipe(batchDeletePageSchema)) body: BatchDeletePageDto, @Request() req) {
+        const result = await this.pageService.batchSoftDelete({ pageIds: body.pageIds, userId: req.user.id })
+        return { data: result, success: true }
+    }
+
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: ['pageIds'],
+            properties: { pageIds: { type: 'array', items: { type: 'string' }, description: '页面ID列表' } },
+        },
+    })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
+    @ApiOperation({ summary: '批量恢复页面', description: '从回收站批量恢复已软删除的页面' })
+    @Post('batch-restore')
+    async batchRestore(@Body(new ZodValidationPipe(batchRestorePageSchema)) body: BatchRestorePageDto, @Request() req) {
+        const result = await this.pageService.batchRestore({ pageIds: body.pageIds, userId: req.user.id })
+        return { data: result, success: true }
+    }
+
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: ['pageIds'],
+            properties: { pageIds: { type: 'array', items: { type: 'string' }, description: '页面ID列表' } },
+        },
+    })
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
+    @ApiOperation({ summary: '批量永久删除页面', description: '从数据库中永久删除多个页面，不可恢复' })
+    @Delete('batch-permanent')
+    async batchPermanentDelete(@Body(new ZodValidationPipe(batchPermanentDeletePageSchema)) body: BatchPermanentDeletePageDto, @Request() req) {
+        const result = await this.pageService.batchPermanentDelete({ pageIds: body.pageIds, userId: req.user.id })
+        return { data: result, success: true }
+    }
+
+    @ApiResponse({
+        status: 200,
+        description: '成功',
+        schema: {
+            properties: { data: { type: 'object', description: '返回数据' }, success: { type: 'boolean', description: '是否成功' } },
+        },
+    })
+    @ApiOperation({ summary: '清空回收站', description: '永久删除回收站中的所有页面' })
+    @Delete('trash')
+    async clearTrash(@Request() req) {
+        const result = await this.pageService.clearTrash({ userId: req.user.id })
+        return { data: result, success: true }
     }
 
     @ApiResponse({

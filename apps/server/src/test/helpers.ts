@@ -2,10 +2,20 @@ import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
 import * as bcrypt from 'bcryptjs'
-import { Repository } from 'typeorm'
+import { DataSource, Like, Repository } from 'typeorm'
 
 import { AppModule } from '../app.module'
+import { AuditLogEntity } from '../entities/audit-log.entity'
+import { CollaboratorEntity } from '../entities/collaborator.entity'
+import { CommentEntity } from '../entities/comment.entity'
+import { FolderEntity } from '../entities/folder.entity'
+import { NotificationEntity } from '../entities/notification.entity'
+import { PageEntity } from '../entities/page.entity'
+import { PageTagEntity } from '../entities/page-tag.entity'
+import { ShareEntity } from '../entities/share.entity'
+import { TagEntity } from '../entities/tag.entity'
 import { UserEntity } from '../entities/user.entity'
+import { VersionEntity } from '../entities/version.entity'
 
 let app: INestApplication
 
@@ -48,23 +58,32 @@ export async function createTestUser(
 }
 
 export async function cleanupUsers(app: INestApplication): Promise<void> {
-    const userRepository = app.get('UserEntityRepository') as Repository<UserEntity>
-    await userRepository.query(`DELETE FROM "user" WHERE username LIKE 'test%'`)
+    const dataSource = app.get(DataSource)
+    await dataSource.getRepository(UserEntity).delete({ username: Like('test%') })
 }
 
 export async function cleanupAll(app: INestApplication): Promise<void> {
-    const userRepository = app.get('UserEntityRepository') as Repository<UserEntity>
-    await userRepository.query(`DELETE FROM "page_tag"`)
-    await userRepository.query(`DELETE FROM "tag"`)
-    await userRepository.query(`DELETE FROM "comment"`)
-    await userRepository.query(`DELETE FROM "share"`)
-    await userRepository.query(`DELETE FROM "collaborator"`)
-    await userRepository.query(`DELETE FROM "notification"`)
-    await userRepository.query(`DELETE FROM "version"`)
-    await userRepository.query(`DELETE FROM "folder"`)
-    await userRepository.query(`DELETE FROM "page"`)
-    await userRepository.query(`DELETE FROM "audit_log"`)
-    await userRepository.query(`DELETE FROM "user" WHERE username LIKE 'test%'`)
+    const dataSource = app.get(DataSource)
+
+    // 按外键依赖顺序清理
+    const entities = [
+        PageTagEntity,
+        TagEntity,
+        CommentEntity,
+        ShareEntity,
+        CollaboratorEntity,
+        NotificationEntity,
+        VersionEntity,
+        FolderEntity,
+        PageEntity,
+        AuditLogEntity,
+    ]
+    for (const entity of entities) {
+        await dataSource.getRepository(entity).delete({})
+    }
+
+    // 清理测试用户
+    await dataSource.getRepository(UserEntity).delete({ username: Like('test%') })
 }
 
 export function generateExpiredToken(app: INestApplication): string {

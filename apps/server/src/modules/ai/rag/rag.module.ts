@@ -26,6 +26,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { DocumentChunkEntity } from '../../../entities/document-chunk.entity'
 import { DocumentChunker } from './chunker/document.chunker'
+import { DocumentChunkRepository } from './vector/document-chunk.repository'
 import { EmbeddingService } from './embedding/embedding.service'
 import { RagService } from './rag.service'
 import { VectorSetupService } from './vector/vector.setup'
@@ -37,6 +38,7 @@ import { VectorStore } from './vector/vector.store'
         TypeOrmModule.forFeature([DocumentChunkEntity]),
     ],
     providers: [
+        DocumentChunkRepository,
         VectorSetupService,
         EmbeddingService,
         DocumentChunker,

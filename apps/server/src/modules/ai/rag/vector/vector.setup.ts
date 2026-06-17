@@ -21,6 +21,12 @@ import { ConfigService } from '@nestjs/config'
 import { DataSource } from 'typeorm'
 
 import { PROVIDER_DEFAULTS, EmbeddingProvider } from '../embedding/embedding.types'
+import { DocumentChunkRepository } from './document-chunk.repository'
+
+/** 常量集中管理，与数据库保持同步 */
+const TABLE_NAME = 'document_chunks'
+const INDEX_NAME = 'document_chunks_embedding_idx'
+const COLUMN_NAME = 'embedding'
 
 @Injectable()
 export class VectorSetupService implements OnModuleInit {
@@ -94,7 +100,8 @@ export class VectorSetupService implements OnModuleInit {
         // 检查 embedding 列是否已存在
         const result = await this.dataSource.query(
             `SELECT column_name FROM information_schema.columns
-             WHERE table_name = 'document_chunks' AND column_name = 'embedding'`,
+             WHERE table_name = $1 AND column_name = $2`,
+            [TABLE_NAME, COLUMN_NAME],
         )
 
         if (result.length > 0) {
@@ -102,10 +109,12 @@ export class VectorSetupService implements OnModuleInit {
             return
         }
 
+        // 白名单校验：确保 dimensions 是合法数字
+        DocumentChunkRepository.validateDimensions(this.dimensions)
+
         // 添加 embedding 列：维度根据 Embedding 提供商配置决定
-        // dashscope 默认 1024 维，openai 默认 1536 维
         await this.dataSource.query(
-            `ALTER TABLE document_chunks ADD COLUMN embedding vector(${this.dimensions})`,
+            `ALTER TABLE ${TABLE_NAME} ADD COLUMN ${COLUMN_NAME} vector(${this.dimensions})`,
         )
         this.logger.log(`embedding 列已创建 (vector(${this.dimensions}))`)
     }
@@ -123,13 +132,11 @@ export class VectorSetupService implements OnModuleInit {
      * 查询时可通过 SET hnsw.ef_search = 40 控制搜索精度和速度的平衡
      */
     private async createHnswIndex() {
-        const indexName = 'document_chunks_embedding_idx'
-
         // 检查索引是否已存在
         const result = await this.dataSource.query(
             `SELECT indexname FROM pg_indexes
-             WHERE tablename = 'document_chunks' AND indexname = $1`,
-            [indexName],
+             WHERE tablename = $1 AND indexname = $2`,
+            [TABLE_NAME, INDEX_NAME],
         )
 
         if (result.length > 0) {
@@ -138,8 +145,8 @@ export class VectorSetupService implements OnModuleInit {
         }
 
         await this.dataSource.query(
-            `CREATE INDEX ${indexName} ON document_chunks
-             USING hnsw (embedding vector_cosine_ops)
+            `CREATE INDEX ${INDEX_NAME} ON ${TABLE_NAME}
+             USING hnsw (${COLUMN_NAME} vector_cosine_ops)
              WITH (m = 16, ef_construction = 64)`,
         )
         this.logger.log('HNSW 索引已创建')

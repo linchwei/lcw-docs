@@ -12,10 +12,7 @@ export const BlockquoteBlockContent = createStronglyTypedTiptapNode({
     group: 'blockContent',
 
     parseHTML() {
-        return [
-            { tag: 'div[data-content-type=' + this.name + ']' },
-            { tag: 'blockquote' },
-        ]
+        return [{ tag: 'div[data-content-type=' + this.name + ']' }, { tag: 'blockquote' }]
     },
 
     renderHTML({ HTMLAttributes }) {

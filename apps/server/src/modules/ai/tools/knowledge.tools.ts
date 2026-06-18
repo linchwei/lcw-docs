@@ -69,7 +69,7 @@ function getDocumentContext(config: Record<string, any>): DocumentContext | null
  * @param config - LangGraph 工具调用时传入的 config 对象
  * @returns 用户 ID，如果未传入则返回 null
  */
-function getUserId(config: Record<string, any>): string | null {
+function _getUserId(config: Record<string, any>): string | null {
     return config?.configurable?.userId ?? null
 }
 

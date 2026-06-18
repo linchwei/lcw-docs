@@ -32,6 +32,6 @@ export class VersionEntity {
     @Column()
     createdBy: number
 
-    @Column({ nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     createdAt?: Date
 }

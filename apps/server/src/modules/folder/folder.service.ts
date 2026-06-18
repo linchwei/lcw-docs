@@ -70,10 +70,7 @@ export class FolderService {
 
             // 将当前文件夹及所有后代文件夹中的页面移回根级
             const allFolderIds = [folder.folderId, ...allDescendantIds]
-            await pageRepo.update(
-                { folderId: In(allFolderIds), user: { id: params.userId } },
-                { folderId: null }
-            )
+            await pageRepo.update({ folderId: In(allFolderIds), user: { id: params.userId } }, { folderId: null })
 
             // 批量删除所有后代文件夹
             if (allDescendantIds.length > 0) {

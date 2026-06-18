@@ -25,19 +25,18 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
         setLoading(true)
         setError(null)
         try {
-            const [cats, tmpls] = await Promise.all([
-                fetchTemplateCategories(),
-                fetchTemplates(),
-            ])
+            const [cats, tmpls] = await Promise.all([fetchTemplateCategories(), fetchTemplates()])
             setCategories(cats.map(c => ({ id: c.categoryId, name: c.name, emoji: c.emoji })))
-            setTemplates(tmpls.map(t => ({
-                id: t.templateId,
-                name: t.name,
-                category: t.categoryId,
-                description: t.description,
-                emoji: t.emoji,
-                content: t.content,
-            })))
+            setTemplates(
+                tmpls.map(t => ({
+                    id: t.templateId,
+                    name: t.name,
+                    category: t.categoryId,
+                    description: t.description,
+                    emoji: t.emoji,
+                    content: t.content,
+                }))
+            )
         } catch (e) {
             setError(e instanceof Error ? e.message : '加载模板失败')
         } finally {
@@ -98,9 +97,7 @@ export function TemplateDialog({ open, onOpenChange, onSelectTemplate }: Templat
                             </button>
                         ))}
                     </div>
-                    {loading && (
-                        <div className="text-center py-8 text-muted-foreground text-sm">加载模板中...</div>
-                    )}
+                    {loading && <div className="text-center py-8 text-muted-foreground text-sm">加载模板中...</div>}
                     {error && (
                         <div className="text-center py-8 space-y-2">
                             <p className="text-sm text-destructive">{error}</p>

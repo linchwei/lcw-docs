@@ -38,8 +38,8 @@ describe('Security - Knowledge Injection & Access Control', () => {
                     messages: [{ role: 'user', content: '测试问题' }],
                     pageId: "' OR 1=1--",
                 })
-            // 应返回 400（验证失败）或正常处理，不应泄露 SQL 错误
-            expect([200, 400, 500]).toContain(res.status)
+            // 应返回 200/201（SSE 流式端点 POST 默认 201）或 400（验证失败）或 500，不应泄露 SQL 错误
+            expect([200, 201, 400, 500]).toContain(res.status)
             expect(res.body).not.toHaveProperty('sql')
             expect(JSON.stringify(res.body)).not.toContain('SELECT')
             expect(JSON.stringify(res.body)).not.toContain('DROP')
@@ -54,7 +54,8 @@ describe('Security - Knowledge Injection & Access Control', () => {
                 .send({
                     query: "'; DROP TABLE knowledge_bookmark;--",
                 })
-            expect([200, 400, 500]).toContain(res.status)
+            // POST 端点默认返回 201
+            expect([200, 201, 400, 500]).toContain(res.status)
             expect(res.body).not.toHaveProperty('sql')
             expect(JSON.stringify(res.body)).not.toContain('SELECT')
         })
@@ -138,9 +139,7 @@ describe('Security - Knowledge Injection & Access Control', () => {
 
             const items = listRes.body.data?.items || listRes.body.items || []
             // 用户 B 的列表不应包含用户 A 的收藏
-            const hasOtherUser = items.some(
-                (b: any) => b.title === '用户A专属收藏'
-            )
+            const hasOtherUser = items.some((b: any) => b.title === '用户A专属收藏')
             expect(hasOtherUser).toBe(false)
         })
     })
@@ -154,8 +153,8 @@ describe('Security - Knowledge Injection & Access Control', () => {
                     messages: [{ role: 'user', content: '测试问题' }],
                     pageId: '../../../etc/passwd',
                 })
-            // 应返回 400（验证失败）或正常处理，不应泄露文件内容
-            expect([200, 400, 500]).toContain(res.status)
+            // 应返回 200/201（SSE 流式端点 POST 默认 201）或 400（验证失败）或正常处理，不应泄露文件内容
+            expect([200, 201, 400, 500]).toContain(res.status)
             if (res.body) {
                 const bodyStr = JSON.stringify(res.body)
                 expect(bodyStr).not.toContain('root:')

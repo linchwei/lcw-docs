@@ -210,9 +210,7 @@ export const handlers = [
 
     http.get(`${API_BASE}/folder`, () => {
         return HttpResponse.json({
-            data: [
-                { folderId: 'folder1', name: '测试文件夹', parentId: null, sortOrder: 0 },
-            ],
+            data: [{ folderId: 'folder1', name: '测试文件夹', parentId: null, sortOrder: 0 }],
             success: true,
         })
     }),

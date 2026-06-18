@@ -25,21 +25,15 @@ export const GhostTextExtension = Extension.create<{ enabled: boolean }, GhostTe
 
 export function showGhostText(editor: any, text: string) {
     const { from, to } = editor.state.selection
-    editor.view.dispatch(
-        editor.state.tr.setMeta(ghostTextPluginKey, { type: 'show', text, from, to })
-    )
+    editor.view.dispatch(editor.state.tr.setMeta(ghostTextPluginKey, { type: 'show', text, from, to }))
 }
 
 export function updateGhostText(editor: any, text: string) {
-    editor.view.dispatch(
-        editor.state.tr.setMeta(ghostTextPluginKey, { type: 'update', text })
-    )
+    editor.view.dispatch(editor.state.tr.setMeta(ghostTextPluginKey, { type: 'update', text }))
 }
 
 export function dismissGhostText(editor: any) {
     const ghostState = ghostTextPluginKey.getState(editor.state)
     if (!ghostState) return
-    editor.view.dispatch(
-        editor.state.tr.setMeta(ghostTextPluginKey, { type: 'dismiss' })
-    )
+    editor.view.dispatch(editor.state.tr.setMeta(ghostTextPluginKey, { type: 'dismiss' }))
 }

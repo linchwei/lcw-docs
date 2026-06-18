@@ -15,11 +15,7 @@ import { ArrowRight, Loader2, Network, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { useEditorContext } from '@/context/EditorContext'
-import {
-    extractStructuredContextFromEditor,
-    generateKnowledgeGraph,
-    StructuredContext,
-} from '@/services/ai'
+import { extractStructuredContextFromEditor, generateKnowledgeGraph, StructuredContext } from '@/services/ai'
 
 interface GraphTabProps {
     pageId: string
@@ -130,13 +126,7 @@ export default function GraphTab({ pageId }: GraphTabProps) {
     return (
         <div className="p-4 space-y-4">
             {/* 生成图谱按钮 */}
-            <Button
-                size="sm"
-                variant="outline"
-                onClick={handleGenerateGraph}
-                disabled={loading}
-                className="w-full h-9"
-            >
+            <Button size="sm" variant="outline" onClick={handleGenerateGraph} disabled={loading} className="w-full h-9">
                 {loading ? (
                     <>
                         <Loader2 size={14} className="animate-spin mr-1" />
@@ -169,18 +159,11 @@ export default function GraphTab({ pageId }: GraphTabProps) {
                     {/* 实体列表 */}
                     {result.entities.length > 0 && (
                         <div>
-                            <div className="text-xs font-medium text-zinc-700 mb-2">
-                                实体列表（{result.entities.length}）
-                            </div>
+                            <div className="text-xs font-medium text-zinc-700 mb-2">实体列表（{result.entities.length}）</div>
                             <div className="flex flex-wrap gap-1.5">
                                 {result.entities.map((entity, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-center gap-1 border border-zinc-200 rounded-md px-2 py-1"
-                                    >
-                                        <span
-                                            className={`text-xs px-1.5 py-0.5 rounded ${getEntityTypeStyle(entity.type)}`}
-                                        >
+                                    <div key={i} className="flex items-center gap-1 border border-zinc-200 rounded-md px-2 py-1">
+                                        <span className={`text-xs px-1.5 py-0.5 rounded ${getEntityTypeStyle(entity.type)}`}>
                                             {entity.type}
                                         </span>
                                         <span className="text-xs text-zinc-700">{entity.name}</span>
@@ -193,22 +176,15 @@ export default function GraphTab({ pageId }: GraphTabProps) {
                     {/* 关系列表 */}
                     {result.relations.length > 0 && (
                         <div>
-                            <div className="text-xs font-medium text-zinc-700 mb-2">
-                                关系列表（{result.relations.length}）
-                            </div>
+                            <div className="text-xs font-medium text-zinc-700 mb-2">关系列表（{result.relations.length}）</div>
                             <div className="space-y-1.5">
                                 {result.relations.map((rel, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-center gap-1.5 text-xs border border-zinc-100 rounded-md p-2"
-                                    >
+                                    <div key={i} className="flex items-center gap-1.5 text-xs border border-zinc-100 rounded-md p-2">
                                         <span className="text-zinc-700 font-medium truncate max-w-[120px]">
                                             {getEntityName(rel.source)}
                                         </span>
                                         <ArrowRight size={10} className="text-brand shrink-0" />
-                                        <span className="text-brand font-medium shrink-0">
-                                            {rel.label}
-                                        </span>
+                                        <span className="text-brand font-medium shrink-0">{rel.label}</span>
                                         <ArrowRight size={10} className="text-brand shrink-0" />
                                         <span className="text-zinc-700 font-medium truncate max-w-[120px]">
                                             {getEntityName(rel.target)}

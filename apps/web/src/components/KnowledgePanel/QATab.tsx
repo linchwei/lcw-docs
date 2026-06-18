@@ -13,29 +13,17 @@
  *
  * @module components/KnowledgePanel/QATab
  */
-import { useCallback, useState } from 'react'
-import {
-    Bookmark,
-    BookOpen,
-    Globe,
-    Lightbulb,
-    ListChecks,
-    MessageCircle,
-    Plus,
-    Send,
-    Sparkles,
-    Square,
-    GitCompare,
-    Target,
-} from 'lucide-react'
 import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
-import { useEditorContext } from '@/context/EditorContext'
-import { ChatMessage, chatWithKnowledge, extractStructuredContextFromEditor, createBookmark, saveKnowledgeCard } from '@/services/ai'
-import { useAIStream } from '@/hooks/useAIStream'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import TextareaAutosize from 'react-textarea-autosize'
 import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
+import { BookOpen, GitCompare, Globe, Lightbulb, ListChecks, MessageCircle, Plus, Send, Sparkles, Square, Target } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import TextareaAutosize from 'react-textarea-autosize'
+import remarkGfm from 'remark-gfm'
+
+import { useEditorContext } from '@/context/EditorContext'
+import { useAIStream } from '@/hooks/useAIStream'
+import { ChatMessage, chatWithKnowledge, createBookmark, extractStructuredContextFromEditor, saveKnowledgeCard } from '@/services/ai'
 
 interface QATabProps {
     pageId: string

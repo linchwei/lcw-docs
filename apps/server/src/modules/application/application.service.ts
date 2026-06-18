@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { nanoid } from 'nanoid'
 import { Repository } from 'typeorm'
 
 import { ApplicationEntity } from '../../entities/application.entity'
@@ -12,8 +13,11 @@ export class ApplicationService {
     ) {}
 
     async create(payload) {
-        this.applicationRepository.save(payload)
-        return payload
+        const entity = new ApplicationEntity({
+            ...payload,
+            appId: 'app' + nanoid(8),
+        })
+        return await this.applicationRepository.save(entity)
     }
 
     async update(payload) {

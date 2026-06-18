@@ -1,4 +1,4 @@
-import { waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { clearAuthenticatedUser, mockAuthenticatedUser, renderWithProviders } from '@/test/helpers'

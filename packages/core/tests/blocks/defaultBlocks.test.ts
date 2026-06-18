@@ -16,9 +16,9 @@ describe('defaultBlocks', () => {
             expect(defaultBlockSpecs).toBeDefined()
         })
 
-        test('应该包含 12 种默认块规范', () => {
+        test('应该包含 15 种默认块规范', () => {
             const blockTypes = Object.keys(defaultBlockSpecs)
-            expect(blockTypes).toHaveLength(12)
+            expect(blockTypes).toHaveLength(15)
         })
 
         test('应该包含 paragraph 块规范', () => {

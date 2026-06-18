@@ -101,7 +101,7 @@ export const getDocumentOutline = tool(
         name: 'get_document_outline',
         description: '获取当前文档的大纲结构，包含所有标题层级和位置信息。用于快速了解文档结构。',
         schema: z.object({}),
-    },
+    }
 )
 
 /**
@@ -122,9 +122,7 @@ export const getSectionContent = tool(
 
         // 如果没有 blockId，通过标题模糊匹配
         if (!targetBlockId && sectionTitle) {
-            const matched = ctx.outline.find(
-                item => item.text.toLowerCase().includes(sectionTitle.toLowerCase()),
-            )
+            const matched = ctx.outline.find(item => item.text.toLowerCase().includes(sectionTitle.toLowerCase()))
             if (matched) {
                 targetBlockId = matched.blockId
             } else {
@@ -159,9 +157,7 @@ export const getSectionContent = tool(
 
         // 提取该 section 下的所有 block
         const sectionBlocks = ctx.blocks.slice(startIdx, endIdx)
-        const content = sectionBlocks
-            .map(b => `[${b.type}${b.level ? ` H${b.level}` : ''}] ${b.content}`)
-            .join('\n')
+        const content = sectionBlocks.map(b => `[${b.type}${b.level ? ` H${b.level}` : ''}] ${b.content}`).join('\n')
 
         return `章节 "${targetOutline.text}" 的内容：\n${content}`
     },
@@ -172,7 +168,7 @@ export const getSectionContent = tool(
             sectionTitle: z.string().optional().describe('Section 标题，支持模糊匹配'),
             blockId: z.string().optional().describe('Block ID，精确定位'),
         }),
-    },
+    }
 )
 
 /**
@@ -198,7 +194,7 @@ export const getSelectedContent = tool(
         name: 'get_selected_content',
         description: '获取用户当前选中的文档内容及其上下文（前后各 2 个 block）',
         schema: z.object({}),
-    },
+    }
 )
 
 /**
@@ -236,13 +232,11 @@ export const searchDocument = tool(
                     return results
                         .map((r: any, i: number) => {
                             const scoreStr = r.score.toFixed(2)
-                            const preview = r.content.length > 300
-                                ? r.content.slice(0, 300) + '...'
-                                : r.content
+                            const preview = r.content.length > 300 ? r.content.slice(0, 300) + '...' : r.content
                             return `[相关内容 ${i + 1}] (相似度: ${scoreStr}, 文档: ${r.pageId})\n${preview}`
                         })
                         .join('\n\n')
-                } catch (error) {
+                } catch {
                     // 语义搜索失败，降级为关键词搜索
                 }
             }
@@ -250,9 +244,7 @@ export const searchDocument = tool(
 
         // 关键词回退路径（原有逻辑）
         const lowerQuery = query.toLowerCase()
-        const matches = ctx.blocks.filter(
-            block => block.content.toLowerCase().includes(lowerQuery),
-        )
+        const matches = ctx.blocks.filter(block => block.content.toLowerCase().includes(lowerQuery))
 
         if (matches.length === 0) {
             return `未找到包含 "${query}" 的内容`
@@ -260,9 +252,7 @@ export const searchDocument = tool(
 
         // 限制返回数量，避免上下文过长
         const limited = matches.slice(0, 10)
-        const result = limited
-            .map(b => `[${b.type}] (id: ${b.id}) ${b.content.slice(0, 200)}`)
-            .join('\n')
+        const result = limited.map(b => `[${b.type}] (id: ${b.id}) ${b.content.slice(0, 200)}`).join('\n')
 
         return `找到 ${matches.length} 个匹配结果（显示前 ${limited.length} 个）：\n${result}`
     },
@@ -273,13 +263,8 @@ export const searchDocument = tool(
             query: z.string().describe('搜索查询'),
             useSemanticSearch: z.boolean().default(true).describe('是否使用语义搜索（默认 true）。语义搜索不可用时自动降级为关键词搜索'),
         }),
-    },
+    }
 )
 
 /** 导出所有文档读取工具，供 Agent 注册使用 */
-export const documentReadTools = [
-    getDocumentOutline,
-    getSectionContent,
-    getSelectedContent,
-    searchDocument,
-]
+export const documentReadTools = [getDocumentOutline, getSectionContent, getSelectedContent, searchDocument]

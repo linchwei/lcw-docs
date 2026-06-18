@@ -45,13 +45,13 @@ export class ApplicationEntity {
     /**
      * 项目创建时间
      */
-    @Column({ nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     createdAt?: Date
 
     /**
      * 项目更新时间
      */
-    @Column({ nullable: true })
+    @Column({ type: 'timestamptz', nullable: true })
     updatedAt?: Date
 
     /**

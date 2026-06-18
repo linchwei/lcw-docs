@@ -28,6 +28,6 @@ export class CollaboratorEntity {
     @ManyToOne('UserEntity')
     user: UserEntity
 
-    @Column({ nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     createdAt?: Date
 }

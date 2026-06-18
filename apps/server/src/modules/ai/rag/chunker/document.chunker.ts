@@ -18,7 +18,7 @@
  */
 import { Injectable, Logger } from '@nestjs/common'
 
-import { DocumentChunk, ChunkingConfig, DEFAULT_CHUNKING_CONFIG } from './chunker.types'
+import { ChunkingConfig, DEFAULT_CHUNKING_CONFIG, DocumentChunk } from './chunker.types'
 
 /** Block 数据结构（与 DocumentContext.blocks 对齐） */
 interface BlockData {
@@ -79,13 +79,7 @@ export class DocumentChunker {
                 }
 
                 // 拆分长 block
-                const subChunks = this.splitLongText(
-                    block.content,
-                    pageId,
-                    block.id,
-                    cfg,
-                    chunkIndex,
-                )
+                const subChunks = this.splitLongText(block.content, pageId, block.id, cfg, chunkIndex)
                 chunks.push(...subChunks)
                 chunkIndex += subChunks.length
                 docOffset += block.content.length
@@ -103,9 +97,7 @@ export class DocumentChunker {
             docOffset += block.content.length
 
             // 缓冲区达到 maxChunkSize 或超过 minChunkSize 且当前 block 是标题时提前输出
-            if (bufferContent.length >= cfg.maxChunkSize ||
-                (bufferContent.length >= cfg.minChunkSize && block.type === 'heading')
-            ) {
+            if (bufferContent.length >= cfg.maxChunkSize || (bufferContent.length >= cfg.minChunkSize && block.type === 'heading')) {
                 chunks.push({
                     pageId,
                     blockId: bufferBlockId,
@@ -154,14 +146,16 @@ export class DocumentChunker {
 
         // 如果文本不超过 maxChunkSize，直接作为一个 chunk
         if (text.length <= cfg.maxChunkSize) {
-            return [{
-                pageId,
-                blockId: 'full-doc',
-                content: text.trim(),
-                chunkIndex: 0,
-                startOffset: 0,
-                endOffset: text.length,
-            }]
+            return [
+                {
+                    pageId,
+                    blockId: 'full-doc',
+                    content: text.trim(),
+                    chunkIndex: 0,
+                    startOffset: 0,
+                    endOffset: text.length,
+                },
+            ]
         }
 
         // 按段落拆分
@@ -216,13 +210,7 @@ export class DocumentChunker {
      * @param startIndex - 起始 chunkIndex
      * @returns 子 chunk 数组
      */
-    private splitLongText(
-        text: string,
-        pageId: string,
-        blockId: string,
-        config: ChunkingConfig,
-        startIndex: number,
-    ): DocumentChunk[] {
+    private splitLongText(text: string, pageId: string, blockId: string, config: ChunkingConfig, startIndex: number): DocumentChunk[] {
         const chunks: DocumentChunk[] = []
 
         // 按段落拆分

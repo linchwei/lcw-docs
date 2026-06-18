@@ -37,13 +37,13 @@ export class PageEntity {
     @Column({ type: 'varchar', length: 500, nullable: true })
     coverImage: string | null
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'timestamptz', nullable: true })
     deletedAt: Date | null
 
-    @Column({ nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     createdAt?: Date
 
-    @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     updatedAt?: Date
 
     @ManyToOne('UserEntity', 'applications')

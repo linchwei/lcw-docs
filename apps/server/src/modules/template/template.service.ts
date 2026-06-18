@@ -2,8 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
-import { TemplateCategoryEntity } from '../../entities/template-category.entity'
 import { TemplateEntity } from '../../entities/template.entity'
+import { TemplateCategoryEntity } from '../../entities/template-category.entity'
 import { CreateCategoryDto, CreateTemplateDto, UpdateCategoryDto, UpdateTemplateDto } from './template.dto'
 import { getSeedCategories, getSeedTemplates } from './template.seed'
 
@@ -15,7 +15,7 @@ export class TemplateService {
         @InjectRepository(TemplateEntity)
         private readonly templateRepository: Repository<TemplateEntity>,
         @InjectRepository(TemplateCategoryEntity)
-        private readonly categoryRepository: Repository<TemplateCategoryEntity>,
+        private readonly categoryRepository: Repository<TemplateCategoryEntity>
     ) {}
 
     async findAllCategories(): Promise<TemplateCategoryEntity[]> {

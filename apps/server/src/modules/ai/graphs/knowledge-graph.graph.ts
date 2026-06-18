@@ -25,7 +25,7 @@ import { createReactAgent } from '@langchain/langgraph/prebuilt'
 
 import { LlmFactory } from '../llm/llm.factory'
 import { KNOWLEDGE_GRAPH_PROMPT } from '../prompts/knowledge.prompt'
-import { searchKnowledge, getDocumentStructure, listIndexedChunks, searchCrossDocuments } from '../tools/knowledge.tools'
+import { getDocumentStructure, listIndexedChunks, searchCrossDocuments, searchKnowledge } from '../tools/knowledge.tools'
 
 /**
  * 创建知识图谱可视化 Agent

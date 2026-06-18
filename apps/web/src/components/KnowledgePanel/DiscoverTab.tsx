@@ -17,8 +17,8 @@ import { useState } from 'react'
 import { useEditorContext } from '@/context/EditorContext'
 import {
     extractStructuredContextFromEditor,
-    getRelatedDocuments,
     generateLearningPath,
+    getRelatedDocuments,
     knowledgeGlobalSearch,
     smartSummary,
     StructuredContext,
@@ -200,11 +200,7 @@ export default function DiscoverTab({ pageId }: DiscoverTabProps) {
                         size="sm"
                         variant="outline"
                         onClick={
-                            card.key === 'summary'
-                                ? handleSmartSummary
-                                : card.key === 'related'
-                                  ? handleRelatedDocs
-                                  : handleLearningPath
+                            card.key === 'summary' ? handleSmartSummary : card.key === 'related' ? handleRelatedDocs : handleLearningPath
                         }
                         disabled={isLoading}
                         className="w-full h-8 text-xs"
@@ -262,15 +258,13 @@ export default function DiscoverTab({ pageId }: DiscoverTabProps) {
                                 <div
                                     key={i}
                                     className="border border-zinc-100 rounded-md p-2 cursor-pointer hover:border-brand/30 transition-colors"
-                                    onClick={() => window.location.href = `/doc/${doc.pageId}`}
+                                    onClick={() => (window.location.href = `/doc/${doc.pageId}`)}
                                 >
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-medium text-zinc-700 truncate">
                                             {doc.title || `文档 ${doc.pageId.slice(0, 8)}...`}
                                         </span>
-                                        <span className="text-xs text-brand">
-                                            相似度 {(doc.score * 100).toFixed(1)}%
-                                        </span>
+                                        <span className="text-xs text-brand">相似度 {(doc.score * 100).toFixed(1)}%</span>
                                     </div>
                                     <p className="text-xs text-zinc-500 line-clamp-2">{doc.matchedContent}</p>
                                 </div>
@@ -308,15 +302,11 @@ export default function DiscoverTab({ pageId }: DiscoverTabProps) {
                                 <div
                                     key={i}
                                     className="border border-zinc-100 rounded-md p-2 cursor-pointer hover:border-brand/30 transition-colors"
-                                    onClick={() => window.location.href = `/doc/${item.pageId}`}
+                                    onClick={() => (window.location.href = `/doc/${item.pageId}`)}
                                 >
                                     <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs text-zinc-500">
-                                            {item.title || `文档 ${item.pageId.slice(0, 8)}...`}
-                                        </span>
-                                        <span className="text-xs text-brand">
-                                            {(item.score * 100).toFixed(1)}%
-                                        </span>
+                                        <span className="text-xs text-zinc-500">{item.title || `文档 ${item.pageId.slice(0, 8)}...`}</span>
+                                        <span className="text-xs text-brand">{(item.score * 100).toFixed(1)}%</span>
                                     </div>
                                     <p className="text-xs text-zinc-600 line-clamp-2">{item.content}</p>
                                 </div>
@@ -330,9 +320,7 @@ export default function DiscoverTab({ pageId }: DiscoverTabProps) {
 
     return (
         <div className="p-4">
-            <div className="grid grid-cols-2 gap-3">
-                {featureCards.map(card => renderFeatureCard(card))}
-            </div>
+            <div className="grid grid-cols-2 gap-3">{featureCards.map(card => renderFeatureCard(card))}</div>
         </div>
     )
 }

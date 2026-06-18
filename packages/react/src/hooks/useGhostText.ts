@@ -33,11 +33,7 @@ export function useGhostText(
 
             const { from } = editor._tiptapEditor.state.selection
             const $pos = editor._tiptapEditor.state.doc.resolve(from)
-            const textBefore = $pos.parent.textBetween(
-                Math.max(0, $pos.parentOffset - 200),
-                $pos.parentOffset,
-                '\n'
-            )
+            const textBefore = $pos.parent.textBetween(Math.max(0, $pos.parentOffset - 200), $pos.parentOffset, '\n')
 
             if (!textBefore.trim()) return
 
@@ -46,11 +42,9 @@ export function useGhostText(
                 abortRef.current = controller
 
                 try {
-                    const response = await chatFn(
-                        [{ role: 'user', content: textBefore }],
-                        controller.signal,
-                        { systemPrompt: GHOST_TEXT_SYSTEM_PROMPT }
-                    )
+                    const response = await chatFn([{ role: 'user', content: textBefore }], controller.signal, {
+                        systemPrompt: GHOST_TEXT_SYSTEM_PROMPT,
+                    })
 
                     if (!response.ok || !response.body) return
 
@@ -80,9 +74,7 @@ export function useGhostText(
                                 try {
                                     const parsed = JSON.parse(data)
                                     // 兼容两种格式：DeepSeek 格式和标准 SSE 格式
-                                    const content = parsed.choices?.[0]?.delta?.content
-                                        || parsed.content
-                                        || ''
+                                    const content = parsed.choices?.[0]?.delta?.content || parsed.content || ''
                                     if (content) {
                                         accumulated += content
                                         if (!ghostTextPluginKey.getState(editor._tiptapEditor.state)) {

@@ -75,9 +75,7 @@ export default function TagsTab({ pageId }: TagsTabProps) {
             const data = await autoTag(pageId, context)
             setResult(data)
             // 默认选中置信度 >= 0.7 的标签
-            const defaultSelected = new Set(
-                data.tags.filter(t => t.confidence >= 0.7).map(t => t.name),
-            )
+            const defaultSelected = new Set(data.tags.filter(t => t.confidence >= 0.7).map(t => t.name))
             setSelectedTags(defaultSelected)
         } catch (e: any) {
             toast({ title: 'AI 标签分析失败', description: e.message, variant: 'destructive' })
@@ -106,15 +104,15 @@ export default function TagsTab({ pageId }: TagsTabProps) {
         try {
             // 获取已有标签列表
             const existingTags: ExistingTagItem[] = (await fetchTags()).data
-            const existingTagMap = new Map<string, string>(
-                existingTags.map((t: ExistingTagItem) => [t.name, t.tagId]),
-            )
+            const existingTagMap = new Map<string, string>(existingTags.map((t: ExistingTagItem) => [t.name, t.tagId]))
 
             // 并行处理选中的标签：先并行创建不存在的标签，再并行关联
-            const tagsToCreate = Array.from(selectedTags).map(tagName => {
-                const tagInfo = result.tags.find(t => t.name === tagName)
-                return { tagName, tagInfo, existingTagId: existingTagMap.get(tagName) }
-            }).filter(t => t.tagInfo)
+            const tagsToCreate = Array.from(selectedTags)
+                .map(tagName => {
+                    const tagInfo = result.tags.find(t => t.name === tagName)
+                    return { tagName, tagInfo, existingTagId: existingTagMap.get(tagName) }
+                })
+                .filter(t => t.tagInfo)
 
             // 并行创建缺失的标签
             const createPromises = tagsToCreate.map(async ({ tagName, tagInfo, existingTagId }) => {
@@ -139,13 +137,7 @@ export default function TagsTab({ pageId }: TagsTabProps) {
     return (
         <div className="p-4 space-y-4">
             {/* AI 分析按钮 */}
-            <Button
-                size="sm"
-                variant="outline"
-                onClick={handleAutoTag}
-                disabled={loading}
-                className="w-full h-9"
-            >
+            <Button size="sm" variant="outline" onClick={handleAutoTag} disabled={loading} className="w-full h-9">
                 {loading ? (
                     <>
                         <Loader2 size={14} className="animate-spin mr-1" />
@@ -175,9 +167,7 @@ export default function TagsTab({ pageId }: TagsTabProps) {
                                     {/* 选中复选框 */}
                                     <div
                                         className={`flex items-center justify-center w-4 h-4 rounded border transition-colors ${
-                                            isSelected
-                                                ? 'bg-brand border-brand'
-                                                : 'border-zinc-300'
+                                            isSelected ? 'bg-brand border-brand' : 'border-zinc-300'
                                         }`}
                                     >
                                         {isSelected && <Check size={10} className="text-white" />}
@@ -185,9 +175,7 @@ export default function TagsTab({ pageId }: TagsTabProps) {
 
                                     {/* 标签颜色和名称 */}
                                     <Tag size={12} style={{ color: tag.color }} />
-                                    <span className="text-xs font-medium text-zinc-700 flex-1">
-                                        {tag.name}
-                                    </span>
+                                    <span className="text-xs font-medium text-zinc-700 flex-1">{tag.name}</span>
 
                                     {/* 置信度条 */}
                                     <div className="flex items-center gap-1.5">
@@ -197,9 +185,7 @@ export default function TagsTab({ pageId }: TagsTabProps) {
                                                 style={{ width: `${tag.confidence * 100}%` }}
                                             />
                                         </div>
-                                        <span className="text-xs text-zinc-400 w-8 text-right">
-                                            {(tag.confidence * 100).toFixed(0)}%
-                                        </span>
+                                        <span className="text-xs text-zinc-400 w-8 text-right">{(tag.confidence * 100).toFixed(0)}%</span>
                                     </div>
                                 </div>
                             )

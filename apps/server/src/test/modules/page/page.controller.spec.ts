@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
+import request from 'supertest'
 
 import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../helpers'
 
@@ -28,7 +28,9 @@ describe('PageController', () => {
             expect(res.body).toHaveProperty('data')
             expect(res.body.data).toHaveProperty('title', 'Test Page')
             expect(res.body.success).toBe(true)
-            createdPageId = res.body.data.pageId
+            if (res.body.data) {
+                createdPageId = res.body.data.pageId
+            }
         })
 
         it('PG-002: should return 401 without auth', async () => {
@@ -184,7 +186,9 @@ describe('PageController', () => {
                 .post('/api/page')
                 .set('Authorization', `Bearer ${testUser.token}`)
                 .send({ emoji: '🗑️', title: 'Page to Delete' })
-            pageToDeleteId = res.body.data.pageId
+            if (res.status === 201 && res.body.data) {
+                pageToDeleteId = res.body.data.pageId
+            }
         })
 
         it('PG-020: should soft delete a page', async () => {

@@ -15,11 +15,7 @@ export function createAISlashMenuItem<BSchema extends BlockSchema, I extends Inl
         subtext: 'AI，让进取的人更具职业价值',
         onItemClick: () => {
             const currentBlock = editor.getTextCursorPosition().block
-            const insertedBlocks = editor.insertBlocks(
-                [{ type: 'paragraph' as any }],
-                currentBlock,
-                'after'
-            )
+            const insertedBlocks = editor.insertBlocks([{ type: 'paragraph' as any }], currentBlock, 'after')
             const aiAnchorBlockId = insertedBlocks[0].id
             options.onInsert(aiAnchorBlockId)
         },

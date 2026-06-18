@@ -25,11 +25,7 @@
  */
 import { useCallback, useRef, useState } from 'react'
 
-import {
-    InterruptEventData,
-    ParsedSSEEvent,
-    readSSEStream,
-} from '@/services/ai'
+import { InterruptEventData, ParsedSSEEvent, readSSEStream } from '@/services/ai'
 
 /** Agent 工作流步骤状态 */
 export interface AgentStepInfo {
@@ -131,15 +127,16 @@ export function useAIStream(options?: UseAIStreamOptions): UseAIStreamReturn {
                 const toolData = event.data
                 if (toolData.tool === 'diff_preview' || toolData.result) {
                     try {
-                        const parsed = typeof toolData.result === 'string'
-                            ? JSON.parse(toolData.result)
-                            : toolData.result
+                        const parsed = typeof toolData.result === 'string' ? JSON.parse(toolData.result) : toolData.result
                         if (parsed?.type === 'update_block' || parsed?.type === 'insert_blocks' || parsed?.type === 'delete_block') {
-                            setDiffs(prev => [...prev, {
-                                type: parsed.type,
-                                blockId: parsed.blockId,
-                                data: parsed,
-                            }])
+                            setDiffs(prev => [
+                                ...prev,
+                                {
+                                    type: parsed.type,
+                                    blockId: parsed.blockId,
+                                    data: parsed,
+                                },
+                            ])
                         }
                     } catch {
                         // 非 JSON 结果，忽略
@@ -156,11 +153,14 @@ export function useAIStream(options?: UseAIStreamOptions): UseAIStreamReturn {
 
             case 'diff': {
                 // Diff 事件：添加到 diffs 列表
-                setDiffs(prev => [...prev, {
-                    type: 'update_block',
-                    blockId: event.data.blockId,
-                    data: event.data,
-                }])
+                setDiffs(prev => [
+                    ...prev,
+                    {
+                        type: 'update_block',
+                        blockId: event.data.blockId,
+                        data: event.data,
+                    },
+                ])
                 break
             }
 
@@ -179,43 +179,46 @@ export function useAIStream(options?: UseAIStreamOptions): UseAIStreamReturn {
      *
      * @param fetcher - 请求函数，接收 AbortSignal，返回 Response
      */
-    const startStream = useCallback(async (fetcher: (signal: AbortSignal) => Promise<Response>): Promise<string> => {
-        // 重置状态
-        contentRef.current = ''
-        setContent('')
-        setInterrupt(null)
-        setAgentSteps([])
-        setDiffs([])
-        setIsGenerating(true)
+    const startStream = useCallback(
+        async (fetcher: (signal: AbortSignal) => Promise<Response>): Promise<string> => {
+            // 重置状态
+            contentRef.current = ''
+            setContent('')
+            setInterrupt(null)
+            setAgentSteps([])
+            setDiffs([])
+            setIsGenerating(true)
 
-        const controller = new AbortController()
-        abortRef.current = controller
+            const controller = new AbortController()
+            abortRef.current = controller
 
-        try {
-            const response = await fetcher(controller.signal)
-            if (!response.ok) {
-                throw new Error(`请求失败: ${response.status}`)
+            try {
+                const response = await fetcher(controller.signal)
+                if (!response.ok) {
+                    throw new Error(`请求失败: ${response.status}`)
+                }
+
+                const reader = response.body?.getReader()
+                if (!reader) throw new Error('无法读取响应流')
+
+                await readSSEStream(reader, handleEvent)
+            } catch (err: unknown) {
+                // AbortError 是用户主动取消，不需要报错
+                if (err instanceof Error && err.name !== 'AbortError') {
+                    console.error('AI stream error:', err)
+                    contentRef.current += `\n\n[错误] ${err.message}`
+                    setContent(contentRef.current)
+                }
+            } finally {
+                setIsGenerating(false)
+                abortRef.current = null
             }
 
-            const reader = response.body?.getReader()
-            if (!reader) throw new Error('无法读取响应流')
-
-            await readSSEStream(reader, handleEvent)
-        } catch (err: unknown) {
-            // AbortError 是用户主动取消，不需要报错
-            if (err instanceof Error && err.name !== 'AbortError') {
-                console.error('AI stream error:', err)
-                contentRef.current += `\n\n[错误] ${err.message}`
-                setContent(contentRef.current)
-            }
-        } finally {
-            setIsGenerating(false)
-            abortRef.current = null
-        }
-
-        // 返回累积的完整内容（从 ref 读取，避免闭包陷阱）
-        return contentRef.current
-    }, [handleEvent])
+            // 返回累积的完整内容（从 ref 读取，避免闭包陷阱）
+            return contentRef.current
+        },
+        [handleEvent]
+    )
 
     /** 取消当前请求 */
     const cancel = useCallback(() => {

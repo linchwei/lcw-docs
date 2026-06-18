@@ -41,22 +41,19 @@ export const insertBlocks = tool(
         name: 'insert_blocks',
         description: '在文档指定位置插入新的内容块。afterBlockId 可以是 blockId（在该 block 后插入）或 "end"（文档末尾）',
         schema: z.object({
-            blocks: z.array(z.object({
-                type: z.enum([
-                    'heading',
-                    'paragraph',
-                    'bulletListItem',
-                    'numberedListItem',
-                    'codeBlock',
-                    'blockquote',
-                ]),
-                content: z.string().describe('Block 的文本内容'),
-                level: z.number().optional().describe('标题层级 1-3，仅 heading 类型需要'),
-                language: z.string().optional().describe('代码语言，仅 codeBlock 类型需要'),
-            })).describe('要插入的 block 列表'),
+            blocks: z
+                .array(
+                    z.object({
+                        type: z.enum(['heading', 'paragraph', 'bulletListItem', 'numberedListItem', 'codeBlock', 'blockquote']),
+                        content: z.string().describe('Block 的文本内容'),
+                        level: z.number().optional().describe('标题层级 1-3，仅 heading 类型需要'),
+                        language: z.string().optional().describe('代码语言，仅 codeBlock 类型需要'),
+                    })
+                )
+                .describe('要插入的 block 列表'),
             afterBlockId: z.string().describe('在哪个 block 后面插入，或 "end" 表示文档末尾'),
         }),
-    },
+    }
 )
 
 /**
@@ -81,7 +78,7 @@ export const updateBlock = tool(
             blockId: z.string().describe('要更新的 block ID'),
             newContent: z.string().describe('新的内容文本'),
         }),
-    },
+    }
 )
 
 /**
@@ -103,12 +100,8 @@ export const deleteBlock = tool(
         schema: z.object({
             blockId: z.string().describe('要删除的 block ID'),
         }),
-    },
+    }
 )
 
 /** 导出所有文档写入工具，供 Agent 注册使用 */
-export const editorWriteTools = [
-    insertBlocks,
-    updateBlock,
-    deleteBlock,
-]
+export const editorWriteTools = [insertBlocks, updateBlock, deleteBlock]

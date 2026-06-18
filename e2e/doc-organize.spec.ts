@@ -300,7 +300,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
 
         // 3. 右键文档 → 移动到文件夹
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             await page.waitForTimeout(500)
 
@@ -341,7 +346,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
 
         // 3. 移动文档到文件夹
         const moreButtons = page.locator('button').filter({ has: page.locator('svg.lucide-more-horizontal') })
-        if (await moreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await moreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await moreButtons.first().click()
             await page.waitForTimeout(500)
 
@@ -360,7 +370,12 @@ test.describe('文档组织与检索 E2E 测试', () => {
 
         // 4. 删除文件夹
         const folderMoreButtons = page.locator('[data-sidebar="menu-action"]')
-        if (await folderMoreButtons.first().isVisible().catch(() => false)) {
+        if (
+            await folderMoreButtons
+                .first()
+                .isVisible()
+                .catch(() => false)
+        ) {
             await folderMoreButtons.first().click()
             await page.waitForTimeout(500)
 

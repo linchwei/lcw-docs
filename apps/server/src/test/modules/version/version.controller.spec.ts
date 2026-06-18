@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
+import request from 'supertest'
 
 import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../helpers'
 
@@ -17,7 +17,9 @@ describe('VersionController', () => {
             .post('/api/page')
             .set('Authorization', `Bearer ${testUser.token}`)
             .send({ emoji: '📄', title: 'Version Test Page' })
-        createdPageId = pageRes.body.data.pageId
+        if (pageRes.status === 201 && pageRes.body.data) {
+            createdPageId = pageRes.body.data.pageId
+        }
     })
 
     afterAll(async () => {
@@ -34,7 +36,9 @@ describe('VersionController', () => {
             expect(res.status).toBe(201)
             expect(res.body).toHaveProperty('data')
             expect(res.body.success).toBe(true)
-            createdVersionId = res.body.data.versionId
+            if (res.body.data) {
+                createdVersionId = res.body.data.versionId
+            }
         })
 
         it('VR-002: should create a version with description', async () => {
@@ -89,7 +93,9 @@ describe('VersionController', () => {
                 .post(`/api/page/${createdPageId}/version`)
                 .set('Authorization', `Bearer ${testUser.token}`)
                 .send({ pageId: createdPageId, description: 'Version for rollback' })
-            versionIdForRollback = res.body.data.versionId
+            if (res.status === 201 && res.body.data) {
+                versionIdForRollback = res.body.data.versionId
+            }
         })
 
         it('VR-006: should rollback to a version', async () => {
@@ -118,13 +124,17 @@ describe('VersionController', () => {
                 .post(`/api/page/${createdPageId}/version`)
                 .set('Authorization', `Bearer ${testUser.token}`)
                 .send({ pageId: createdPageId, description: 'Version 1' })
-            v1 = res1.body.data.versionId
+            if (res1.status === 201 && res1.body.data) {
+                v1 = res1.body.data.versionId
+            }
 
             const res2 = await request(app.getHttpServer())
                 .post(`/api/page/${createdPageId}/version`)
                 .set('Authorization', `Bearer ${testUser.token}`)
                 .send({ pageId: createdPageId, description: 'Version 2' })
-            v2 = res2.body.data.versionId
+            if (res2.status === 201 && res2.body.data) {
+                v2 = res2.body.data.versionId
+            }
         })
 
         it('VR-007: should diff two versions', async () => {

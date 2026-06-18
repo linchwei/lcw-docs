@@ -1,4 +1,4 @@
-import { Controller, Post, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
+import { BadRequestException, Controller, Post, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger'
@@ -28,6 +28,9 @@ export class UploadController {
     @Post()
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file: any, @Request() _req) {
+        if (!file) {
+            throw new BadRequestException('No file uploaded')
+        }
         const result = await this.uploadService.saveFile(file)
         return { data: result, success: true }
     }

@@ -1,6 +1,6 @@
-import katex from 'katex'
 import { InputRule } from '@tiptap/core'
 import { TextSelection } from '@tiptap/pm/state'
+import katex from 'katex'
 
 import { createBlockSpecFromStronglyTypedTiptapNode, createStronglyTypedTiptapNode, PropSchema } from '../../schema/index'
 import { defaultProps } from '../defaultProps'

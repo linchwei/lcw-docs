@@ -195,7 +195,7 @@ export async function chatWithAgent(
     messages: ChatMessage[],
     context?: StructuredContext,
     threadId?: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
 ): Promise<Response> {
     return fetch('/api/ai/chat', {
         method: 'POST',
@@ -215,11 +215,7 @@ export async function chatWithAgent(
  * @param signal - AbortSignal
  * @returns Response 对象
  */
-export async function generateSummary(
-    documentContent: string,
-    threadId?: string,
-    signal?: AbortSignal,
-): Promise<Response> {
+export async function generateSummary(documentContent: string, threadId?: string, signal?: AbortSignal): Promise<Response> {
     return fetch('/api/ai/summary', {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -240,12 +236,7 @@ export async function generateSummary(
  * @param signal - AbortSignal
  * @returns Response 对象
  */
-export async function generateOutline(
-    topic: string,
-    requirements?: string,
-    threadId?: string,
-    signal?: AbortSignal,
-): Promise<Response> {
+export async function generateOutline(topic: string, requirements?: string, threadId?: string, signal?: AbortSignal): Promise<Response> {
     return fetch('/api/ai/outline', {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -272,7 +263,7 @@ export async function rewriteContent(
     instruction: string,
     context?: string,
     threadId?: string,
-    signal?: AbortSignal,
+    signal?: AbortSignal
 ): Promise<Response> {
     return fetch('/api/ai/rewrite', {
         method: 'POST',
@@ -293,12 +284,7 @@ export async function rewriteContent(
  * @param signal - AbortSignal
  * @returns Response 对象
  */
-export async function resumeAgent(
-    threadId: string,
-    approved: boolean,
-    feedback?: string,
-    signal?: AbortSignal,
-): Promise<Response> {
+export async function resumeAgent(threadId: string, approved: boolean, feedback?: string, signal?: AbortSignal): Promise<Response> {
     return fetch('/api/ai/resume', {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -330,7 +316,7 @@ export async function chatWithKnowledge(
     threadId?: string,
     signal?: AbortSignal,
     context?: StructuredContext,
-    scope: 'current' | 'all' = 'current',
+    scope: 'current' | 'all' = 'current'
 ): Promise<Response> {
     return fetch('/api/ai/knowledge/chat', {
         method: 'POST',
@@ -366,7 +352,7 @@ export async function getKnowledgeStatus(pageId: string): Promise<{
  */
 export async function indexForKnowledge(
     pageId: string,
-    blocks: Array<{ id: string; type: string; content: string; level?: number }>,
+    blocks: Array<{ id: string; type: string; content: string; level?: number }>
 ): Promise<{ success: boolean }> {
     const res = await fetch('/api/ai/knowledge/index', {
         method: 'POST',
@@ -387,7 +373,7 @@ export async function indexForKnowledge(
  */
 export async function autoTag(
     pageId: string,
-    context?: StructuredContext,
+    context?: StructuredContext
 ): Promise<{
     tags: Array<{ name: string; color: string; confidence: number }>
     suggestedFolder: string
@@ -410,7 +396,7 @@ export async function autoTag(
  */
 export async function generateKnowledgeGraph(
     pageId: string,
-    context?: StructuredContext,
+    context?: StructuredContext
 ): Promise<{
     entities: Array<{ id: string; name: string; type: string }>
     relations: Array<{ source: string; target: string; label: string; type: string }>
@@ -458,7 +444,7 @@ export async function saveKnowledgeCard(params: {
  */
 export async function smartSummary(
     pageId: string,
-    context?: StructuredContext,
+    context?: StructuredContext
 ): Promise<{
     keyPoints: string[]
     coreConclusion: string
@@ -484,7 +470,7 @@ export async function smartSummary(
  */
 export async function generateLearningPath(
     pageId: string,
-    context?: StructuredContext,
+    context?: StructuredContext
 ): Promise<{
     path: Array<{ pageId: string; title: string; reason: string; order: number }>
 }> {
@@ -507,7 +493,7 @@ export async function generateLearningPath(
  */
 export async function getRelatedDocuments(
     pageId: string,
-    topK: number = 5,
+    topK: number = 5
 ): Promise<Array<{ pageId: string; score: number; matchedContent: string }>> {
     const res = await fetch(`/api/ai/knowledge/related/${pageId}?topK=${topK}`, {
         headers: getAuthHeaders(),
@@ -528,7 +514,7 @@ export async function getRelatedDocuments(
 export async function knowledgeGlobalSearch(
     query: string,
     topK: number = 10,
-    minScore: number = 0.5,
+    minScore: number = 0.5
 ): Promise<Array<{ pageId: string; blockId: string; content: string; score: number }>> {
     const res = await fetch('/api/ai/knowledge/global-search', {
         method: 'POST',
@@ -567,10 +553,7 @@ export async function createBookmark(params: {
  * @param pageSize - 每页数量（默认 20）
  * @returns 分页收藏列表
  */
-export async function listBookmarks(
-    page: number = 1,
-    pageSize: number = 20,
-): Promise<{ items: any[]; total: number }> {
+export async function listBookmarks(page: number = 1, pageSize: number = 20): Promise<{ items: any[]; total: number }> {
     const res = await fetch(`/api/ai/knowledge/bookmarks?page=${page}&pageSize=${pageSize}`, {
         headers: getAuthHeaders(),
     })
@@ -613,10 +596,7 @@ export async function searchBookmarks(query: string): Promise<any[]> {
  * @param pageSize - 每页数量（默认 20）
  * @returns 分页线程列表
  */
-export async function listKnowledgeThreads(
-    page: number = 1,
-    pageSize: number = 20,
-): Promise<{ items: any[]; total: number }> {
+export async function listKnowledgeThreads(page: number = 1, pageSize: number = 20): Promise<{ items: any[]; total: number }> {
     const res = await fetch(`/api/ai/knowledge/threads?page=${page}&pageSize=${pageSize}`, {
         headers: getAuthHeaders(),
     })
@@ -716,7 +696,7 @@ export function parseSSEEvent(eventLine: string | undefined, dataLine: string): 
  */
 export async function readSSEStream(
     reader: ReadableStreamDefaultReader<Uint8Array>,
-    onEvent: (event: ParsedSSEEvent) => void,
+    onEvent: (event: ParsedSSEEvent) => void
 ): Promise<void> {
     const decoder = new TextDecoder()
     let buffer = ''
@@ -777,7 +757,7 @@ export async function readSSEStream(
  */
 export function extractStructuredContextFromEditor(
     blocks: Array<{ id: string; type: string; content: any; props?: Record<string, any> }>,
-    selection?: { text: string; blockId: string },
+    selection?: { text: string; blockId: string }
 ): StructuredContext {
     const outline: StructuredContext['outline'] = []
     const flatBlocks: StructuredContext['blocks'] = []

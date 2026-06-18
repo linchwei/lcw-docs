@@ -18,11 +18,11 @@
  *
  * @module llm/factory
  */
-import { Injectable } from '@nestjs/common'
 import { ChatOpenAI } from '@langchain/openai'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { LlmCreateOptions, LlmProvider, LLM_CONFIG } from './llm.types'
+import { LLM_CONFIG, LlmCreateOptions, LlmProvider } from './llm.types'
 
 @Injectable()
 export class LlmFactory {

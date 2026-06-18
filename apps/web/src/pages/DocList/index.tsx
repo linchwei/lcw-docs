@@ -607,11 +607,7 @@ function PageCard({
                         onToggleSelect(page.pageId)
                     }}
                 >
-                    {selected ? (
-                        <CheckSquare size={20} className="text-primary" />
-                    ) : (
-                        <Square size={20} className="text-muted-foreground" />
-                    )}
+                    {selected ? <CheckSquare size={20} className="text-primary" /> : <Square size={20} className="text-muted-foreground" />}
                 </div>
             )}
             {page.coverImage ? (

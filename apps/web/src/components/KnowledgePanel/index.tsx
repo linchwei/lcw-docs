@@ -13,14 +13,15 @@
  *
  * @module components/KnowledgePanel
  */
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
-import { BookOpen, Compass, Tag, Share2, Bookmark, Settings } from 'lucide-react'
 import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
+import { Bookmark, BookOpen, Compass, Settings, Share2, Tag } from 'lucide-react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+
 import { useEditorContext } from '@/context/EditorContext'
-import { getKnowledgeStatus, indexForKnowledge, extractStructuredContextFromEditor } from '@/services'
-import { ChatMessage } from '@/services/ai'
 import { useAutoIndex } from '@/hooks/useAutoIndex'
+import { getKnowledgeStatus, indexForKnowledge } from '@/services'
+import { ChatMessage } from '@/services/ai'
 
 /** Tab 类型定义 */
 type KnowledgeTab = 'qa' | 'discover' | 'tags' | 'graph' | 'bookmarks' | 'manage'
@@ -146,7 +147,7 @@ export function KnowledgePanel({
                             'flex items-center gap-1 px-3 py-2.5 text-xs whitespace-nowrap border-b-2 transition-colors cursor-pointer',
                             activeTab === tab.key
                                 ? 'border-brand text-brand font-medium'
-                                : 'border-transparent text-zinc-500 hover:text-zinc-800',
+                                : 'border-transparent text-zinc-500 hover:text-zinc-800'
                         )}
                     >
                         <tab.icon size={12} />
@@ -165,7 +166,9 @@ export function KnowledgePanel({
                 ) : indexStatus?.isIndexed ? (
                     <div className="flex items-center justify-between text-xs text-zinc-500">
                         <span>已索引 {indexStatus.totalChunks} 个分块</span>
-                        <span>{indexStatus.embeddedChunks}/{indexStatus.totalChunks} 已嵌入</span>
+                        <span>
+                            {indexStatus.embeddedChunks}/{indexStatus.totalChunks} 已嵌入
+                        </span>
                     </div>
                 ) : (
                     <div className="flex items-center justify-between">

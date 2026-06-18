@@ -40,7 +40,9 @@ export function useDocOutline(editor: LcwDocEditor<any, any, any>) {
         if (activeId) {
             isScrollingRef.current = true
             setActiveHeadingId(activeId)
-            setTimeout(() => { isScrollingRef.current = false }, 150)
+            setTimeout(() => {
+                isScrollingRef.current = false
+            }, 150)
         }
     }, [headings])
 
@@ -67,32 +69,35 @@ export function useDocOutline(editor: LcwDocEditor<any, any, any>) {
         updateFromStorage()
     }, [updateFromStorage])
 
-    const scrollToHeading = useCallback((blockId: string) => {
-        const container = scrollContainerRef.current
-        if (!container) return
+    const scrollToHeading = useCallback(
+        (blockId: string) => {
+            const container = scrollContainerRef.current
+            if (!container) return
 
-        const el = document.querySelector(`[data-id="${blockId}"]`)
-        if (!el) return
+            const el = document.querySelector(`[data-id="${blockId}"]`)
+            if (!el) return
 
-        const containerRect = container.getBoundingClientRect()
-        const elRect = el.getBoundingClientRect()
-        const scrollTop = container.scrollTop
-        const targetTop = elRect.top - containerRect.top + scrollTop - 100
+            const containerRect = container.getBoundingClientRect()
+            const elRect = el.getBoundingClientRect()
+            const scrollTop = container.scrollTop
+            const targetTop = elRect.top - containerRect.top + scrollTop - 100
 
-        container.scrollTo({ top: targetTop, behavior: 'smooth' })
+            container.scrollTo({ top: targetTop, behavior: 'smooth' })
 
-        const highlightEl = document.createElement('div')
-        highlightEl.className = 'bn-heading-highlight-overlay'
-        highlightEl.style.top = `${elRect.top - containerRect.top + scrollTop}px`
-        highlightEl.style.height = `${elRect.height}px`
-        container.appendChild(highlightEl)
+            const highlightEl = document.createElement('div')
+            highlightEl.className = 'bn-heading-highlight-overlay'
+            highlightEl.style.top = `${elRect.top - containerRect.top + scrollTop}px`
+            highlightEl.style.height = `${elRect.height}px`
+            container.appendChild(highlightEl)
 
-        setTimeout(() => {
-            highlightEl.remove()
-        }, 2000)
+            setTimeout(() => {
+                highlightEl.remove()
+            }, 2000)
 
-        editor.focus()
-    }, [editor])
+            editor.focus()
+        },
+        [editor]
+    )
 
     return { headings, activeHeadingId, scrollToHeading }
 }

@@ -1,14 +1,14 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, In } from 'typeorm'
+import { In, Repository } from 'typeorm'
 import { PostgresqlPersistence } from 'y-postgresql'
 
 import { CollaboratorEntity } from '../../entities/collaborator.entity'
 import { PageEntity } from '../../entities/page.entity'
 import { ForbiddenCode, ForbiddenError } from '../../fundamentals/common/exceptions/forbidden.exception'
-import { RagService } from '../ai/rag/rag.service'
 import { yjsXmlMentionCollect } from '../../utils/yjsXMLMentionCollect'
 import { yjsXmlToText } from '../../utils/yjsXmlToText'
+import { RagService } from '../ai/rag/rag.service'
 
 @Injectable()
 export class PageService {
@@ -18,7 +18,7 @@ export class PageService {
         @InjectRepository(CollaboratorEntity)
         private readonly collaboratorRepository: Repository<CollaboratorEntity>,
         @Inject('YJS_POSTGRESQL_ADAPTER') private readonly yjsPostgresqlAdapter: PostgresqlPersistence,
-        private readonly ragService: RagService,
+        private readonly ragService: RagService
     ) {}
 
     async create(payload) {
@@ -317,18 +317,20 @@ export class PageService {
                         where: matchedPageIds.map(pageId => ({ pageId, isDeleted: false })),
                     })
 
-                    return pages.map(page => {
-                        const match = pageScoreMap.get(page.pageId)!
-                        return {
-                            pageId: page.pageId,
-                            emoji: page.emoji,
-                            title: page.title,
-                            snippet: match.bestContent.slice(0, 150),
-                            updatedAt: page.updatedAt,
-                            matchType: 'semantic' as const,
-                            score: match.maxScore,
-                        }
-                    }).sort((a, b) => (b.score || 0) - (a.score || 0))
+                    return pages
+                        .map(page => {
+                            const match = pageScoreMap.get(page.pageId)!
+                            return {
+                                pageId: page.pageId,
+                                emoji: page.emoji,
+                                title: page.title,
+                                snippet: match.bestContent.slice(0, 150),
+                                updatedAt: page.updatedAt,
+                                matchType: 'semantic' as const,
+                                score: match.maxScore,
+                            }
+                        })
+                        .sort((a, b) => (b.score || 0) - (a.score || 0))
                 }
             } catch {
                 // 语义搜索失败，降级为关键词搜索

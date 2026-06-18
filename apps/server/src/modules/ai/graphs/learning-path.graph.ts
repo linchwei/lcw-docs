@@ -27,7 +27,7 @@ import { createReactAgent } from '@langchain/langgraph/prebuilt'
 
 import { LlmFactory } from '../llm/llm.factory'
 import { LEARNING_PATH_PROMPT } from '../prompts/knowledge.prompt'
-import { searchCrossDocuments, getRelatedDocuments } from '../tools/knowledge.tools'
+import { getRelatedDocuments, searchCrossDocuments } from '../tools/knowledge.tools'
 
 /**
  * 创建学习路径 Agent

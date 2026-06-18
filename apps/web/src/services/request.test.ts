@@ -49,7 +49,7 @@ describe('request interceptor', () => {
 
         const handler = request.interceptors.response.handlers[0]?.rejected
         if (handler) {
-            const _result = handler({ response: { status: 401, data: {} } })
+            handler({ response: { status: 401, data: {} } }).catch(() => {})
             expect(window.location.href).toBe('/account/login')
         }
 

@@ -75,15 +75,23 @@ export class DocumentChunkRepository {
                 const chunk = batchChunks[i]
                 const base = i * 7
                 placeholders.push(
-                    `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}::vector)`,
+                    `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}::vector)`
                 )
-                values.push(chunk.pageId, chunk.blockId, chunk.content, chunk.chunkIndex, chunk.startOffset, chunk.endOffset, chunk.embedding)
+                values.push(
+                    chunk.pageId,
+                    chunk.blockId,
+                    chunk.content,
+                    chunk.chunkIndex,
+                    chunk.startOffset,
+                    chunk.endOffset,
+                    chunk.embedding
+                )
             }
 
             await this.dataSource.query(
                 `INSERT INTO ${TABLE} (${COL.pageId}, ${COL.blockId}, ${COL.content}, ${COL.chunkIndex}, ${COL.startOffset}, ${COL.endOffset}, ${COL.embedding})
                  VALUES ${placeholders.join(', ')}`,
-                values,
+                values
             )
         }
     }
@@ -131,10 +139,7 @@ export class DocumentChunkRepository {
      * @param pageId - 文档 pageId
      */
     async deleteByPageId(pageId: string): Promise<void> {
-        await this.dataSource.query(
-            `DELETE FROM ${TABLE} WHERE ${COL.pageId} = $1`,
-            [pageId],
-        )
+        await this.dataSource.query(`DELETE FROM ${TABLE} WHERE ${COL.pageId} = $1`, [pageId])
     }
 
     /**
@@ -151,7 +156,7 @@ export class DocumentChunkRepository {
              WHERE ${COL.embedding} IS NULL
              ORDER BY ${COL.id}
              LIMIT $1`,
-            [limit],
+            [limit]
         )
     }
 
@@ -162,10 +167,7 @@ export class DocumentChunkRepository {
      * @param vectorStr - 向量字符串，如 "[0.1,0.2,...]"
      */
     async updateEmbedding(chunkId: number, vectorStr: string): Promise<void> {
-        await this.dataSource.query(
-            `UPDATE ${TABLE} SET ${COL.embedding} = $1::vector WHERE ${COL.id} = $2`,
-            [vectorStr, chunkId],
-        )
+        await this.dataSource.query(`UPDATE ${TABLE} SET ${COL.embedding} = $1::vector WHERE ${COL.id} = $2`, [vectorStr, chunkId])
     }
 
     /**
@@ -186,7 +188,7 @@ export class DocumentChunkRepository {
             `SELECT COUNT(*) as total, COUNT(${COL.embedding}) as embedded, COUNT(*) - COUNT(${COL.embedding}) as unembedded
              FROM ${TABLE}
              WHERE ${COL.pageId} = $1`,
-            [pageId],
+            [pageId]
         )
         const row = rows[0]
         return {
@@ -212,11 +214,11 @@ export class DocumentChunkRepository {
         const [pageRows, countRows] = await Promise.all([
             this.dataSource.query(
                 `SELECT DISTINCT dc.${COL.pageId} as page_id FROM ${TABLE} dc JOIN page p ON dc.${COL.pageId} = p."pageId" WHERE p."userId" = $1`,
-                [userId],
+                [userId]
             ),
             this.dataSource.query(
                 `SELECT COUNT(*) as total, COUNT(dc.${COL.embedding}) as embedded FROM ${TABLE} dc JOIN page p ON dc.${COL.pageId} = p."pageId" WHERE p."userId" = $1`,
-                [userId],
+                [userId]
             ),
         ])
         return {
@@ -235,22 +237,23 @@ export class DocumentChunkRepository {
      * @param limit - 每页数量
      * @param offset - 偏移量
      */
-    async listChunksByPageId(pageId: string, limit: number, offset: number): Promise<{
+    async listChunksByPageId(
+        pageId: string,
+        limit: number,
+        offset: number
+    ): Promise<{
         items: any[]
         total: number
     }> {
         const [countRows, items] = await Promise.all([
-            this.dataSource.query(
-                `SELECT COUNT(*) as total FROM ${TABLE} WHERE ${COL.pageId} = $1`,
-                [pageId],
-            ),
+            this.dataSource.query(`SELECT COUNT(*) as total FROM ${TABLE} WHERE ${COL.pageId} = $1`, [pageId]),
             this.dataSource.query(
                 `SELECT ${COL.id}, ${COL.pageId}, ${COL.blockId}, ${COL.content}, ${COL.chunkIndex}, ${COL.startOffset}, ${COL.endOffset}
                  FROM ${TABLE}
                  WHERE ${COL.pageId} = $1
                  ORDER BY ${COL.chunkIndex}
                  LIMIT $2 OFFSET $3`,
-                [pageId, limit, offset],
+                [pageId, limit, offset]
             ),
         ])
         return {
@@ -268,15 +271,15 @@ export class DocumentChunkRepository {
      * @param chunkId - 目标分块 ID
      * @param contextBlocks - 前后各取的上下文分块数量
      */
-    async getChunkWithContext(chunkId: number, contextBlocks: number): Promise<{
+    async getChunkWithContext(
+        chunkId: number,
+        contextBlocks: number
+    ): Promise<{
         chunk: any
         before: any[]
         after: any[]
     }> {
-        const chunkRows = await this.dataSource.query(
-            `SELECT * FROM ${TABLE} WHERE ${COL.id} = $1`,
-            [chunkId],
-        )
+        const chunkRows = await this.dataSource.query(`SELECT * FROM ${TABLE} WHERE ${COL.id} = $1`, [chunkId])
         if (chunkRows.length === 0) {
             throw new Error(`分块不存在: id=${chunkId}`)
         }
@@ -288,14 +291,14 @@ export class DocumentChunkRepository {
                  WHERE ${COL.pageId} = $1 AND ${COL.chunkIndex} < $2
                  ORDER BY ${COL.chunkIndex} DESC
                  LIMIT $3`,
-                [chunk.pageId, chunk.chunkIndex, contextBlocks],
+                [chunk.pageId, chunk.chunkIndex, contextBlocks]
             ),
             this.dataSource.query(
                 `SELECT * FROM ${TABLE}
                  WHERE ${COL.pageId} = $1 AND ${COL.chunkIndex} > $2
                  ORDER BY ${COL.chunkIndex} ASC
                  LIMIT $3`,
-                [chunk.pageId, chunk.chunkIndex, contextBlocks],
+                [chunk.pageId, chunk.chunkIndex, contextBlocks]
             ),
         ])
 

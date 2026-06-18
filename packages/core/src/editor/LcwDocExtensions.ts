@@ -9,10 +9,10 @@
 import { Extension } from '@tiptap/core'
 import Collaboration from '@tiptap/extension-collaboration'
 import CollaborationCaret from '@tiptap/extension-collaboration-caret'
-import { Dropcursor, Gapcursor, UndoRedo } from '@tiptap/extensions'
 import { HardBreak } from '@tiptap/extension-hard-break'
 import { Link } from '@tiptap/extension-link'
 import { Text } from '@tiptap/extension-text'
+import { Dropcursor, Gapcursor, UndoRedo } from '@tiptap/extensions'
 import * as Y from 'yjs'
 
 import { createDropFileExtension } from '../api/clipboard/fromClipboard/fileDropExtension'

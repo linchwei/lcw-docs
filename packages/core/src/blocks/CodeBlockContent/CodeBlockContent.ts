@@ -234,7 +234,7 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
             doc: ProseMirrorNode,
             parser: typeof parserWithLineNumbers,
             nodeTypes: string[],
-            cache: DecorationCache,
+            cache: DecorationCache
         ): [DecorationSet | undefined, Promise<void>[]] {
             const allDecorations: Decoration[][] = []
             const promises: Promise<void>[] = []
@@ -273,69 +273,68 @@ const CodeBlockContent = createStronglyTypedTiptapNode({
                 }
             })
 
-            return [
-                allDecorations.length > 0
-                    ? DecorationSet.create(doc, allDecorations.flat())
-                    : undefined,
-                promises,
-            ]
+            return [allDecorations.length > 0 ? DecorationSet.create(doc, allDecorations.flat()) : undefined, promises]
         }
 
-        return [new Plugin({
-            key: pluginKey,
-            state: {
-                init(_, instance) {
-                    const cache = new DecorationCache()
-                    const [decorations, promises] = calculateDecorations(
-                        instance.doc, parserWithLineNumbers, [nodeTypeName], cache,
-                    )
-                    return { cache, decorations, promises }
+        return [
+            new Plugin({
+                key: pluginKey,
+                state: {
+                    init(_, instance) {
+                        const cache = new DecorationCache()
+                        const [decorations, promises] = calculateDecorations(instance.doc, parserWithLineNumbers, [nodeTypeName], cache)
+                        return { cache, decorations, promises }
+                    },
+                    apply: (tr, data) => {
+                        const cache = data.cache.invalidate(tr)
+                        const refresh = !!tr.getMeta('prosemirror-highlight-refresh')
+                        if (!tr.docChanged && !refresh) {
+                            return {
+                                cache,
+                                decorations: data.decorations?.map(tr.mapping, tr.doc),
+                                promises: data.promises,
+                            }
+                        }
+                        const [decorations, promises] = calculateDecorations(tr.doc, parserWithLineNumbers, [nodeTypeName], cache)
+                        return { cache, decorations, promises }
+                    },
                 },
-                apply: (tr, data) => {
-                    const cache = data.cache.invalidate(tr)
-                    const refresh = !!tr.getMeta('prosemirror-highlight-refresh')
-                    if (!tr.docChanged && !refresh) {
-                        return {
-                            cache,
-                            decorations: data.decorations?.map(tr.mapping, tr.doc),
-                            promises: data.promises,
+                view: view => {
+                    const pendingPromises = new Set<Promise<void>>()
+                    const refresh = () => {
+                        if (pendingPromises.size > 0) return
+                        const tr = view.state.tr.setMeta('prosemirror-highlight-refresh', true)
+                        view.dispatch(tr)
+                    }
+                    const check = () => {
+                        const state = pluginKey.getState(view.state)
+                        for (const promise of state?.promises ?? []) {
+                            pendingPromises.add(promise)
+                            promise
+                                .then(() => {
+                                    pendingPromises.delete(promise)
+                                    refresh()
+                                })
+                                .catch((error: unknown) => {
+                                    console.error('[code-highlight] Error resolving parser:', error)
+                                    pendingPromises.delete(promise)
+                                })
                         }
                     }
-                    const [decorations, promises] = calculateDecorations(
-                        tr.doc, parserWithLineNumbers, [nodeTypeName], cache,
-                    )
-                    return { cache, decorations, promises }
-                },
-            },
-            view: (view) => {
-                const pendingPromises = new Set<Promise<void>>()
-                const refresh = () => {
-                    if (pendingPromises.size > 0) return
-                    const tr = view.state.tr.setMeta('prosemirror-highlight-refresh', true)
-                    view.dispatch(tr)
-                }
-                const check = () => {
-                    const state = pluginKey.getState(view.state)
-                    for (const promise of state?.promises ?? []) {
-                        pendingPromises.add(promise)
-                        promise.then(() => {
-                            pendingPromises.delete(promise)
-                            refresh()
-                        }).catch((error: unknown) => {
-                            console.error('[code-highlight] Error resolving parser:', error)
-                            pendingPromises.delete(promise)
-                        })
+                    check()
+                    return {
+                        update: () => {
+                            check()
+                        },
                     }
-                }
-                check()
-                return { update: () => { check() } }
-            },
-            props: {
-                decorations(state) {
-                    return this.getState(state)?.decorations
                 },
-            },
-        })]
+                props: {
+                    decorations(state) {
+                        return this.getState(state)?.decorations
+                    },
+                },
+            }),
+        ]
     },
 
     addInputRules() {

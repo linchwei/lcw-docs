@@ -17,8 +17,8 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { DocumentChunk } from '../chunker/chunker.types'
 import { DocumentChunkRepository } from './document-chunk.repository'
-import { VectorSearchResult, VectorSearchOptions, DEFAULT_SEARCH_OPTIONS } from './vector.types'
 import { VectorSetupService } from './vector.setup'
+import { DEFAULT_SEARCH_OPTIONS, VectorSearchOptions, VectorSearchResult } from './vector.types'
 
 @Injectable()
 export class VectorStore {
@@ -26,7 +26,7 @@ export class VectorStore {
 
     constructor(
         private chunkRepo: DocumentChunkRepository,
-        private vectorSetup: VectorSetupService,
+        private vectorSetup: VectorSetupService
     ) {}
 
     /**
@@ -69,10 +69,7 @@ export class VectorStore {
      * @param options - 搜索选项（topK、minScore、pageId 过滤）
      * @returns 按相似度降序排列的搜索结果
      */
-    async similaritySearch(
-        queryEmbedding: number[],
-        options?: Partial<VectorSearchOptions>,
-    ): Promise<VectorSearchResult[]> {
+    async similaritySearch(queryEmbedding: number[], options?: Partial<VectorSearchOptions>): Promise<VectorSearchResult[]> {
         if (!this.vectorSetup.getIsReady()) {
             this.logger.warn('pgvector 未就绪，无法执行语义搜索')
             return []
@@ -89,12 +86,7 @@ export class VectorStore {
         await this.chunkRepo.setHnswEfSearch(40)
 
         // 余弦相似度搜索
-        const results = await this.chunkRepo.similaritySearch(
-            vectorStr,
-            opts.pageId || null,
-            opts.minScore,
-            opts.topK,
-        )
+        const results = await this.chunkRepo.similaritySearch(vectorStr, opts.pageId || null, opts.minScore, opts.topK)
 
         return results.map((row: any) => ({
             chunkId: row.id,

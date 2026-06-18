@@ -1,6 +1,16 @@
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, useDroppable, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core'
+import {
+    DndContext,
+    type DragEndEvent,
+    DragOverlay,
+    type DragStartEvent,
+    PointerSensor,
+    useDroppable,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core'
 import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
-import { useState, useCallback, createContext, useContext, type ReactNode } from 'react'
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react'
+
 import * as srv from '@/services'
 import { queryClient } from '@/utils/query-client'
 
@@ -37,34 +47,37 @@ export function SidebarDndContext({ children }: SidebarDndContextProps) {
         setActiveId(String(event.active.id))
     }, [])
 
-    const handleDragEnd = useCallback(async (event: DragEndEvent) => {
-        const { active, over } = event
-        setActiveId(null)
+    const handleDragEnd = useCallback(
+        async (event: DragEndEvent) => {
+            const { active, over } = event
+            setActiveId(null)
 
-        if (!over || !active) return
+            if (!over || !active) return
 
-        // 仅处理页面类型的拖拽
-        if (active.data.current?.type !== 'page') return
+            // 仅处理页面类型的拖拽
+            if (active.data.current?.type !== 'page') return
 
-        const pageId = String(active.id)
-        const overId = String(over.id)
+            const pageId = String(active.id)
+            const overId = String(over.id)
 
-        let targetFolderId: string | null = null
-        if (overId.startsWith('folder-')) {
-            targetFolderId = overId.replace('folder-', '')
-        } else if (overId !== 'root-area') {
-            return
-        }
+            let targetFolderId: string | null = null
+            if (overId.startsWith('folder-')) {
+                targetFolderId = overId.replace('folder-', '')
+            } else if (overId !== 'root-area') {
+                return
+            }
 
-        try {
-            await srv.updatePage({ pageId, folderId: targetFolderId })
-            queryClient.invalidateQueries({ queryKey: ['pages'] })
-            queryClient.invalidateQueries({ queryKey: ['folders'] })
-        } catch (error) {
-            console.error('Failed to move page:', error)
-            toast({ title: '移动文档失败', variant: 'destructive' })
-        }
-    }, [queryClient, toast])
+            try {
+                await srv.updatePage({ pageId, folderId: targetFolderId })
+                queryClient.invalidateQueries({ queryKey: ['pages'] })
+                queryClient.invalidateQueries({ queryKey: ['folders'] })
+            } catch (error) {
+                console.error('Failed to move page:', error)
+                toast({ title: '移动文档失败', variant: 'destructive' })
+            }
+        },
+        [queryClient, toast]
+    )
 
     const handleDragCancel = useCallback(() => {
         setActiveId(null)

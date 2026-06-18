@@ -21,14 +21,14 @@
  *
  * @module graphs/outline
  */
-import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { BaseMessage } from '@langchain/core/messages'
+import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { messagesStateReducer } from '@langchain/langgraph'
-import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 import { MemorySaver } from '@langchain/langgraph'
+import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 
 import { LlmFactory } from '../llm/llm.factory'
-import { GENERATE_OUTLINE_PROMPT, EXPAND_SECTION_PROMPT } from '../prompts/outline.prompt'
+import { EXPAND_SECTION_PROMPT, GENERATE_OUTLINE_PROMPT } from '../prompts/outline.prompt'
 
 /** 大纲项结构（与前端 AIOutlineApproval 组件对应） */
 interface OutlineItem {
@@ -100,9 +100,7 @@ async function generateOutline(state: typeof OutlineState.State, llmFactory: Llm
     const llm = llmFactory.create({ temperature: 0.7 })
 
     const requirementsText = state.requirements ? `\n额外要求：${state.requirements}` : ''
-    const prompt = GENERATE_OUTLINE_PROMPT
-        .replace('{topic}', state.topic)
-        .replace('{requirements}', requirementsText)
+    const prompt = GENERATE_OUTLINE_PROMPT.replace('{topic}', state.topic).replace('{requirements}', requirementsText)
 
     const response = await llm.invoke(prompt)
     const content = typeof response.content === 'string' ? response.content : String(response.content)
@@ -136,7 +134,7 @@ async function generateOutline(state: typeof OutlineState.State, llmFactory: Llm
  * 使 Graph 在此节点前暂停，等待用户审批。
  * 前端收到 interrupt 事件后展示大纲编辑界面。
  */
-async function approveOutline(state: typeof OutlineState.State) {
+async function approveOutline(_state: typeof OutlineState.State) {
     return { approvedOutline: true }
 }
 
@@ -155,8 +153,7 @@ async function expandSection(state: typeof OutlineState.State, llmFactory: LlmFa
         return { currentSectionIndex: state.currentSectionIndex }
     }
 
-    const prompt = EXPAND_SECTION_PROMPT
-        .replace('{title}', section.title)
+    const prompt = EXPAND_SECTION_PROMPT.replace('{title}', section.title)
         .replace('{description}', section.description)
         .replace('{topic}', state.topic)
 
@@ -190,10 +187,10 @@ export function createOutlineGraph(llmFactory: LlmFactory, checkpointer?: Postgr
     const saver = checkpointer ?? new MemorySaver()
 
     return new StateGraph(OutlineState)
-        .addNode('generateOutline', (state) => generateOutline(state, llmFactory))
+        .addNode('generateOutline', state => generateOutline(state, llmFactory))
         .addNode('approveOutline', approveOutline)
-        .addNode('expandSection', (state) => expandSection(state, llmFactory))
-        .addNode('done', (state) => state)
+        .addNode('expandSection', state => expandSection(state, llmFactory))
+        .addNode('done', state => state)
         .addEdge(START, 'generateOutline')
         .addEdge('generateOutline', 'approveOutline')
         .addEdge('approveOutline', 'expandSection')

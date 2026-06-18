@@ -99,7 +99,12 @@ export function getBlockFromPos<
     BSchema extends BlockSchemaWithBlock<BType, Config>,
     I extends InlineContentSchema,
     S extends StyleSchema,
->(getPos: (() => number | undefined) | boolean, editor: LcwDocEditor<BSchema, I, S>, tipTapEditor: Editor, type: BType): SpecificBlock<BSchema, BType, I, S> | undefined {
+>(
+    getPos: (() => number | undefined) | boolean,
+    editor: LcwDocEditor<BSchema, I, S>,
+    tipTapEditor: Editor,
+    type: BType
+): SpecificBlock<BSchema, BType, I, S> | undefined {
     if (typeof getPos === 'boolean') {
         throw new Error('Cannot find node position as getPos is a boolean, not a function.')
     }

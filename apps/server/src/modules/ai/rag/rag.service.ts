@@ -25,13 +25,13 @@
  */
 import { Injectable, Logger } from '@nestjs/common'
 
-import { DocumentChunker } from './chunker/document.chunker'
 import { ChunkingConfig } from './chunker/chunker.types'
+import { DocumentChunker } from './chunker/document.chunker'
 import { EmbeddingService } from './embedding/embedding.service'
 import { DocumentChunkRepository } from './vector/document-chunk.repository'
-import { VectorSearchOptions, VectorSearchResult } from './vector/vector.types'
-import { VectorStore } from './vector/vector.store'
 import { VectorSetupService } from './vector/vector.setup'
+import { VectorStore } from './vector/vector.store'
+import { VectorSearchOptions, VectorSearchResult } from './vector/vector.types'
 
 /** Block 数据结构（与 DocumentContext.blocks 对齐，字段均为必填） */
 interface BlockData {
@@ -72,7 +72,7 @@ export class RagService {
         private embeddingService: EmbeddingService,
         private vectorStore: VectorStore,
         private vectorSetup: VectorSetupService,
-        private chunkRepo: DocumentChunkRepository,
+        private chunkRepo: DocumentChunkRepository
     ) {}
 
     /**
@@ -85,11 +85,7 @@ export class RagService {
      * @param blocks - 文档 block 列表（字段可为可选，内部会填充默认值）
      * @param chunkingConfig - 可选的分块配置
      */
-    async indexDocument(
-        pageId: string,
-        blocks: BlockInput[],
-        chunkingConfig?: Partial<ChunkingConfig>,
-    ): Promise<void> {
+    async indexDocument(pageId: string, blocks: BlockInput[], chunkingConfig?: Partial<ChunkingConfig>): Promise<void> {
         // 前置检查：Embedding 服务和 pgvector 必须可用
         if (!this.embeddingService.isAvailable()) {
             this.logger.warn('Embedding 服务不可用，跳过文档索引')
@@ -103,12 +99,14 @@ export class RagService {
 
         try {
             // 将可选字段转为必填（提供默认值）
-            const normalizedBlocks: BlockData[] = blocks.map(b => ({
-                id: b.id || '',
-                type: b.type || 'paragraph',
-                content: b.content || '',
-                level: b.level,
-            })).filter(b => b.content.length > 0)
+            const normalizedBlocks: BlockData[] = blocks
+                .map(b => ({
+                    id: b.id || '',
+                    type: b.type || 'paragraph',
+                    content: b.content || '',
+                    level: b.level,
+                }))
+                .filter(b => b.content.length > 0)
 
             // 1. 删除旧分块（增量索引：先删后建）
             await this.vectorStore.deleteByPageId(pageId)
@@ -134,9 +132,7 @@ export class RagService {
 
             this.logger.log(`文档 ${pageId} 索引完成: ${chunks.length} 个分块`)
         } catch (error) {
-            this.logger.error(
-                `文档索引失败 ${pageId}: ${error instanceof Error ? error.message : error}`,
-            )
+            this.logger.error(`文档索引失败 ${pageId}: ${error instanceof Error ? error.message : error}`)
             // 索引失败不影响文档保存，只记录错误
         }
     }
@@ -190,9 +186,7 @@ export class RagService {
         return results
             .map((r, i) => {
                 const scoreStr = r.score.toFixed(2)
-                const contentPreview = r.content.length > 300
-                    ? r.content.slice(0, 300) + '...'
-                    : r.content
+                const contentPreview = r.content.length > 300 ? r.content.slice(0, 300) + '...' : r.content
                 return `[相关内容 ${i + 1}] (文档: ${r.pageId}, 相似度: ${scoreStr})\n${contentPreview}`
             })
             .join('\n\n')
@@ -237,7 +231,10 @@ export class RagService {
      * @param chunkId - 目标分块 ID
      * @param contextBlocks - 前后各取的上下文分块数量
      */
-    async getChunkWithContext(chunkId: number, contextBlocks: number): Promise<{
+    async getChunkWithContext(
+        chunkId: number,
+        contextBlocks: number
+    ): Promise<{
         chunk: VectorSearchResult
         before: VectorSearchResult[]
         after: VectorSearchResult[]

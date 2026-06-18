@@ -72,8 +72,7 @@ describe('Knowledge AI Controller', () => {
     // === 索引状态 ===
 
     it('KN-006: 索引状态查询未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/ai/knowledge/status/test-page')
+        const res = await request(app.getHttpServer()).get('/api/ai/knowledge/status/test-page')
         expect(res.status).toBe(401)
     })
 
@@ -86,9 +85,7 @@ describe('Knowledge AI Controller', () => {
     })
 
     it('KN-008: 索引状态查询缺少 pageId 路径参数应返回 404', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/ai/knowledge/status/')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).get('/api/ai/knowledge/status/').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(404)
     })
 
@@ -120,9 +117,7 @@ describe('Knowledge AI Controller', () => {
     // === 自动标签 ===
 
     it('KN-012: 自动标签未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/ai/knowledge/auto-tag')
-            .send({ pageId: 'test-page' })
+        const res = await request(app.getHttpServer()).post('/api/ai/knowledge/auto-tag').send({ pageId: 'test-page' })
         expect(res.status).toBe(401)
     })
 
@@ -137,9 +132,7 @@ describe('Knowledge AI Controller', () => {
     // === 知识图谱 ===
 
     it('KN-014: 知识图谱未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/ai/knowledge/graph')
-            .send({ pageId: 'test-page' })
+        const res = await request(app.getHttpServer()).post('/api/ai/knowledge/graph').send({ pageId: 'test-page' })
         expect(res.status).toBe(401)
     })
 
@@ -179,9 +172,7 @@ describe('Knowledge AI Controller', () => {
     // === 智能摘要 ===
 
     it('KN-019: 智能摘要未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/ai/knowledge/smart-summary')
-            .send({ pageId: 'test-page' })
+        const res = await request(app.getHttpServer()).post('/api/ai/knowledge/smart-summary').send({ pageId: 'test-page' })
         expect(res.status).toBe(401)
     })
 
@@ -196,9 +187,7 @@ describe('Knowledge AI Controller', () => {
     // === 学习路径 ===
 
     it('KN-021: 学习路径未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/ai/knowledge/learning-path')
-            .send({ pageId: 'test-page' })
+        const res = await request(app.getHttpServer()).post('/api/ai/knowledge/learning-path').send({ pageId: 'test-page' })
         expect(res.status).toBe(401)
     })
 
@@ -213,8 +202,7 @@ describe('Knowledge AI Controller', () => {
     // === 关联文档 ===
 
     it('KN-023: 关联文档未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/ai/knowledge/related/test-page')
+        const res = await request(app.getHttpServer()).get('/api/ai/knowledge/related/test-page')
         expect(res.status).toBe(401)
     })
 
@@ -228,9 +216,7 @@ describe('Knowledge AI Controller', () => {
     // === 全局搜索 ===
 
     it('KN-025: 全局搜索未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/ai/knowledge/global-search')
-            .send({ query: 'test' })
+        const res = await request(app.getHttpServer()).post('/api/ai/knowledge/global-search').send({ query: 'test' })
         expect(res.status).toBe(401)
     })
 
@@ -277,23 +263,19 @@ describe('Knowledge AI Controller', () => {
     })
 
     it('KN-031: 收藏列表未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/ai/knowledge/bookmarks')
+        const res = await request(app.getHttpServer()).get('/api/ai/knowledge/bookmarks')
         expect(res.status).toBe(401)
     })
 
     it('KN-032: 收藏列表正常应返回 200', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/ai/knowledge/bookmarks')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).get('/api/ai/knowledge/bookmarks').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(200)
         expect(res.body).toHaveProperty('items')
         expect(res.body).toHaveProperty('total')
     })
 
     it('KN-033: 删除收藏未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .delete('/api/ai/knowledge/bookmark/999')
+        const res = await request(app.getHttpServer()).delete('/api/ai/knowledge/bookmark/999')
         expect(res.status).toBe(401)
     })
 
@@ -305,9 +287,7 @@ describe('Knowledge AI Controller', () => {
     })
 
     it('KN-035: 搜索收藏未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .post('/api/ai/knowledge/bookmark/search')
-            .send({ query: 'test' })
+        const res = await request(app.getHttpServer()).post('/api/ai/knowledge/bookmark/search').send({ query: 'test' })
         expect(res.status).toBe(401)
     })
 
@@ -322,21 +302,17 @@ describe('Knowledge AI Controller', () => {
     // === 对话历史 ===
 
     it('KN-037: 对话历史未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/ai/knowledge/threads')
+        const res = await request(app.getHttpServer()).get('/api/ai/knowledge/threads')
         expect(res.status).toBe(401)
     })
 
     it('KN-038: 对话历史已认证应返回 200', async () => {
-        const res = await request(app.getHttpServer())
-            .get('/api/ai/knowledge/threads')
-            .set('Authorization', `Bearer ${testUser.token}`)
+        const res = await request(app.getHttpServer()).get('/api/ai/knowledge/threads').set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(200)
     })
 
     it('KN-039: 删除对话未认证应返回 401', async () => {
-        const res = await request(app.getHttpServer())
-            .delete('/api/ai/knowledge/thread/test-thread-id')
+        const res = await request(app.getHttpServer()).delete('/api/ai/knowledge/thread/test-thread-id')
         expect(res.status).toBe(401)
     })
 

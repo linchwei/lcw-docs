@@ -1,29 +1,29 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { CanActivate, ExecutionContext, INestApplication, Injectable, ValidationPipe } from '@nestjs/common'
+import { APP_GUARD } from '@nestjs/core'
 import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
 import * as bcrypt from 'bcryptjs'
 import { DataSource, Like, Repository } from 'typeorm'
 
 import { AppModule } from '../app.module'
-import { AuditLogEntity } from '../entities/audit-log.entity'
-import { CollaboratorEntity } from '../entities/collaborator.entity'
-import { CommentEntity } from '../entities/comment.entity'
-import { FolderEntity } from '../entities/folder.entity'
-import { KnowledgeBookmarkEntity } from '../entities/knowledge-bookmark.entity'
-import { NotificationEntity } from '../entities/notification.entity'
-import { PageEntity } from '../entities/page.entity'
-import { PageTagEntity } from '../entities/page-tag.entity'
-import { ShareEntity } from '../entities/share.entity'
-import { TagEntity } from '../entities/tag.entity'
 import { UserEntity } from '../entities/user.entity'
-import { VersionEntity } from '../entities/version.entity'
 
 let app: INestApplication
+
+@Injectable()
+class MockThrottlerGuard implements CanActivate {
+    canActivate(_context: ExecutionContext): boolean {
+        return true
+    }
+}
 
 export async function createTestApp(): Promise<INestApplication> {
     const moduleFixture = await Test.createTestingModule({
         imports: [AppModule],
-    }).compile()
+    })
+        .overrideProvider(APP_GUARD)
+        .useClass(MockThrottlerGuard)
+        .compile()
 
     app = moduleFixture.createNestApplication()
     app.setGlobalPrefix('api')
@@ -65,6 +65,15 @@ export async function cleanupUsers(app: INestApplication): Promise<void> {
 
 export async function cleanupAll(app: INestApplication): Promise<void> {
     const dataSource = app.get(DataSource)
+
+    // 安全检查：确保连接的是测试数据库，防止误清空开发/生产数据
+    const currentDatabase = dataSource.options.database as string
+    if (!currentDatabase || !currentDatabase.includes('test')) {
+        throw new Error(
+            `❌ 安全检查失败：当前连接的数据库 "${currentDatabase}" 不是测试数据库！` +
+                `测试只能操作数据库名包含 "test" 的数据库，请检查 NODE_ENV 是否设置为 "test"。`
+        )
+    }
 
     // 按外键依赖顺序清理，使用 TRUNCATE CASCADE 避免外键约束问题
     try {

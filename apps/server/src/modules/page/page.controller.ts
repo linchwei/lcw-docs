@@ -6,7 +6,20 @@ import { nanoid } from 'nanoid'
 import { PageEntity } from '../../entities/page.entity'
 import { UserEntity } from '../../entities/user.entity'
 import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
-import { CreatePageDto, createPageSchema, DeletePageDto, deletePageSchema, UpdatePageDto, updatePageSchema, BatchDeletePageDto, batchDeletePageSchema, BatchRestorePageDto, batchRestorePageSchema, BatchPermanentDeletePageDto, batchPermanentDeletePageSchema } from './page.dto'
+import {
+    BatchDeletePageDto,
+    batchDeletePageSchema,
+    BatchPermanentDeletePageDto,
+    batchPermanentDeletePageSchema,
+    BatchRestorePageDto,
+    batchRestorePageSchema,
+    CreatePageDto,
+    createPageSchema,
+    DeletePageDto,
+    deletePageSchema,
+    UpdatePageDto,
+    updatePageSchema,
+} from './page.dto'
 import { PageService } from './page.service'
 
 @ApiTags('页面')
@@ -147,7 +160,10 @@ export class PageController {
     })
     @ApiOperation({ summary: '批量永久删除页面', description: '从数据库中永久删除多个页面，不可恢复' })
     @Delete('batch-permanent')
-    async batchPermanentDelete(@Body(new ZodValidationPipe(batchPermanentDeletePageSchema)) body: BatchPermanentDeletePageDto, @Request() req) {
+    async batchPermanentDelete(
+        @Body(new ZodValidationPipe(batchPermanentDeletePageSchema)) body: BatchPermanentDeletePageDto,
+        @Request() req
+    ) {
         const result = await this.pageService.batchPermanentDelete({ pageIds: body.pageIds, userId: req.user.id })
         return { data: result, success: true }
     }

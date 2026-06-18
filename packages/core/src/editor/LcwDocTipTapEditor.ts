@@ -171,6 +171,7 @@ export class LcwDocTipTapEditor extends TiptapEditor {
     private createViewAlternative() {
         let view: EditorView
 
+        // eslint-disable-next-line prefer-const -- 必须用 let 先声明再赋值，避免 EditorView 构造期间 dispatchTransaction 闭包访问 view 时的 TDZ 错误
         view = new EditorView(
             { mount: this.options.element as any },
             {

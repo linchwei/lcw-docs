@@ -286,11 +286,7 @@ export class SideMenuView<BSchema extends BlockSchema, I extends InlineContentSc
 
         const editorWrapper = this.pmView.dom!.parentElement!
 
-        if (
-            event &&
-            event.target &&
-            !(editorWrapper === event.target || editorWrapper.contains(event.target as HTMLElement))
-        ) {
+        if (event && event.target && !(editorWrapper === event.target || editorWrapper.contains(event.target as HTMLElement))) {
             if (this.state?.show) {
                 this.state.show = false
                 this.emitUpdate(this.state)

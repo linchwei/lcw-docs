@@ -27,7 +27,7 @@ const CalloutBlockContent = createStronglyTypedTiptapNode({
                 parseHTML: (element: HTMLElement) => {
                     return element.getAttribute('data-callout-type') || 'info'
                 },
-                renderHTML: (attributes) => {
+                renderHTML: attributes => {
                     return {
                         'data-callout-type': attributes.calloutType,
                     }
@@ -202,7 +202,7 @@ const CalloutBlockContent = createStronglyTypedTiptapNode({
             return {
                 dom,
                 contentDOM,
-                update: (newNode) => {
+                update: newNode => {
                     if (newNode.type !== this.type) {
                         return false
                     }

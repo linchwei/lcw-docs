@@ -1,7 +1,9 @@
 import { waitFor } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { clearAuthenticatedUser, renderWithProviders } from '@/test/helpers'
+import { server } from '@/test/mocks/server'
 
 vi.mock('@/services', async () => {
     const actual = await vi.importActual('@/services')

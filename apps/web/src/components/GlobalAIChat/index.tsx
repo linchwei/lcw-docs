@@ -1,15 +1,15 @@
-import { extractTextFromBlocks, PartialBlock } from '@lcw-doc/core'
+import { PartialBlock } from '@lcw-doc/core'
 import { ArrowUp, Copy, FileInput, FileText, Lightbulb, MessageSquare, PenLine, Plus, RotateCcw, Search, Sparkles, X } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { useEffect, useRef, useState } from 'react'
-import TextareaAutosize from 'react-textarea-autosize'
 import { useHotkeys } from 'react-hotkeys-hook'
+import ReactMarkdown from 'react-markdown'
+import TextareaAutosize from 'react-textarea-autosize'
+import remarkGfm from 'remark-gfm'
 
-import { useEditorContext } from '@/context/EditorContext'
-import { ChatMessage, StructuredContext, chatWithAgent, extractStructuredContextFromEditor } from '@/services'
-import { useAIStream } from '@/hooks/useAIStream'
 import { AIDiffPreview } from '@/components/AIDiffPreview'
+import { useEditorContext } from '@/context/EditorContext'
+import { useAIStream } from '@/hooks/useAIStream'
+import { ChatMessage, chatWithAgent, extractStructuredContextFromEditor, StructuredContext } from '@/services'
 
 const SYSTEM_PROMPT =
     '你是一个专业的文档编辑助手。你可以帮助用户撰写、改写、翻译和总结文档内容。请用中文回复，保持专业和友好的语气。当用户提供文档上下文时，请基于上下文内容进行回答。'
@@ -47,9 +47,13 @@ export function GlobalAIChat() {
         if (streamContent) scrollToBottom()
     }, [streamContent])
 
-    useHotkeys('mod+j', () => {
-        setIsOpen(prev => !prev)
-    }, { enableOnFormTags: false })
+    useHotkeys(
+        'mod+j',
+        () => {
+            setIsOpen(prev => !prev)
+        },
+        { enableOnFormTags: false }
+    )
 
     useEffect(() => {
         const styleId = 'global-ai-chat-animations'
@@ -122,7 +126,7 @@ export function GlobalAIChat() {
         const apiMessages: ChatMessage[] = [systemMessage, ...chatHistory, apiUserMessage]
 
         // startStream 返回累积的完整内容，避免闭包陷阱
-        const result = await startStream(async (signal) => {
+        const result = await startStream(async signal => {
             return chatWithAgent(apiMessages, context, undefined, signal)
         })
 
@@ -205,38 +209,39 @@ export function GlobalAIChat() {
         }
     }
 
-    const panelStyle = position.x === 0 && position.y === 0
-        ? {
-            position: 'fixed' as const,
-            bottom: '24px',
-            right: '24px',
-            width: '420px',
-            height: '560px',
-            backgroundColor: '#fff',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-            border: '1px solid #e9e9e7',
-            display: 'flex',
-            flexDirection: 'column' as const,
-            zIndex: 9999,
-            overflow: 'hidden',
-        }
-        : {
-            position: 'fixed' as const,
-            bottom: '24px',
-            right: '24px',
-            width: '420px',
-            height: '560px',
-            backgroundColor: '#fff',
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
-            border: '1px solid #e9e9e7',
-            display: 'flex',
-            flexDirection: 'column' as const,
-            zIndex: 9999,
-            overflow: 'hidden',
-            transform: `translate(${position.x}px, ${position.y}px)`,
-        }
+    const panelStyle =
+        position.x === 0 && position.y === 0
+            ? {
+                  position: 'fixed' as const,
+                  bottom: '24px',
+                  right: '24px',
+                  width: '420px',
+                  height: '560px',
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+                  border: '1px solid #e9e9e7',
+                  display: 'flex',
+                  flexDirection: 'column' as const,
+                  zIndex: 9999,
+                  overflow: 'hidden',
+              }
+            : {
+                  position: 'fixed' as const,
+                  bottom: '24px',
+                  right: '24px',
+                  width: '420px',
+                  height: '560px',
+                  backgroundColor: '#fff',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)',
+                  border: '1px solid #e9e9e7',
+                  display: 'flex',
+                  flexDirection: 'column' as const,
+                  zIndex: 9999,
+                  overflow: 'hidden',
+                  transform: `translate(${position.x}px, ${position.y}px)`,
+              }
 
     return (
         <>
@@ -334,12 +339,14 @@ export function GlobalAIChat() {
                                     gap: '16px',
                                 }}
                             >
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#9b9a97' }}>
+                                <div
+                                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#9b9a97' }}
+                                >
                                     <MessageSquare size={32} color="#d4d4d4" />
                                     <span style={{ fontSize: '13px' }}>向 AI 助手提问，开始对话</span>
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
-                                    {suggestions.map((s) => (
+                                    {suggestions.map(s => (
                                         <div
                                             key={s.label}
                                             className="rounded-lg border border-zinc-200 p-3 cursor-pointer hover:border-zinc-300 hover:shadow-sm transition-all"
@@ -385,7 +392,10 @@ export function GlobalAIChat() {
                                     )}
                                 </div>
                                 {msg.role === 'assistant' && i === messages.length - 1 && !isGenerating && (
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ display: 'flex', gap: '2px', marginTop: '4px' }}>
+                                    <div
+                                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                        style={{ display: 'flex', gap: '2px', marginTop: '4px' }}
+                                    >
                                         <button
                                             onClick={() => handleCopy(msg.content, i)}
                                             style={{
@@ -405,7 +415,11 @@ export function GlobalAIChat() {
                                             onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f5f5f4')}
                                             onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                                         >
-                                            {copiedIdx === i ? <span style={{ fontSize: '11px', color: '#6B45FF' }}>已复制</span> : <Copy size={14} />}
+                                            {copiedIdx === i ? (
+                                                <span style={{ fontSize: '11px', color: '#6B45FF' }}>已复制</span>
+                                            ) : (
+                                                <Copy size={14} />
+                                            )}
                                         </button>
                                         <button
                                             onClick={handleRegenerate}
@@ -519,17 +533,17 @@ export function GlobalAIChat() {
                             <div style={{ marginTop: '8px' }}>
                                 <AIDiffPreview
                                     diffs={diffs}
-                                    onAccept={(diff) => {
+                                    onAccept={diff => {
                                         // TODO: 将 diff 操作应用到编辑器
                                         console.log('Accept diff:', diff)
                                     }}
-                                    onReject={(diff) => {
+                                    onReject={diff => {
                                         console.log('Reject diff:', diff)
                                     }}
-                                    onAcceptAll={(allDiffs) => {
+                                    onAcceptAll={allDiffs => {
                                         console.log('Accept all diffs:', allDiffs)
                                     }}
-                                    onRejectAll={(allDiffs) => {
+                                    onRejectAll={allDiffs => {
                                         console.log('Reject all diffs:', allDiffs)
                                     }}
                                     onClose={() => {

@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
+import request from 'supertest'
 
 import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../helpers'
 
@@ -26,7 +26,9 @@ describe('ApplicationController', () => {
         expect(res.status).toBe(201)
         expect(res.body).toHaveProperty('data')
         expect(res.body.success).toBe(true)
-        createdAppId = res.body.data.appId
+        if (res.body.data) {
+            createdAppId = res.body.data.appId
+        }
     })
 
     it('AP-003: should return application list', async () => {

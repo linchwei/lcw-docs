@@ -20,11 +20,11 @@
  *
  * @module graphs/summary
  */
-import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { BaseMessage } from '@langchain/core/messages'
+import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { messagesStateReducer } from '@langchain/langgraph'
-import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 import { MemorySaver } from '@langchain/langgraph'
+import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 
 import { LlmFactory } from '../llm/llm.factory'
 import { CHUNK_SUMMARY_PROMPT, MERGE_SUMMARIES_PROMPT, REFINE_SUMMARY_PROMPT } from '../prompts/summary.prompt'
@@ -179,10 +179,10 @@ export function createSummaryGraph(llmFactory: LlmFactory, checkpointer?: Postgr
     const saver = checkpointer ?? new MemorySaver()
 
     return new StateGraph(SummaryState)
-        .addNode('chunk', (state) => chunkDocument(state))
-        .addNode('summarize', (state) => summarizeChunks(state, llmFactory))
-        .addNode('merge', (state) => mergeSummaries(state, llmFactory))
-        .addNode('refine', (state) => refineSummary(state, llmFactory))
+        .addNode('chunk', state => chunkDocument(state))
+        .addNode('summarize', state => summarizeChunks(state, llmFactory))
+        .addNode('merge', state => mergeSummaries(state, llmFactory))
+        .addNode('refine', state => refineSummary(state, llmFactory))
         .addEdge(START, 'chunk')
         .addEdge('chunk', 'summarize')
         .addEdge('summarize', 'merge')

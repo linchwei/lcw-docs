@@ -140,11 +140,7 @@ export function createReactInlineContentSpec<T extends CustomInlineContentConfig
                                         )
 
                                         editor._tiptapEditor.view.dispatch(
-                                            editor._tiptapEditor.view.state.tr.replaceWith(
-                                                pos,
-                                                pos + props.node.nodeSize,
-                                                content
-                                            )
+                                            editor._tiptapEditor.view.state.tr.replaceWith(pos, pos + props.node.nodeSize, content)
                                         )
                                     }}
                                 />

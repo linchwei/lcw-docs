@@ -15,7 +15,7 @@
  *
  * @module components/AIDiffPreview
  */
-import { Check, X, CheckCheck, XCircle } from 'lucide-react'
+import { Check, CheckCheck, X, XCircle } from 'lucide-react'
 import { useState } from 'react'
 
 import type { DiffItem } from '@/hooks/useAIStream'
@@ -70,23 +70,13 @@ function DiffItemView({
                         fontWeight: 600,
                         padding: '2px 8px',
                         borderRadius: '4px',
-                        backgroundColor:
-                            type === 'insert_blocks' ? '#dcfce7' :
-                            type === 'update_block' ? '#fef3c7' :
-                            '#fee2e2',
-                        color:
-                            type === 'insert_blocks' ? '#166534' :
-                            type === 'update_block' ? '#92400e' :
-                            '#991b1b',
+                        backgroundColor: type === 'insert_blocks' ? '#dcfce7' : type === 'update_block' ? '#fef3c7' : '#fee2e2',
+                        color: type === 'insert_blocks' ? '#166534' : type === 'update_block' ? '#92400e' : '#991b1b',
                     }}
                 >
                     {type === 'insert_blocks' ? '插入' : type === 'update_block' ? '修改' : '删除'}
                 </span>
-                {diff.blockId && (
-                    <span style={{ fontSize: '11px', color: '#9b9a97' }}>
-                        Block: {diff.blockId.slice(0, 8)}...
-                    </span>
-                )}
+                {diff.blockId && <span style={{ fontSize: '11px', color: '#9b9a97' }}>Block: {diff.blockId.slice(0, 8)}...</span>}
             </div>
 
             {/* Diff 内容展示 */}
@@ -116,14 +106,8 @@ function DiffItemView({
                             </span>
                         )}
                         {data.oldContent && data.newContent && '\n'}
-                        {data.newContent && (
-                            <span style={{ backgroundColor: '#dcfce7', color: '#166534' }}>
-                                {data.newContent}
-                            </span>
-                        )}
-                        {!data.oldContent && !data.newContent && (
-                            <span>{JSON.stringify(data, null, 2)}</span>
-                        )}
+                        {data.newContent && <span style={{ backgroundColor: '#dcfce7', color: '#166534' }}>{data.newContent}</span>}
+                        {!data.oldContent && !data.newContent && <span>{JSON.stringify(data, null, 2)}</span>}
                     </>
                 )}
 
@@ -175,15 +159,11 @@ function DiffItemView({
             )}
 
             {status === 'accepted' && (
-                <span style={{ fontSize: '12px', color: '#166534', marginTop: '4px', display: 'inline-block' }}>
-                    已接受
-                </span>
+                <span style={{ fontSize: '12px', color: '#166534', marginTop: '4px', display: 'inline-block' }}>已接受</span>
             )}
 
             {status === 'rejected' && (
-                <span style={{ fontSize: '12px', color: '#991b1b', marginTop: '4px', display: 'inline-block' }}>
-                    已拒绝
-                </span>
+                <span style={{ fontSize: '12px', color: '#991b1b', marginTop: '4px', display: 'inline-block' }}>已拒绝</span>
             )}
         </div>
     )
@@ -194,18 +174,9 @@ function DiffItemView({
  *
  * 展示 AI 对文档的修改建议，支持逐项审批或批量操作。
  */
-export function AIDiffPreview({
-    diffs,
-    onAccept,
-    onReject,
-    onAcceptAll,
-    onRejectAll,
-    onClose,
-}: AIDiffPreviewProps) {
+export function AIDiffPreview({ diffs, onAccept, onReject, onAcceptAll, onRejectAll, onClose }: AIDiffPreviewProps) {
     // 每个 Diff 项的审批状态
-    const [statuses, setStatuses] = useState<DiffApprovalStatus[]>(
-        () => diffs.map(() => 'pending')
-    )
+    const [statuses, setStatuses] = useState<DiffApprovalStatus[]>(() => diffs.map(() => 'pending'))
 
     // 更新单个 Diff 的状态
     const updateStatus = (index: number, status: DiffApprovalStatus) => {

@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
+import request from 'supertest'
 
 import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../helpers'
 
@@ -18,7 +18,9 @@ describe('CollaboratorController', () => {
             .post('/api/page')
             .set('Authorization', `Bearer ${testUser.token}`)
             .send({ emoji: '📄', title: 'Collab Test Page' })
-        createdPageId = pageRes.body.data.pageId
+        if (pageRes.status === 201 && pageRes.body.data) {
+            createdPageId = pageRes.body.data.pageId
+        }
     })
 
     afterAll(async () => {

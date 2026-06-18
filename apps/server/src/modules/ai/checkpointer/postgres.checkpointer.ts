@@ -18,8 +18,8 @@
  * @module checkpointer/postgres
  */
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
-import { ConfigService } from '@nestjs/config'
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class PostgresCheckpointerService implements OnModuleInit {

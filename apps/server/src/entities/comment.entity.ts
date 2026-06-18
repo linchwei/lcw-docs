@@ -29,15 +29,15 @@ export class CommentEntity {
     @Column({ type: 'varchar', nullable: true })
     parentId: string | null
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'timestamptz', nullable: true })
     resolvedAt: Date | null
 
     @Column()
     createdBy: number
 
-    @Column({ nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     createdAt?: Date
 
-    @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     updatedAt?: Date
 }

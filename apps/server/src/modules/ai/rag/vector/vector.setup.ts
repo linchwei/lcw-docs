@@ -20,7 +20,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { DataSource } from 'typeorm'
 
-import { PROVIDER_DEFAULTS, EmbeddingProvider } from '../embedding/embedding.types'
+import { EmbeddingProvider, PROVIDER_DEFAULTS } from '../embedding/embedding.types'
 import { DocumentChunkRepository } from './document-chunk.repository'
 
 /** 常量集中管理，与数据库保持同步 */
@@ -40,7 +40,7 @@ export class VectorSetupService implements OnModuleInit {
 
     constructor(
         private dataSource: DataSource,
-        private configService: ConfigService,
+        private configService: ConfigService
     ) {
         const provider = (this.configService.get<string>('EMBEDDING_PROVIDER') || 'dashscope') as EmbeddingProvider
         const providerDefaults = PROVIDER_DEFAULTS[provider] || PROVIDER_DEFAULTS.dashscope
@@ -61,9 +61,7 @@ export class VectorSetupService implements OnModuleInit {
             this.isReady = true
             this.logger.log('pgvector 初始化完成，RAG 语义搜索已就绪')
         } catch (error) {
-            this.logger.warn(
-                `pgvector 初始化失败，RAG 功能将降级为关键词搜索: ${error instanceof Error ? error.message : error}`,
-            )
+            this.logger.warn(`pgvector 初始化失败，RAG 功能将降级为关键词搜索: ${error instanceof Error ? error.message : error}`)
             this.isReady = false
         }
     }
@@ -101,7 +99,7 @@ export class VectorSetupService implements OnModuleInit {
         const result = await this.dataSource.query(
             `SELECT column_name FROM information_schema.columns
              WHERE table_name = $1 AND column_name = $2`,
-            [TABLE_NAME, COLUMN_NAME],
+            [TABLE_NAME, COLUMN_NAME]
         )
 
         if (result.length > 0) {
@@ -113,9 +111,7 @@ export class VectorSetupService implements OnModuleInit {
         DocumentChunkRepository.validateDimensions(this.dimensions)
 
         // 添加 embedding 列：维度根据 Embedding 提供商配置决定
-        await this.dataSource.query(
-            `ALTER TABLE ${TABLE_NAME} ADD COLUMN ${COLUMN_NAME} vector(${this.dimensions})`,
-        )
+        await this.dataSource.query(`ALTER TABLE ${TABLE_NAME} ADD COLUMN ${COLUMN_NAME} vector(${this.dimensions})`)
         this.logger.log(`embedding 列已创建 (vector(${this.dimensions}))`)
     }
 
@@ -136,7 +132,7 @@ export class VectorSetupService implements OnModuleInit {
         const result = await this.dataSource.query(
             `SELECT indexname FROM pg_indexes
              WHERE tablename = $1 AND indexname = $2`,
-            [TABLE_NAME, INDEX_NAME],
+            [TABLE_NAME, INDEX_NAME]
         )
 
         if (result.length > 0) {
@@ -147,7 +143,7 @@ export class VectorSetupService implements OnModuleInit {
         await this.dataSource.query(
             `CREATE INDEX ${INDEX_NAME} ON ${TABLE_NAME}
              USING hnsw (${COLUMN_NAME} vector_cosine_ops)
-             WITH (m = 16, ef_construction = 64)`,
+             WITH (m = 16, ef_construction = 64)`
         )
         this.logger.log('HNSW 索引已创建')
     }

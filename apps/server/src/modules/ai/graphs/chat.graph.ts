@@ -12,9 +12,9 @@
  *
  * @module graphs/chat
  */
+import { MemorySaver } from '@langchain/langgraph'
 import { createReactAgent } from '@langchain/langgraph/prebuilt'
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
-import { MemorySaver } from '@langchain/langgraph'
 
 import { LlmFactory } from '../llm/llm.factory'
 import { CHAT_SYSTEM_PROMPT } from '../prompts/chat.prompt'

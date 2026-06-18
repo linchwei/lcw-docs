@@ -7,7 +7,7 @@ export interface OutlineStorage {
     activeHeadingId: string | null
 }
 
-export const OutlineExtension = Extension.create<{}, OutlineStorage>({
+export const OutlineExtension = Extension.create<Record<string, unknown>, OutlineStorage>({
     name: 'outline',
 
     addStorage() {

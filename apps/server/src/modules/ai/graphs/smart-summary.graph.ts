@@ -25,7 +25,7 @@ import { createReactAgent } from '@langchain/langgraph/prebuilt'
 
 import { LlmFactory } from '../llm/llm.factory'
 import { SMART_SUMMARY_PROMPT } from '../prompts/knowledge.prompt'
-import { searchKnowledge, getDocumentStructure, listIndexedChunks } from '../tools/knowledge.tools'
+import { getDocumentStructure, listIndexedChunks, searchKnowledge } from '../tools/knowledge.tools'
 
 /**
  * 创建智能摘要 Agent

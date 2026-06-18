@@ -20,39 +20,48 @@
  *
  * @module ai/service
  */
-import { nanoid } from 'nanoid'
-import { Injectable, Inject, Logger } from '@nestjs/common'
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { PostgresqlPersistence } from 'y-postgresql'
+import { nanoid } from 'nanoid'
 import { DataSource } from 'typeorm'
+import { PostgresqlPersistence } from 'y-postgresql'
 import * as Y from 'yjs'
 
-import { PostgresCheckpointerService } from './checkpointer/postgres.checkpointer'
-import { HumanMessage, AIMessage, SystemMessage, BaseMessage } from '@langchain/core/messages'
-import { formatStructuredContext, StructuredContext } from './context/structured-context'
-import { createChatGraph } from './graphs/chat.graph'
-import { createOutlineGraph } from './graphs/outline.graph'
-import { createRewriteGraph } from './graphs/rewrite.graph'
-import { createSummaryGraph } from './graphs/summary.graph'
-import { LlmFactory } from './llm/llm.factory'
-import { RagService } from './rag/rag.service'
-import {
-    formatAgentStatusEvent,
-    formatContentEvent,
-    formatDoneEvent,
-    formatInterruptEvent,
-    formatToolCallEvent,
-} from './sse/sse-formatter'
-import { ChatDto, ChatMessage, OutlineDto, ResumeDto, RewriteDto, SummaryDto, KnowledgeChatDto, AutoTagDto, KnowledgeGraphDto, SaveKnowledgeCardDto, SmartSummaryDto, LearningPathDto, RelatedDocumentsDto, KnowledgeGlobalSearchDto } from './ai.dto'
-import { createKnowledgeGraph } from './graphs/knowledge.graph'
-import { createAutoTagGraph } from './graphs/auto-tag.graph'
-import { createKnowledgeGraphGraph } from './graphs/knowledge-graph.graph'
-import { createSmartSummaryGraph } from './graphs/smart-summary.graph'
-import { createLearningPathGraph } from './graphs/learning-path.graph'
-import { KnowledgeBookmarkService } from './knowledge/knowledge-bookmark.service'
-import { PageService } from '../page/page.service'
 import { UserEntity } from '../../entities/user.entity'
 import { docs } from '../../fundamentals/yjs-postgresql/utils'
+import { PageService } from '../page/page.service'
+import {
+    AutoTagDto,
+    ChatDto,
+    ChatMessage,
+    KnowledgeChatDto,
+    KnowledgeGlobalSearchDto,
+    KnowledgeGraphDto,
+    LearningPathDto,
+    OutlineDto,
+    RelatedDocumentsDto,
+    ResumeDto,
+    RewriteDto,
+    SaveKnowledgeCardDto,
+    SmartSummaryDto,
+    SummaryDto,
+} from './ai.dto'
+import { PostgresCheckpointerService } from './checkpointer/postgres.checkpointer'
+import { formatStructuredContext, StructuredContext } from './context/structured-context'
+import { createAutoTagGraph } from './graphs/auto-tag.graph'
+import { createChatGraph } from './graphs/chat.graph'
+import { createKnowledgeGraph } from './graphs/knowledge.graph'
+import { createKnowledgeGraphGraph } from './graphs/knowledge-graph.graph'
+import { createLearningPathGraph } from './graphs/learning-path.graph'
+import { createOutlineGraph } from './graphs/outline.graph'
+import { createRewriteGraph } from './graphs/rewrite.graph'
+import { createSmartSummaryGraph } from './graphs/smart-summary.graph'
+import { createSummaryGraph } from './graphs/summary.graph'
+import { KnowledgeBookmarkService } from './knowledge/knowledge-bookmark.service'
+import { LlmFactory } from './llm/llm.factory'
+import { RagService } from './rag/rag.service'
+import { formatAgentStatusEvent, formatContentEvent, formatDoneEvent, formatInterruptEvent, formatToolCallEvent } from './sse/sse-formatter'
 
 @Injectable()
 export class AiService {
@@ -66,7 +75,7 @@ export class AiService {
         private readonly bookmarkService: KnowledgeBookmarkService,
         private readonly pageService: PageService,
         @Inject('YJS_POSTGRESQL_ADAPTER') private readonly yjsPostgresqlAdapter: PostgresqlPersistence,
-        private readonly dataSource: DataSource,
+        private readonly dataSource: DataSource
     ) {}
 
     /**
@@ -113,17 +122,17 @@ export class AiService {
             // ChatMessage 使用 role 字段，LangChain 使用 type 字段，需要手动映射
             const baseMessages: BaseMessage[] = messages.map(m => {
                 switch (m.role) {
-                    case 'system': return new SystemMessage(m.content)
-                    case 'assistant': return new AIMessage(m.content)
-                    default: return new HumanMessage(m.content)
+                    case 'system':
+                        return new SystemMessage(m.content)
+                    case 'assistant':
+                        return new AIMessage(m.content)
+                    default:
+                        return new HumanMessage(m.content)
                 }
             })
 
             // 使用 streamEvents 获取流式输出
-            const stream = graph.streamEvents(
-                { messages: baseMessages },
-                { configurable, version: 'v2' },
-            )
+            const stream = graph.streamEvents({ messages: baseMessages }, { configurable, version: 'v2' })
 
             for await (const event of stream) {
                 // 处理 LLM 输出事件：文本内容流
@@ -229,10 +238,7 @@ export class AiService {
         }
 
         try {
-            const result = await graph.invoke(
-                { documentContent: dto.documentContent, messages: [] },
-                { configurable },
-            )
+            const result = await graph.invoke({ documentContent: dto.documentContent, messages: [] }, { configurable })
 
             // 返回最终摘要
             if (result.finalSummary) {
@@ -264,18 +270,19 @@ export class AiService {
         const configurable = { thread_id: threadId }
 
         try {
-            const result = await graph.invoke(
-                { topic: dto.topic, requirements: dto.requirements || '', messages: [] },
-                { configurable },
-            )
+            const result = await graph.invoke({ topic: dto.topic, requirements: dto.requirements || '', messages: [] }, { configurable })
 
             // 如果被中断（等待审批），推送中断事件
             // LangGraph interruptBefore 会使 invoke 在中断点返回
             if (result.outline && result.outline.length > 0) {
-                yield formatInterruptEvent('approveOutline', {
-                    outline: result.outline,
-                    flatOutline: result.flatOutline,
-                }, threadId)
+                yield formatInterruptEvent(
+                    'approveOutline',
+                    {
+                        outline: result.outline,
+                        flatOutline: result.flatOutline,
+                    },
+                    threadId
+                )
             }
             yield formatDoneEvent()
         } catch (error: unknown) {
@@ -310,15 +317,19 @@ export class AiService {
                     context: dto.context || '',
                     messages: [],
                 },
-                { configurable },
+                { configurable }
             )
 
             // 推送改写结果和 Diff
             if (result.rewrittenContent) {
-                yield formatInterruptEvent('approveRewrite', {
-                    rewrittenContent: result.rewrittenContent,
-                    diff: result.diff,
-                }, threadId)
+                yield formatInterruptEvent(
+                    'approveRewrite',
+                    {
+                        rewrittenContent: result.rewrittenContent,
+                        diff: result.diff,
+                    },
+                    threadId
+                )
             }
             yield formatDoneEvent()
         } catch (error: unknown) {
@@ -349,7 +360,7 @@ export class AiService {
                 // 用户批准，继续执行
                 const stream = graph.streamEvents(
                     null, // 传入 null 表示从中断点继续
-                    { configurable, version: 'v2' },
+                    { configurable, version: 'v2' }
                 )
 
                 for await (const event of stream) {
@@ -425,7 +436,10 @@ export class AiService {
             scope: dto.scope,
         }
         // 转换消息格式
-        const messages = dto.messages.map(m => ({ type: m.role === 'user' ? 'human' : m.role === 'assistant' ? 'ai' : 'system', content: m.content }))
+        const messages = dto.messages.map(m => ({
+            type: m.role === 'user' ? 'human' : m.role === 'assistant' ? 'ai' : 'system',
+            content: m.content,
+        }))
         // 注入上下文到 system message
         if (dto.context) {
             const contextText = formatStructuredContext(dto.context as StructuredContext)
@@ -504,10 +518,7 @@ export class AiService {
     async autoTag(dto: AutoTagDto) {
         const graph = createAutoTagGraph(this.llmFactory)
         const configurable = { ragService: this.ragService, pageId: dto.pageId, context: dto.context }
-        const result = await graph.invoke(
-            { messages: [{ role: 'user', content: '请分析这篇文档并生成标签建议' }] },
-            { configurable },
-        )
+        const result = await graph.invoke({ messages: [{ role: 'user', content: '请分析这篇文档并生成标签建议' }] }, { configurable })
         const rawContent = result.messages[result.messages.length - 1].content
         const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
         try {
@@ -531,10 +542,7 @@ export class AiService {
     async generateKnowledgeGraph(dto: KnowledgeGraphDto) {
         const graph = createKnowledgeGraphGraph(this.llmFactory)
         const configurable = { ragService: this.ragService, pageId: dto.pageId, context: dto.context }
-        const result = await graph.invoke(
-            { messages: [{ role: 'user', content: '请分析这篇文档并生成知识图谱' }] },
-            { configurable },
-        )
+        const result = await graph.invoke({ messages: [{ role: 'user', content: '请分析这篇文档并生成知识图谱' }] }, { configurable })
         const rawContent = result.messages[result.messages.length - 1].content
         const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
         try {
@@ -638,10 +646,7 @@ export class AiService {
     async smartSummary(dto: SmartSummaryDto) {
         const graph = createSmartSummaryGraph(this.llmFactory)
         const configurable = { ragService: this.ragService, pageId: dto.pageId, context: dto.context }
-        const result = await graph.invoke(
-            { messages: [{ role: 'user', content: '请生成这篇文档的智能摘要' }] },
-            { configurable },
-        )
+        const result = await graph.invoke({ messages: [{ role: 'user', content: '请生成这篇文档的智能摘要' }] }, { configurable })
         const rawContent = result.messages[result.messages.length - 1].content
         const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
         try {
@@ -666,10 +671,7 @@ export class AiService {
     async generateLearningPath(dto: LearningPathDto, userId: number) {
         const graph = createLearningPathGraph(this.llmFactory)
         const configurable = { ragService: this.ragService, pageId: dto.pageId, userId, context: dto.context }
-        const result = await graph.invoke(
-            { messages: [{ role: 'user', content: '请基于当前文档推荐学习路径' }] },
-            { configurable },
-        )
+        const result = await graph.invoke({ messages: [{ role: 'user', content: '请基于当前文档推荐学习路径' }] }, { configurable })
         const rawContent = result.messages[result.messages.length - 1].content
         const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
         try {
@@ -691,12 +693,15 @@ export class AiService {
      * @param userId - 用户 ID
      * @returns 相关文档列表
      */
-    async getRelatedDocuments(dto: RelatedDocumentsDto, userId: number) {
+    async getRelatedDocuments(dto: RelatedDocumentsDto, _userId: number) {
         // 获取当前文档的代表性内容
         const chunks = await this.ragService.retrieve('', { pageId: dto.pageId, topK: 3, minScore: 0 })
         if (!chunks.length) return []
         // 用当前文档内容搜索其他文档
-        const queryText = chunks.map(c => c.content).join(' ').slice(0, 500)
+        const queryText = chunks
+            .map(c => c.content)
+            .join(' ')
+            .slice(0, 500)
         const results = await this.ragService.retrieve(queryText, { topK: dto.topK, minScore: 0.6 })
         // 过滤当前文档 + 按 pageId 去重
         const seen = new Set<string>([dto.pageId])
@@ -714,7 +719,7 @@ export class AiService {
      * @param userId - 用户 ID
      * @returns 搜索结果列表
      */
-    async knowledgeGlobalSearch(dto: KnowledgeGlobalSearchDto, userId: number) {
+    async knowledgeGlobalSearch(dto: KnowledgeGlobalSearchDto, _userId: number) {
         const results = await this.ragService.retrieve(dto.query, { topK: dto.topK, minScore: dto.minScore })
         return results.map(r => ({ pageId: r.pageId, blockId: r.blockId, content: r.content, score: r.score }))
     }
@@ -741,7 +746,7 @@ export class AiService {
             // 注意：LangGraph 的 checkpoints 表不存储 userId，
             // 当前通过 thread_id 前缀 "knowledge-" 过滤知识库线程
             const countResult = await this.dataSource.query(
-                `SELECT COUNT(DISTINCT thread_id) as total FROM checkpoints WHERE thread_id LIKE 'knowledge-%'`,
+                `SELECT COUNT(DISTINCT thread_id) as total FROM checkpoints WHERE thread_id LIKE 'knowledge-%'`
             )
             const total = Number(countResult[0]?.total || 0)
 
@@ -753,7 +758,7 @@ export class AiService {
                  GROUP BY thread_id
                  ORDER BY last_active DESC
                  LIMIT $1 OFFSET $2`,
-                [pageSize, offset],
+                [pageSize, offset]
             )
 
             const items = rows.map((row: any) => ({

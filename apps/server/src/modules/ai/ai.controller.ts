@@ -17,45 +17,45 @@
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { SkipThrottle } from '@nestjs/throttler'
 import type { Response } from 'express'
-import { Throttle, SkipThrottle } from '@nestjs/throttler'
 
 import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
 import {
+    AutoTagDto,
+    autoTagSchema,
     ChatDto,
     chatSchema,
+    CreateBookmarkDto,
+    createBookmarkSchema,
     IndexDocumentDto,
     indexDocumentSchema,
+    KnowledgeChatDto,
+    knowledgeChatSchema,
+    KnowledgeGlobalSearchDto,
+    knowledgeGlobalSearchSchema,
+    KnowledgeGraphDto,
+    knowledgeGraphSchema,
+    KnowledgeIndexDto,
+    knowledgeIndexSchema,
+    LearningPathDto,
+    learningPathSchema,
     OutlineDto,
     outlineSchema,
     ResumeDto,
     resumeSchema,
     RewriteDto,
     rewriteSchema,
-    SemanticSearchDto,
-    semanticSearchSchema,
-    SummaryDto,
-    summarySchema,
-    KnowledgeChatDto,
-    knowledgeChatSchema,
-    KnowledgeIndexDto,
-    knowledgeIndexSchema,
-    AutoTagDto,
-    autoTagSchema,
-    KnowledgeGraphDto,
-    knowledgeGraphSchema,
     SaveKnowledgeCardDto,
     saveKnowledgeCardSchema,
-    SmartSummaryDto,
-    smartSummarySchema,
-    LearningPathDto,
-    learningPathSchema,
-    CreateBookmarkDto,
-    createBookmarkSchema,
     SearchBookmarksDto,
     searchBookmarksSchema,
-    KnowledgeGlobalSearchDto,
-    knowledgeGlobalSearchSchema,
+    SemanticSearchDto,
+    semanticSearchSchema,
+    SmartSummaryDto,
+    smartSummarySchema,
+    SummaryDto,
+    summarySchema,
 } from './ai.dto'
 import { AiService } from './ai.service'
 import { KnowledgeBookmarkService } from './knowledge/knowledge-bookmark.service'
@@ -70,7 +70,7 @@ export class AiController {
     constructor(
         private readonly aiService: AiService,
         private readonly ragService: RagService,
-        private readonly bookmarkService: KnowledgeBookmarkService,
+        private readonly bookmarkService: KnowledgeBookmarkService
     ) {}
 
     /**
@@ -87,7 +87,6 @@ export class AiController {
         req.on('close', () => {
             aborted = true
         })
-
         ;(async () => {
             try {
                 for await (const chunk of stream) {
@@ -111,10 +110,7 @@ export class AiController {
      * 和文档写入工具（插入、更新、删除，需 Diff 审批）。
      */
     @Post('chat')
-    async chat(
-        @Body(new ZodValidationPipe(chatSchema)) body: ChatDto,
-        @Res() res: Response,
-    ) {
+    async chat(@Body(new ZodValidationPipe(chatSchema)) body: ChatDto, @Res() res: Response) {
         this.streamSSE(res, this.aiService.chatStream(body))
     }
 
@@ -125,10 +121,7 @@ export class AiController {
      * 内部使用分块摘要 + 合并 + 精炼的工作流。
      */
     @Post('summary')
-    async summary(
-        @Body(new ZodValidationPipe(summarySchema)) body: SummaryDto,
-        @Res() res: Response,
-    ) {
+    async summary(@Body(new ZodValidationPipe(summarySchema)) body: SummaryDto, @Res() res: Response) {
         this.streamSSE(res, this.aiService.summaryStream(body))
     }
 
@@ -139,10 +132,7 @@ export class AiController {
      * 前端收到 interrupt 事件后展示大纲编辑界面。
      */
     @Post('outline')
-    async outline(
-        @Body(new ZodValidationPipe(outlineSchema)) body: OutlineDto,
-        @Res() res: Response,
-    ) {
+    async outline(@Body(new ZodValidationPipe(outlineSchema)) body: OutlineDto, @Res() res: Response) {
         this.streamSSE(res, this.aiService.outlineStream(body))
     }
 
@@ -153,10 +143,7 @@ export class AiController {
      * 前端收到 interrupt 事件后展示 Diff 预览界面。
      */
     @Post('rewrite')
-    async rewrite(
-        @Body(new ZodValidationPipe(rewriteSchema)) body: RewriteDto,
-        @Res() res: Response,
-    ) {
+    async rewrite(@Body(new ZodValidationPipe(rewriteSchema)) body: RewriteDto, @Res() res: Response) {
         this.streamSSE(res, this.aiService.rewriteStream(body))
     }
 
@@ -167,10 +154,7 @@ export class AiController {
      * threadId 用于定位暂停的 Agent 状态。
      */
     @Post('resume')
-    async resume(
-        @Body(new ZodValidationPipe(resumeSchema)) body: ResumeDto,
-        @Res() res: Response,
-    ) {
+    async resume(@Body(new ZodValidationPipe(resumeSchema)) body: ResumeDto, @Res() res: Response) {
         this.streamSSE(res, this.aiService.resumeAgent(body))
     }
 
@@ -182,9 +166,7 @@ export class AiController {
      * 索引是幂等的：重复调用会先删除旧分块再重新索引。
      */
     @Post('rag/index')
-    async indexDocument(
-        @Body(new ZodValidationPipe(indexDocumentSchema)) body: IndexDocumentDto,
-    ) {
+    async indexDocument(@Body(new ZodValidationPipe(indexDocumentSchema)) body: IndexDocumentDto) {
         if (!this.ragService.isAvailable()) {
             return { success: false, message: 'RAG 服务不可用（Embedding API 或 pgvector 未配置）' }
         }
@@ -204,9 +186,7 @@ export class AiController {
      * 返回按相似度降序排列的文档分块列表。
      */
     @Post('rag/search')
-    async semanticSearch(
-        @Body(new ZodValidationPipe(semanticSearchSchema)) body: SemanticSearchDto,
-    ) {
+    async semanticSearch(@Body(new ZodValidationPipe(semanticSearchSchema)) body: SemanticSearchDto) {
         if (!this.ragService.isAvailable()) {
             return { success: false, message: 'RAG 服务不可用', results: [] }
         }
@@ -229,11 +209,7 @@ export class AiController {
      * 根据搜索范围（当前文档/全部文档）检索相关内容后生成回答。
      */
     @Post('knowledge/chat')
-    async knowledgeChat(
-        @Body(new ZodValidationPipe(knowledgeChatSchema)) body: KnowledgeChatDto,
-        @Req() req: any,
-        @Res() res: Response,
-    ) {
+    async knowledgeChat(@Body(new ZodValidationPipe(knowledgeChatSchema)) body: KnowledgeChatDto, @Req() req: any, @Res() res: Response) {
         this.streamSSE(res, this.aiService.knowledgeChatStream(body, req.user.id))
     }
 
@@ -254,9 +230,7 @@ export class AiController {
      * 供知识库问答和语义搜索使用。
      */
     @Post('knowledge/index')
-    async indexForKnowledge(
-        @Body(new ZodValidationPipe(knowledgeIndexSchema)) body: KnowledgeIndexDto,
-    ) {
+    async indexForKnowledge(@Body(new ZodValidationPipe(knowledgeIndexSchema)) body: KnowledgeIndexDto) {
         return this.aiService.indexForKnowledge(body as { pageId: string; blocks: any[] })
     }
 
@@ -276,9 +250,7 @@ export class AiController {
      * 基于文档内容自动生成标签，便于分类和检索。
      */
     @Post('knowledge/auto-tag')
-    async autoTag(
-        @Body(new ZodValidationPipe(autoTagSchema)) body: AutoTagDto,
-    ) {
+    async autoTag(@Body(new ZodValidationPipe(autoTagSchema)) body: AutoTagDto) {
         return this.aiService.autoTag(body)
     }
 
@@ -288,9 +260,7 @@ export class AiController {
      * 基于文档内容生成知识图谱，展示概念之间的关系。
      */
     @Post('knowledge/graph')
-    async generateKnowledgeGraph(
-        @Body(new ZodValidationPipe(knowledgeGraphSchema)) body: KnowledgeGraphDto,
-    ) {
+    async generateKnowledgeGraph(@Body(new ZodValidationPipe(knowledgeGraphSchema)) body: KnowledgeGraphDto) {
         return this.aiService.generateKnowledgeGraph(body)
     }
 
@@ -300,10 +270,7 @@ export class AiController {
      * 将 AI 生成的知识卡片保存到用户的收藏中。
      */
     @Post('knowledge/save-card')
-    async saveKnowledgeCard(
-        @Body(new ZodValidationPipe(saveKnowledgeCardSchema)) body: SaveKnowledgeCardDto,
-        @Req() req: any,
-    ) {
+    async saveKnowledgeCard(@Body(new ZodValidationPipe(saveKnowledgeCardSchema)) body: SaveKnowledgeCardDto, @Req() req: any) {
         return this.aiService.saveKnowledgeCard(body, req.user.id)
     }
 
@@ -313,9 +280,7 @@ export class AiController {
      * 基于文档内容和上下文生成结构化摘要。
      */
     @Post('knowledge/smart-summary')
-    async smartSummary(
-        @Body(new ZodValidationPipe(smartSummarySchema)) body: SmartSummaryDto,
-    ) {
+    async smartSummary(@Body(new ZodValidationPipe(smartSummarySchema)) body: SmartSummaryDto) {
         return this.aiService.smartSummary(body)
     }
 
@@ -325,10 +290,7 @@ export class AiController {
      * 基于文档内容推荐学习路径，帮助用户系统化学习。
      */
     @Post('knowledge/learning-path')
-    async generateLearningPath(
-        @Body(new ZodValidationPipe(learningPathSchema)) body: LearningPathDto,
-        @Req() req: any,
-    ) {
+    async generateLearningPath(@Body(new ZodValidationPipe(learningPathSchema)) body: LearningPathDto, @Req() req: any) {
         return this.aiService.generateLearningPath(body, req.user.id)
     }
 
@@ -338,11 +300,7 @@ export class AiController {
      * 基于向量相似度查找与指定文档相关联的其他文档。
      */
     @Get('knowledge/related/:pageId')
-    async getRelatedDocuments(
-        @Param('pageId') pageId: string,
-        @Query() query: any,
-        @Req() req: any,
-    ) {
+    async getRelatedDocuments(@Param('pageId') pageId: string, @Query() query: any, @Req() req: any) {
         return this.aiService.getRelatedDocuments({ pageId, topK: parseInt(query.topK) || 5 }, req.user.id)
     }
 
@@ -352,10 +310,7 @@ export class AiController {
      * 跨文档的语义搜索，返回按相似度排序的结果。
      */
     @Post('knowledge/global-search')
-    async knowledgeGlobalSearch(
-        @Body(new ZodValidationPipe(knowledgeGlobalSearchSchema)) body: KnowledgeGlobalSearchDto,
-        @Req() req: any,
-    ) {
+    async knowledgeGlobalSearch(@Body(new ZodValidationPipe(knowledgeGlobalSearchSchema)) body: KnowledgeGlobalSearchDto, @Req() req: any) {
         return this.aiService.knowledgeGlobalSearch(body, req.user.id)
     }
 
@@ -367,10 +322,7 @@ export class AiController {
      * 否则 /bookmark/search 会被 /bookmark 路由先匹配到。
      */
     @Post('knowledge/bookmark/search')
-    async searchBookmarks(
-        @Body(new ZodValidationPipe(searchBookmarksSchema)) body: SearchBookmarksDto,
-        @Req() req: any,
-    ) {
+    async searchBookmarks(@Body(new ZodValidationPipe(searchBookmarksSchema)) body: SearchBookmarksDto, @Req() req: any) {
         return this.bookmarkService.search({ userId: req.user.id, query: body.query })
     }
 
@@ -380,10 +332,7 @@ export class AiController {
      * 收藏文档中的知识片段，支持关联问题和对话线程。
      */
     @Post('knowledge/bookmark')
-    async createBookmark(
-        @Body(new ZodValidationPipe(createBookmarkSchema)) body: CreateBookmarkDto,
-        @Req() req: any,
-    ) {
+    async createBookmark(@Body(new ZodValidationPipe(createBookmarkSchema)) body: CreateBookmarkDto, @Req() req: any) {
         return this.bookmarkService.create({
             ...body,
             userId: req.user.id,
@@ -396,10 +345,7 @@ export class AiController {
      * 分页返回当前用户的知识收藏列表。
      */
     @Get('knowledge/bookmarks')
-    async listBookmarks(
-        @Query() query: any,
-        @Req() req: any,
-    ) {
+    async listBookmarks(@Query() query: any, @Req() req: any) {
         return this.bookmarkService.list({
             userId: req.user.id,
             page: parseInt(query.page) || 1,
@@ -413,10 +359,7 @@ export class AiController {
      * 根据收藏 ID 删除指定的知识收藏。
      */
     @Delete('knowledge/bookmark/:id')
-    async deleteBookmark(
-        @Param('id') id: string,
-        @Req() req: any,
-    ) {
+    async deleteBookmark(@Param('id') id: string, @Req() req: any) {
         return this.bookmarkService.delete({ bookmarkId: parseInt(id), userId: req.user.id })
     }
 
@@ -426,10 +369,7 @@ export class AiController {
      * 分页返回当前用户的对话线程列表。
      */
     @Get('knowledge/threads')
-    async listThreads(
-        @Query() query: any,
-        @Req() req: any,
-    ) {
+    async listThreads(@Query() query: any, @Req() req: any) {
         return this.aiService.listThreads(req.user.id, parseInt(query.page) || 1, parseInt(query.pageSize) || 20)
     }
 
@@ -439,10 +379,7 @@ export class AiController {
      * 根据线程 ID 删除指定的对话线程及其历史记录。
      */
     @Delete('knowledge/thread/:threadId')
-    async deleteThread(
-        @Param('threadId') threadId: string,
-        @Req() req: any,
-    ) {
+    async deleteThread(@Param('threadId') threadId: string, @Req() _req: any) {
         return this.aiService.deleteThread(threadId)
     }
 

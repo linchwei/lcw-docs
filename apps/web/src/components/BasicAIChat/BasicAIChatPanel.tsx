@@ -1,11 +1,11 @@
 import { BlockSchema, InlineContentSchema, LcwDocEditor, PartialBlock, StyleSchema } from '@lcw-doc/core'
 import { ArrowUp, Sparkles, X } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import TextareaAutosize from 'react-textarea-autosize'
 
-import { ChatMessage, StructuredContext, chatWithAgent, extractStructuredContextFromEditor } from '@/services'
 import { useAIStream } from '@/hooks/useAIStream'
+import { ChatMessage, chatWithAgent, extractStructuredContextFromEditor, StructuredContext } from '@/services'
 
 interface BasicAIChatPanelProps<BSchema extends BlockSchema, ISchema extends InlineContentSchema, SSchema extends StyleSchema> {
     editor?: LcwDocEditor<BSchema, ISchema, SSchema>
@@ -43,7 +43,7 @@ export function BasicAIChatPanel<BSchema extends BlockSchema, ISchema extends In
         const messages: ChatMessage[] = [systemMessage, ...chatHistory, userMessage]
 
         // startStream 返回累积的完整内容，避免闭包陷阱
-        const result = await startStream(async (signal) => {
+        const result = await startStream(async signal => {
             return chatWithAgent(messages, context, undefined, signal)
         })
 

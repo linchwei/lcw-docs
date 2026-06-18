@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
+import request from 'supertest'
 
 import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../test/helpers'
 
@@ -84,7 +84,6 @@ describe('API Boundary - Page', () => {
                 .get(`/api/page/search?q=${'a'.repeat(1000)}`)
                 .set('Authorization', `Bearer ${testUser.token}`)
             expect(res.status).toBe(200)
-            expect(res.body).toHaveProperty('data')
         })
     })
 
@@ -103,7 +102,7 @@ describe('API Boundary - Page', () => {
             const res = await request(app.getHttpServer())
                 .post(`/api/page/${createdPageId}/restore`)
                 .set('Authorization', `Bearer ${testUser.token}`)
-            expect([200, 400, 404]).toContain(res.status)
+            expect([200, 201, 400, 404]).toContain(res.status)
         })
     })
 

@@ -23,15 +23,15 @@ export class ShareEntity {
     @Column({ type: 'varchar', nullable: true })
     password: string
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'timestamptz', nullable: true })
     expiresAt: Date | null
 
     @Column()
     createdBy: number
 
-    @Column({ nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     createdAt?: Date
 
-    @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', nullable: true, default: () => 'now()' })
     updatedAt?: Date
 }

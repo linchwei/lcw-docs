@@ -107,9 +107,7 @@ describe('Sidebar Interaction Tests', () => {
         })
 
         // Test Page 2 is favorited (isFavorite: true in MSW mock)
-        const moreButtons = screen.getAllByRole('button').filter(btn =>
-            btn.querySelector('svg.lucide-more-vertical')
-        )
+        const moreButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('svg.lucide-more-vertical'))
         if (moreButtons.length > 1) {
             await user.click(moreButtons[1])
             await waitFor(() => {
@@ -127,9 +125,7 @@ describe('Sidebar Interaction Tests', () => {
         })
 
         // Test Page 1 is not favorited (isFavorite: false in MSW mock)
-        const moreButtons = screen.getAllByRole('button').filter(btn =>
-            btn.querySelector('svg.lucide-more-vertical')
-        )
+        const moreButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('svg.lucide-more-vertical'))
         if (moreButtons.length > 0) {
             await user.click(moreButtons[0])
             await waitFor(() => {

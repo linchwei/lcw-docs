@@ -25,7 +25,7 @@ import { createReactAgent } from '@langchain/langgraph/prebuilt'
 
 import { LlmFactory } from '../llm/llm.factory'
 import { AUTO_TAG_PROMPT } from '../prompts/knowledge.prompt'
-import { searchKnowledge, getDocumentStructure } from '../tools/knowledge.tools'
+import { getDocumentStructure, searchKnowledge } from '../tools/knowledge.tools'
 
 /**
  * 创建自动标签 Agent

@@ -12,10 +12,7 @@ export const DividerBlockContent = createStronglyTypedTiptapNode({
     group: 'blockContent',
 
     parseHTML() {
-        return [
-            { tag: 'div[data-content-type=' + this.name + ']' },
-            { tag: 'hr' },
-        ]
+        return [{ tag: 'div[data-content-type=' + this.name + ']' }, { tag: 'hr' }]
     },
 
     renderHTML({ HTMLAttributes }) {

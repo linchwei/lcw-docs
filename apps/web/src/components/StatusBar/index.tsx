@@ -1,9 +1,9 @@
 import { LcwDocEditor } from '@lcw-doc/core'
+import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 import { BookOpen, Sparkles } from 'lucide-react'
 
 import { useWordCount } from '@/hooks/useWordCount'
 import { formatNumber } from '@/utils/wordCount'
-import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 
 interface StatusBarProps {
     editor: LcwDocEditor<any, any, any> | null
@@ -13,13 +13,7 @@ interface StatusBarProps {
     knowledgePanelOpen?: boolean
 }
 
-export function StatusBar({
-    editor,
-    onAIReadingToggle,
-    onKnowledgePanelToggle,
-    aiReadingOpen,
-    knowledgePanelOpen,
-}: StatusBarProps) {
+export function StatusBar({ editor, onAIReadingToggle, onKnowledgePanelToggle, aiReadingOpen, knowledgePanelOpen }: StatusBarProps) {
     const { charsWithoutSpaces, words, paragraphs, readingTimeText, hasSelection, selectionChars } = useWordCount(editor)
 
     return (
@@ -31,16 +25,12 @@ export function StatusBar({
                         onClick={onAIReadingToggle}
                         className={cn(
                             'relative flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors duration-150 cursor-pointer',
-                            aiReadingOpen
-                                ? 'text-brand'
-                                : 'text-muted-foreground hover:text-foreground',
+                            aiReadingOpen ? 'text-brand' : 'text-muted-foreground hover:text-foreground'
                         )}
                     >
                         <Sparkles size={13} />
                         <span>AI 阅读</span>
-                        {aiReadingOpen && (
-                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-brand rounded-full" />
-                        )}
+                        {aiReadingOpen && <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-brand rounded-full" />}
                     </button>
                 )}
                 {onKnowledgePanelToggle && (
@@ -48,9 +38,7 @@ export function StatusBar({
                         onClick={onKnowledgePanelToggle}
                         className={cn(
                             'relative flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors duration-150 cursor-pointer',
-                            knowledgePanelOpen
-                                ? 'text-brand'
-                                : 'text-muted-foreground hover:text-foreground',
+                            knowledgePanelOpen ? 'text-brand' : 'text-muted-foreground hover:text-foreground'
                         )}
                     >
                         <BookOpen size={13} />

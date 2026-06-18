@@ -20,11 +20,11 @@
  *
  * @module graphs/rewrite
  */
-import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { BaseMessage } from '@langchain/core/messages'
+import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { messagesStateReducer } from '@langchain/langgraph'
-import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 import { MemorySaver } from '@langchain/langgraph'
+import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 
 import { LlmFactory } from '../llm/llm.factory'
 import { REWRITE_PROMPT } from '../prompts/rewrite.prompt'
@@ -74,8 +74,7 @@ const RewriteState = Annotation.Root({
 async function generateRewrite(state: typeof RewriteState.State, llmFactory: LlmFactory) {
     const llm = llmFactory.create({ temperature: 0.5 })
 
-    const prompt = REWRITE_PROMPT
-        .replace('{selectedContent}', state.selectedContent)
+    const prompt = REWRITE_PROMPT.replace('{selectedContent}', state.selectedContent)
         .replace('{instruction}', state.instruction)
         .replace('{context}', state.context || '无上下文')
 
@@ -113,7 +112,7 @@ async function generateRewrite(state: typeof RewriteState.State, llmFactory: Llm
  * 使 Graph 在此节点前暂停，等待用户审批。
  * 前端收到 interrupt 事件后展示 Diff 预览界面。
  */
-async function approveRewrite(state: typeof RewriteState.State) {
+async function approveRewrite(_state: typeof RewriteState.State) {
     return { approved: true }
 }
 
@@ -128,7 +127,7 @@ export function createRewriteGraph(llmFactory: LlmFactory, checkpointer?: Postgr
     const saver = checkpointer ?? new MemorySaver()
 
     return new StateGraph(RewriteState)
-        .addNode('generateRewrite', (state) => generateRewrite(state, llmFactory))
+        .addNode('generateRewrite', state => generateRewrite(state, llmFactory))
         .addNode('approveRewrite', approveRewrite)
         .addEdge(START, 'generateRewrite')
         .addEdge('generateRewrite', 'approveRewrite')

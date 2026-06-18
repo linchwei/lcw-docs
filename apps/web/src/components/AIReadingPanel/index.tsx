@@ -1,18 +1,15 @@
-import { extractTextFromBlocks, PartialBlock } from '@lcw-doc/core'
-import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
-import { ArrowUp, ClipboardList, Globe, ListChecks, MessageCircle, Sparkles, X } from 'lucide-react'
+import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
+import { ArrowUp, ClipboardList, Globe, ListChecks, MessageCircle, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import TextareaAutosize from 'react-textarea-autosize'
+import remarkGfm from 'remark-gfm'
 
 import { useEditorContext } from '@/context/EditorContext'
-import { ChatMessage, StructuredContext, chatWithAgent, extractStructuredContextFromEditor } from '@/services'
 import { useAIStream } from '@/hooks/useAIStream'
-import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
+import { ChatMessage, chatWithAgent, extractStructuredContextFromEditor, StructuredContext } from '@/services'
 
-interface AIReadingPanelProps {
-}
+type AIReadingPanelProps = Record<string, unknown>
 
 interface ChatMessageItem {
     role: 'user' | 'assistant'
@@ -23,13 +20,23 @@ const SYSTEM_PROMPT =
     '你是一个专业的文档阅读助手。你可以帮助用户理解、总结、翻译和分析文档内容。请用中文回复，保持专业和友好的语气。回答时请基于提供的文档内容，如果文档中没有相关信息，请如实说明。'
 
 const presetActions = [
-    { icon: ClipboardList, title: '文档摘要', description: '一键生成文档精简摘要', prompt: '请为这篇文档生成一份精简摘要，概括核心内容和主旨。' },
+    {
+        icon: ClipboardList,
+        title: '文档摘要',
+        description: '一键生成文档精简摘要',
+        prompt: '请为这篇文档生成一份精简摘要，概括核心内容和主旨。',
+    },
     { icon: ListChecks, title: '要点提炼', description: '提取文档关键要点', prompt: '请提炼这篇文档的关键要点，以列表形式呈现。' },
-    { icon: MessageCircle, title: '智能问答', description: '基于文档内容回答提问', prompt: '我已经阅读了这篇文档，请告诉我你可以回答哪些关于这篇文档的问题？' },
+    {
+        icon: MessageCircle,
+        title: '智能问答',
+        description: '基于文档内容回答提问',
+        prompt: '我已经阅读了这篇文档，请告诉我你可以回答哪些关于这篇文档的问题？',
+    },
     { icon: Globe, title: '内容翻译', description: '将文档翻译为指定语言', prompt: '请将这篇文档的内容翻译为英文，保持原文的语义和风格。' },
 ]
 
-export function AIReadingPanel({}: AIReadingPanelProps) {
+export function AIReadingPanel(_props: AIReadingPanelProps) {
     const { editor } = useEditorContext()
     const [input, setInput] = useState('')
     const [messages, setMessages] = useState<ChatMessageItem[]>([])
@@ -49,17 +56,6 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
         setTimeout(() => {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         }, 50)
-    }
-
-    const getDocumentContext = (): string | undefined => {
-        if (!editor) return undefined
-        try {
-            const blocks = editor.document
-            const docText = extractTextFromBlocks(blocks as PartialBlock[], 6000)
-            return docText
-        } catch {
-            return undefined
-        }
     }
 
     const handleSend = async (prompt?: string) => {
@@ -86,7 +82,7 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
         const apiMessages: ChatMessage[] = [systemMessage, ...chatHistory, apiUserMessage]
 
         // startStream 返回累积的完整内容，避免闭包陷阱
-        const result = await startStream(async (signal) => {
+        const result = await startStream(async signal => {
             return chatWithAgent(apiMessages, context, undefined, signal)
         })
 
@@ -147,7 +143,7 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
                                         'max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed',
                                         msg.role === 'user'
                                             ? 'bg-brand text-brand-foreground rounded-br-sm'
-                                            : 'bg-zinc-100 text-zinc-800 rounded-bl-sm',
+                                            : 'bg-zinc-100 text-zinc-800 rounded-bl-sm'
                                     )}
                                 >
                                     {msg.role === 'assistant' ? (
@@ -161,12 +157,8 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
                                                     h3: ({ children }) => (
                                                         <h3 className="font-medium mt-3 mb-1 text-zinc-800">{children}</h3>
                                                     ),
-                                                    ul: ({ children }) => (
-                                                        <ul className="list-disc pl-4 my-1">{children}</ul>
-                                                    ),
-                                                    ol: ({ children }) => (
-                                                        <ol className="list-decimal pl-4 my-1">{children}</ol>
-                                                    ),
+                                                    ul: ({ children }) => <ul className="list-disc pl-4 my-1">{children}</ul>,
+                                                    ol: ({ children }) => <ol className="list-decimal pl-4 my-1">{children}</ol>,
                                                     code: ({ className, children, ...props }) => {
                                                         const isBlock = className?.includes('language-')
                                                         if (isBlock) {
@@ -177,7 +169,10 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
                                                             )
                                                         }
                                                         return (
-                                                            <code className="bg-zinc-200/60 px-1 py-0.5 rounded text-xs font-mono" {...props}>
+                                                            <code
+                                                                className="bg-zinc-200/60 px-1 py-0.5 rounded text-xs font-mono"
+                                                                {...props}
+                                                            >
                                                                 {children}
                                                             </code>
                                                         )
@@ -189,7 +184,12 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
                                                     ),
                                                     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                                                     a: ({ href, children }) => (
-                                                        <a href={href} className="text-brand underline" target="_blank" rel="noopener noreferrer">
+                                                        <a
+                                                            href={href}
+                                                            className="text-brand underline"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
                                                             {children}
                                                         </a>
                                                     ),
@@ -224,18 +224,10 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
                                             components={{
-                                                h2: ({ children }) => (
-                                                    <h2 className="font-semibold mt-4 mb-2 text-zinc-800">{children}</h2>
-                                                ),
-                                                h3: ({ children }) => (
-                                                    <h3 className="font-medium mt-3 mb-1 text-zinc-800">{children}</h3>
-                                                ),
-                                                ul: ({ children }) => (
-                                                    <ul className="list-disc pl-4 my-1">{children}</ul>
-                                                ),
-                                                ol: ({ children }) => (
-                                                    <ol className="list-decimal pl-4 my-1">{children}</ol>
-                                                ),
+                                                h2: ({ children }) => <h2 className="font-semibold mt-4 mb-2 text-zinc-800">{children}</h2>,
+                                                h3: ({ children }) => <h3 className="font-medium mt-3 mb-1 text-zinc-800">{children}</h3>,
+                                                ul: ({ children }) => <ul className="list-disc pl-4 my-1">{children}</ul>,
+                                                ol: ({ children }) => <ol className="list-decimal pl-4 my-1">{children}</ol>,
                                                 code: ({ className, children, ...props }) => {
                                                     const isBlock = className?.includes('language-')
                                                     if (isBlock) {
@@ -258,7 +250,12 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
                                                 ),
                                                 strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                                                 a: ({ href, children }) => (
-                                                    <a href={href} className="text-brand underline" target="_blank" rel="noopener noreferrer">
+                                                    <a
+                                                        href={href}
+                                                        className="text-brand underline"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
                                                         {children}
                                                     </a>
                                                 ),
@@ -303,9 +300,7 @@ export function AIReadingPanel({}: AIReadingPanelProps) {
                             disabled={!input.trim()}
                             className={cn(
                                 'flex items-center justify-center w-7 h-7 rounded-md border-none cursor-pointer shrink-0 transition-all duration-150',
-                                input.trim()
-                                    ? 'bg-brand text-brand-foreground hover:bg-brand/90'
-                                    : 'bg-zinc-100 text-zinc-400',
+                                input.trim() ? 'bg-brand text-brand-foreground hover:bg-brand/90' : 'bg-zinc-100 text-zinc-400'
                             )}
                         >
                             <ArrowUp size={14} />

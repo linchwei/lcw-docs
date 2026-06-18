@@ -1,5 +1,5 @@
-import { TemplateCategoryEntity } from '../../entities/template-category.entity'
 import { TemplateEntity } from '../../entities/template.entity'
+import { TemplateCategoryEntity } from '../../entities/template-category.entity'
 
 export function getSeedCategories(): TemplateCategoryEntity[] {
     return [

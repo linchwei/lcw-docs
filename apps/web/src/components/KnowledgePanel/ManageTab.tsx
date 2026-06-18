@@ -13,7 +13,7 @@ import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
 import { AlertTriangle, Database, Loader2, RefreshCw, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
-import { deleteKnowledgeThread, listKnowledgeThreads, clearKnowledgeIndex } from '@/services/ai'
+import { clearKnowledgeIndex, deleteKnowledgeThread, listKnowledgeThreads } from '@/services/ai'
 
 /** 索引状态接口 */
 interface IndexStatus {
@@ -142,9 +142,7 @@ export default function ManageTab({ pageId, indexStatus, onIndex, onLoadStatus }
                         <div className="flex justify-between">
                             <span className="text-zinc-500">最后索引时间</span>
                             <span className="text-zinc-700">
-                                {indexStatus.lastIndexedAt
-                                    ? new Date(indexStatus.lastIndexedAt).toLocaleString('zh-CN')
-                                    : '未索引'}
+                                {indexStatus.lastIndexedAt ? new Date(indexStatus.lastIndexedAt).toLocaleString('zh-CN') : '未索引'}
                             </span>
                         </div>
 
@@ -187,12 +185,7 @@ export default function ManageTab({ pageId, indexStatus, onIndex, onLoadStatus }
                                 {indexing ? <Loader2 size={12} className="animate-spin mr-1" /> : null}
                                 确认
                             </Button>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setShowIndexConfirm(false)}
-                                className="h-7 text-xs"
-                            >
+                            <Button size="sm" variant="outline" onClick={() => setShowIndexConfirm(false)} className="h-7 text-xs">
                                 取消
                             </Button>
                         </div>
@@ -219,19 +212,10 @@ export default function ManageTab({ pageId, indexStatus, onIndex, onLoadStatus }
                         </div>
                         <p className="text-xs text-red-600 mb-2">此操作不可撤销，所有嵌入数据将被删除。</p>
                         <div className="flex gap-2">
-                            <Button
-                                size="sm"
-                                onClick={handleClearIndex}
-                                className="h-7 text-xs bg-red-500 hover:bg-red-600"
-                            >
+                            <Button size="sm" onClick={handleClearIndex} className="h-7 text-xs bg-red-500 hover:bg-red-600">
                                 确认清除
                             </Button>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setShowClearConfirm(false)}
-                                className="h-7 text-xs"
-                            >
+                            <Button size="sm" variant="outline" onClick={() => setShowClearConfirm(false)} className="h-7 text-xs">
                                 取消
                             </Button>
                         </div>
@@ -253,13 +237,7 @@ export default function ManageTab({ pageId, indexStatus, onIndex, onLoadStatus }
             <div>
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-zinc-700">对话历史</span>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={loadThreads}
-                        disabled={threadsLoading}
-                        className="h-6 px-2 text-xs"
-                    >
+                    <Button variant="ghost" size="sm" onClick={loadThreads} disabled={threadsLoading} className="h-6 px-2 text-xs">
                         {threadsLoading ? <Loader2 size={12} className="animate-spin" /> : '刷新'}
                     </Button>
                 </div>
@@ -269,10 +247,7 @@ export default function ManageTab({ pageId, indexStatus, onIndex, onLoadStatus }
                 ) : (
                     <div className="space-y-1.5">
                         {threads.map(thread => (
-                            <div
-                                key={thread.id}
-                                className="flex items-center justify-between border border-zinc-200 rounded-md p-2"
-                            >
+                            <div key={thread.id} className="flex items-center justify-between border border-zinc-200 rounded-md p-2">
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs font-medium text-zinc-700 truncate">
                                         {thread.title || `线程 ${thread.id.slice(0, 8)}...`}
@@ -289,11 +264,7 @@ export default function ManageTab({ pageId, indexStatus, onIndex, onLoadStatus }
                                     onClick={() => handleDeleteThread(thread.id)}
                                     disabled={deletingThread === thread.id}
                                 >
-                                    {deletingThread === thread.id ? (
-                                        <Loader2 size={12} className="animate-spin" />
-                                    ) : (
-                                        <Trash2 size={12} />
-                                    )}
+                                    {deletingThread === thread.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
                                 </Button>
                             </div>
                         ))}

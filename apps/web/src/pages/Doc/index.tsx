@@ -10,7 +10,6 @@ import {
 } from '@lcw-doc/shadcn-shared-ui/components/ui/dropdown-menu'
 import { Separator } from '@lcw-doc/shadcn-shared-ui/components/ui/separator'
 import { SidebarInset, SidebarTrigger, useSidebar } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
-import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/tooltip'
 import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
@@ -36,7 +35,7 @@ import {
     Users,
     WifiOff,
 } from 'lucide-react'
-import { Suspense, useEffect, lazy, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import { WebsocketProvider } from 'y-websocket'
@@ -54,10 +53,10 @@ import { AboutDialog } from '@/components/LayoutAside/AboutDialog'
 import { SettingsDialog } from '@/components/LayoutAside/SettingsDialog'
 import { NotificationBell } from '@/components/NotificationBell'
 import { PageTags } from '@/components/PageTags'
+import { ResizableDrawer } from '@/components/ResizableDrawer'
 import { SearchBar } from '@/components/SearchBar'
 import { SharePopover } from '@/components/SharePopover'
 import { ShortcutPanel } from '@/components/ShortcutPanel'
-import { ResizableDrawer } from '@/components/ResizableDrawer'
 import { StatusBar } from '@/components/StatusBar'
 import { VersionPanel } from '@/components/VersionPanel'
 import { useEditorContext } from '@/context/EditorContext'
@@ -102,17 +101,6 @@ export const Doc = () => {
     const [qaThreadId, setQaThreadId] = useState<string | undefined>()
     const [qaScope, setQaScope] = useState<'current' | 'all'>('current')
 
-    /** 切换 AI 阅读面板（与知识库面板互斥） */
-    const handleAIReadingPanelToggle = () => {
-        setAIReadingPanelOpen(prev => !prev)
-        if (!aiReadingPanelOpen) setKnowledgePanelOpen(false)
-    }
-
-    /** 切换知识库面板（与 AI 阅读面板互斥） */
-    const handleKnowledgePanelToggle = () => {
-        setKnowledgePanelOpen(prev => !prev)
-        if (!knowledgePanelOpen) setAIReadingPanelOpen(false)
-    }
     const [mode, setMode] = useState<'edit' | 'read' | 'review'>('edit')
     const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
         return localStorage.getItem('doc-outline-collapsed') === 'true'
@@ -813,7 +801,6 @@ export const Doc = () => {
                                                     : undefined
                                             }
                                         />
-
                                     </h1>
                                     {mode === 'read' && (page?.role === 'editor' || page?.role === 'owner') && (
                                         <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
@@ -866,7 +853,11 @@ export const Doc = () => {
                         icon={<Sparkles size={16} className="text-brand" />}
                         storageKey="ai-reading"
                     >
-                        <Suspense fallback={<div className="flex items-center justify-center h-full text-sm text-muted-foreground">加载中...</div>}>
+                        <Suspense
+                            fallback={
+                                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">加载中...</div>
+                            }
+                        >
                             <AIReadingPanel />
                         </Suspense>
                     </ResizableDrawer>
@@ -877,7 +868,11 @@ export const Doc = () => {
                         icon={<BookOpen size={16} className="text-brand" />}
                         storageKey="knowledge"
                     >
-                        <Suspense fallback={<div className="flex items-center justify-center h-full text-sm text-muted-foreground">加载中...</div>}>
+                        <Suspense
+                            fallback={
+                                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">加载中...</div>
+                            }
+                        >
                             <KnowledgePanel
                                 pageId={params?.id || ''}
                                 qaMessages={qaMessages}

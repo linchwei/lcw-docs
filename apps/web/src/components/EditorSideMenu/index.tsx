@@ -31,7 +31,15 @@ interface EditorSideMenuProps {
     unfreezeMenu: () => void
 }
 
-export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, blockDragEnd, freezeMenu, unfreezeMenu }: EditorSideMenuProps) {
+export function EditorSideMenu({
+    editor,
+    block,
+    isBlockEmpty,
+    blockDragStart,
+    blockDragEnd,
+    freezeMenu,
+    unfreezeMenu,
+}: EditorSideMenuProps) {
     const blockIcon = getBlockTypeIcon(block)
     const [menuOpen, setMenuOpen] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
@@ -136,7 +144,10 @@ export function EditorSideMenu({ editor, block, isBlockEmpty, blockDragStart, bl
                     <button
                         draggable={true}
                         onDragStart={blockDragStart}
-                        onDragEnd={() => { blockDragEnd(); unfreezeMenu() }}
+                        onDragEnd={() => {
+                            blockDragEnd()
+                            unfreezeMenu()
+                        }}
                         onMouseDown={freezeMenu}
                         onMouseEnter={handleHoverInsert}
                         className="flex items-center justify-center w-6 h-6 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors cursor-grab"

@@ -22,9 +22,9 @@
  *
  * @module rag/embedding/service
  */
+import { OpenAIEmbeddings } from '@langchain/openai'
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { OpenAIEmbeddings } from '@langchain/openai'
 
 import { DEFAULT_EMBEDDING_CONFIG, EmbeddingConfig, EmbeddingProvider, PROVIDER_DEFAULTS } from './embedding.types'
 
@@ -64,8 +64,7 @@ export class EmbeddingService {
      * 未配置时回退到 OPENAI_API_KEY（与 LLM 共享）。
      */
     private initEmbeddings() {
-        const apiKey = this.configService.get<string>('EMBEDDING_API_KEY')
-            || this.configService.get<string>('OPENAI_API_KEY')
+        const apiKey = this.configService.get<string>('EMBEDDING_API_KEY') || this.configService.get<string>('OPENAI_API_KEY')
 
         if (!apiKey) {
             this.logger.warn('EMBEDDING_API_KEY 和 OPENAI_API_KEY 均未配置，Embedding 服务不可用')
@@ -82,7 +81,7 @@ export class EmbeddingService {
         })
 
         this.logger.log(
-            `Embedding 服务已初始化 (提供商: ${this.config.provider}, 模型: ${this.config.model}, 维度: ${this.config.dimensions}, 端点: ${this.config.baseURL})`,
+            `Embedding 服务已初始化 (提供商: ${this.config.provider}, 模型: ${this.config.model}, 维度: ${this.config.dimensions}, 端点: ${this.config.baseURL})`
         )
     }
 

@@ -78,15 +78,18 @@ export const createPasteFromClipboardExtension = <BSchema extends BlockSchema, I
 
                                 if (looksLikeMarkdown(data)) {
                                     const anchorBlock = editor.getTextCursorPosition().block
-                                    editor.tryParseMarkdownToBlocks(data).then(blocks => {
-                                        if (blocks.length > 0) {
-                                            editor.insertBlocks(blocks, anchorBlock, 'after')
-                                        } else {
+                                    editor
+                                        .tryParseMarkdownToBlocks(data)
+                                        .then(blocks => {
+                                            if (blocks.length > 0) {
+                                                editor.insertBlocks(blocks, anchorBlock, 'after')
+                                            } else {
+                                                editor._tiptapEditor.view.pasteText(data)
+                                            }
+                                        })
+                                        .catch(() => {
                                             editor._tiptapEditor.view.pasteText(data)
-                                        }
-                                    }).catch(() => {
-                                        editor._tiptapEditor.view.pasteText(data)
-                                    })
+                                        })
                                 } else {
                                     editor._tiptapEditor.view.pasteText(data)
                                 }

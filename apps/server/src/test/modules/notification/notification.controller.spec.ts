@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common'
-import * as request from 'supertest'
+import request from 'supertest'
 
 import { cleanupAll, closeTestApp, createTestApp, createTestUser } from '../../helpers'
 
@@ -28,7 +28,9 @@ describe('NotificationController', () => {
             .get('/api/notification/unread-count')
             .set('Authorization', `Bearer ${testUser.token}`)
         expect(res.status).toBe(200)
-        expect(res.body.data).toHaveProperty('count')
+        // notification controller returns { data: count, success: true } where count is a number
+        expect(res.body).toHaveProperty('data')
+        expect(typeof res.body.data).toBe('number')
     })
 
     it('NT-004: should mark all as read', async () => {

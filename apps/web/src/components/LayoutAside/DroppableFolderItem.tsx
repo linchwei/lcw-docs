@@ -16,10 +16,7 @@ export function DroppableFolderItem({ folderId, children }: DroppableFolderItemP
     return (
         <div
             ref={setNodeRef}
-            className={cn(
-                'rounded-md transition-colors',
-                isOver && 'bg-sidebar-accent/50 ring-1 ring-sidebar-accent ring-inset'
-            )}
+            className={cn('rounded-md transition-colors', isOver && 'bg-sidebar-accent/50 ring-1 ring-sidebar-accent ring-inset')}
         >
             {children}
         </div>

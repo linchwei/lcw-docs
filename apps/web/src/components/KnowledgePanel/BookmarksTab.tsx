@@ -14,11 +14,7 @@ import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
 import { BookMarked, Loader2, Search, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import {
-    deleteBookmark,
-    listBookmarks,
-    searchBookmarks,
-} from '@/services/ai'
+import { deleteBookmark, listBookmarks, searchBookmarks } from '@/services/ai'
 
 /** 收藏项 */
 interface BookmarkItem {
@@ -112,7 +108,7 @@ export default function BookmarksTab() {
         <div
             key={bookmark.id}
             className="border border-zinc-200 rounded-lg p-3 cursor-pointer hover:border-brand/30 transition-colors"
-            onClick={() => window.location.href = `/doc/${bookmark.sourcePageId}`}
+            onClick={() => (window.location.href = `/doc/${bookmark.sourcePageId}`)}
         >
             <div className="flex items-start justify-between gap-2 mb-1.5">
                 <span className="text-sm font-medium text-zinc-800 line-clamp-1">{bookmark.title}</span>
@@ -120,7 +116,10 @@ export default function BookmarksTab() {
                     variant="ghost"
                     size="sm"
                     className="h-6 w-6 p-0 shrink-0 text-zinc-400 hover:text-red-500"
-                    onClick={(e) => { e.stopPropagation(); handleDelete(bookmark.id) }}
+                    onClick={e => {
+                        e.stopPropagation()
+                        handleDelete(bookmark.id)
+                    }}
                 >
                     <Trash2 size={12} />
                 </Button>
@@ -152,21 +151,12 @@ export default function BookmarksTab() {
                         className="flex-1 text-sm outline-none bg-transparent"
                     />
                     {searchResults !== null && (
-                        <button
-                            onClick={clearSearch}
-                            className="text-xs text-brand hover:underline shrink-0"
-                        >
+                        <button onClick={clearSearch} className="text-xs text-brand hover:underline shrink-0">
                             清空
                         </button>
                     )}
                 </div>
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleSearch}
-                    disabled={searching || !searchQuery.trim()}
-                    className="h-8 px-3"
-                >
+                <Button size="sm" variant="outline" onClick={handleSearch} disabled={searching || !searchQuery.trim()} className="h-8 px-3">
                     {searching ? <Loader2 size={14} className="animate-spin" /> : '搜索'}
                 </Button>
             </div>
@@ -182,9 +172,7 @@ export default function BookmarksTab() {
                     <span className="text-xs">暂无收藏</span>
                 </div>
             ) : (
-                <div className="space-y-2">
-                    {displayList.map(renderBookmarkCard)}
-                </div>
+                <div className="space-y-2">{displayList.map(renderBookmarkCard)}</div>
             )}
 
             {/* 加载更多 */}

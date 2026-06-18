@@ -29,22 +29,17 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { KnowledgeBookmarkEntity } from '../../entities/knowledge-bookmark.entity'
 import { PageModule } from '../page/page.module'
-import { PostgresCheckpointerService } from './checkpointer/postgres.checkpointer'
-import { LlmFactory } from './llm/llm.factory'
 import { AiController } from './ai.controller'
 import { AiService } from './ai.service'
+import { PostgresCheckpointerService } from './checkpointer/postgres.checkpointer'
 import { KnowledgeBookmarkService } from './knowledge/knowledge-bookmark.service'
+import { LlmFactory } from './llm/llm.factory'
 import { RagModule } from './rag/rag.module'
 
 @Module({
     imports: [ConfigModule, RagModule, PageModule, TypeOrmModule.forFeature([KnowledgeBookmarkEntity])],
     controllers: [AiController],
-    providers: [
-        AiService,
-        LlmFactory,
-        PostgresCheckpointerService,
-        KnowledgeBookmarkService,
-    ],
+    providers: [AiService, LlmFactory, PostgresCheckpointerService, KnowledgeBookmarkService],
     exports: [AiService, LlmFactory],
 })
 export class AiModule {}

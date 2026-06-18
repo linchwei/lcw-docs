@@ -51,8 +51,8 @@ import {
 import { useCallback, useState } from 'react'
 import { NavLink, useMatch, useNavigate } from 'react-router-dom'
 
-import { TemplateDialog } from '@/components/TemplateDialog'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { TemplateDialog } from '@/components/TemplateDialog'
 import { Template } from '@/data/templates'
 import * as srv from '@/services'
 import { Folder } from '@/types/api'

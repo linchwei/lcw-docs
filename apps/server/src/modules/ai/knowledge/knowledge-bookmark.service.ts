@@ -66,11 +66,7 @@ export class KnowledgeBookmarkService {
      * @param params.pageSize - 每页条数，默认 20
      * @returns 分页结果，包含 items 和 total
      */
-    async list(params: {
-        userId: number
-        page?: number
-        pageSize?: number
-    }): Promise<{ items: KnowledgeBookmarkEntity[]; total: number }> {
+    async list(params: { userId: number; page?: number; pageSize?: number }): Promise<{ items: KnowledgeBookmarkEntity[]; total: number }> {
         const page = params.page ?? 1
         const pageSize = params.pageSize ?? 20
 
@@ -121,10 +117,7 @@ export class KnowledgeBookmarkService {
         return this.bookmarkRepo
             .createQueryBuilder('bookmark')
             .where('bookmark.userId = :userId', { userId })
-            .andWhere(
-                '(LOWER(bookmark.title) LIKE LOWER(:query) OR LOWER(bookmark.content) LIKE LOWER(:query))',
-                { query: `%${query}%` },
-            )
+            .andWhere('(LOWER(bookmark.title) LIKE LOWER(:query) OR LOWER(bookmark.content) LIKE LOWER(:query))', { query: `%${query}%` })
             .orderBy('bookmark.createdAt', 'DESC')
             .limit(20)
             .getMany()

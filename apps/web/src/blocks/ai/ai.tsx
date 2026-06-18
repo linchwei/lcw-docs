@@ -1,9 +1,9 @@
 import { createReactBlockSpec } from '@lcw-doc/react'
 import { AlertTriangle, Check, RotateCcw, Send, Sparkles, X } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 
-import { ChatMessage, chatWithAgent } from '@/services'
 import { useAIStream } from '@/hooks/useAIStream'
+import { ChatMessage, chatWithAgent } from '@/services'
 
 export const AI = createReactBlockSpec(
     {
@@ -39,7 +39,7 @@ function AIBlockContent({
     const [error, setError] = useState('')
 
     // 使用统一的 AI 流式 Hook
-    const { content: streamContent, isGenerating, startStream, cancel } = useAIStream()
+    const { content: streamContent, startStream, cancel } = useAIStream()
     // 保存 startStream 返回值到 ref，避免 handleAccept 闭包陷阱
     const resultRef = useRef<string>('')
 
@@ -58,7 +58,7 @@ function AIBlockContent({
         ]
 
         try {
-            const result = await startStream(async (signal) => {
+            const result = await startStream(async signal => {
                 return chatWithAgent(messages, undefined, undefined, signal)
             })
             resultRef.current = result || ''

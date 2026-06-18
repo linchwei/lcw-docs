@@ -82,17 +82,13 @@ export function formatStructuredContext(ctx: StructuredContext): string {
 
     // 第 1 层：文档大纲（始终包含）
     if (ctx.outline.length > 0) {
-        const outlineText = ctx.outline
-            .map(item => `${'  '.repeat(item.level - 1)}${item.level}. ${item.text}`)
-            .join('\n')
+        const outlineText = ctx.outline.map(item => `${'  '.repeat(item.level - 1)}${item.level}. ${item.text}`).join('\n')
         parts.push(`## 文档大纲\n${outlineText}`)
     }
 
     // 第 2 层：选区上下文（有选区时包含）
     if (ctx.selection) {
-        parts.push(
-            `## 当前选区上下文\n[前文] ${ctx.selection.before}\n[选区] ${ctx.selection.text}\n[后文] ${ctx.selection.after}`,
-        )
+        parts.push(`## 当前选区上下文\n[前文] ${ctx.selection.before}\n[选区] ${ctx.selection.text}\n[后文] ${ctx.selection.after}`)
     }
 
     // 第 3 层：Section 摘要（无选区时包含各 section 首段）
@@ -125,9 +121,7 @@ function extractSectionSummaries(ctx: StructuredContext): string[] {
             currentHeading = `${'#'.repeat(block.level || 1)} ${block.content}`
         } else if (block.type === 'paragraph' && currentHeading) {
             // 遇到段落且有标题，取首段作为摘要
-            const truncated = block.content.length > 100
-                ? block.content.slice(0, 100) + '...'
-                : block.content
+            const truncated = block.content.length > 100 ? block.content.slice(0, 100) + '...' : block.content
             summaries.push(`- ${currentHeading}：${truncated}`)
             // 重置标题，避免重复添加同一 section 的多个段落
             currentHeading = ''

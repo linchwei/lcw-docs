@@ -39,12 +39,7 @@ export interface AIOutlineApprovalProps {
  *
  * 展示 AI 生成的大纲，用户可编辑后确认生成。
  */
-export function AIOutlineApproval({
-    outline: initialOutline,
-    threadId,
-    onConfirm,
-    onCancel,
-}: AIOutlineApprovalProps) {
+export function AIOutlineApproval({ outline: initialOutline, threadId, onConfirm, onCancel }: AIOutlineApprovalProps) {
     // 可编辑的大纲列表
     const [sections, setSections] = useState<OutlineSection[]>(initialOutline)
     // 正在编辑的章节索引
@@ -107,9 +102,7 @@ export function AIOutlineApproval({
                     backgroundColor: '#fafaf9',
                 }}
             >
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#37352f' }}>
-                    AI 生成大纲
-                </span>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#37352f' }}>AI 生成大纲</span>
                 <button
                     onClick={onCancel}
                     style={{

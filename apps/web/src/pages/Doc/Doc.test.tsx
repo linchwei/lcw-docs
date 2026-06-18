@@ -43,6 +43,8 @@ vi.mock('yjs', () => ({
         getXmlFragment() {
             return { toJSON: () => '' }
         }
+        on() {}
+        off() {}
         destroy() {}
     },
     encodeStateAsUpdate: () => new Uint8Array(),

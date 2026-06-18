@@ -26,25 +26,15 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { DocumentChunkEntity } from '../../../entities/document-chunk.entity'
 import { DocumentChunker } from './chunker/document.chunker'
-import { DocumentChunkRepository } from './vector/document-chunk.repository'
 import { EmbeddingService } from './embedding/embedding.service'
 import { RagService } from './rag.service'
+import { DocumentChunkRepository } from './vector/document-chunk.repository'
 import { VectorSetupService } from './vector/vector.setup'
 import { VectorStore } from './vector/vector.store'
 
 @Module({
-    imports: [
-        ConfigModule,
-        TypeOrmModule.forFeature([DocumentChunkEntity]),
-    ],
-    providers: [
-        DocumentChunkRepository,
-        VectorSetupService,
-        EmbeddingService,
-        DocumentChunker,
-        VectorStore,
-        RagService,
-    ],
+    imports: [ConfigModule, TypeOrmModule.forFeature([DocumentChunkEntity])],
+    providers: [DocumentChunkRepository, VectorSetupService, EmbeddingService, DocumentChunker, VectorStore, RagService],
     exports: [RagService, EmbeddingService],
 })
 export class RagModule {}

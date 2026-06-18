@@ -8,6 +8,7 @@
  * @module hooks/useAutoIndex
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { indexForKnowledge } from '@/services/ai'
 
 /** Hook 参数 */

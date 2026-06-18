@@ -6,15 +6,14 @@
         },
         "build": {
             "dependsOn": ["^build"],
-            "outputs": []
+            "outputs": ["build/esm/**", "dist/**"]
         },
         "dev": {
             "cache": false,
             "persistent": true
         },
         "typecheck": {
-            "cache": false,
-            "persistent": true
+            "cache": false
         },
         "test": {
             "dependsOn": ["^build"]

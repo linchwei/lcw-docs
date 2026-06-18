@@ -6,8 +6,6 @@ FROM base AS build
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/core/package.json ./packages/core/
 COPY packages/react/package.json ./packages/react/
-COPY packages/shadcn/package.json ./packages/shadcn/
-COPY packages/shadcn-shared-ui/package.json ./packages/shadcn-shared-ui/
 COPY apps/server/package.json ./apps/server/
 RUN pnpm install --frozen-lockfile
 

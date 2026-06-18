@@ -1,7 +1,7 @@
 const eslint = require('@eslint/js')
 const globals = require('globals')
 const reactHooks = require('eslint-plugin-react-hooks')
-const reactRefresh = require('eslint-plugin-react-refresh')
+const reactRefresh = require('eslint-plugin-react-refresh').default
 const eslintPrettier = require('eslint-plugin-prettier')
 const importSort = require('eslint-plugin-simple-import-sort')
 
@@ -18,28 +18,38 @@ const ignores = [
   'commitlint.config.js',
 ]
 
+const reactRefreshConfig = {
+  files: ['apps/web/**/*.{ts,tsx}'],
+  ...reactRefresh.configs.vite,
+  rules: {
+    ...reactRefresh.configs.vite.rules,
+    'react-refresh/only-export-components': 'warn',
+  },
+}
+
 const frontendBuilderConfig = {
-  files: ['apps/frontend/builder/**/*.{ts,tsx}'],
+  files: ['apps/web/**/*.{ts,tsx}'],
   languageOptions: {
     ecmaVersion: 2020,
     globals: globals.browser,
   },
   plugins: {
     'react-hooks': reactHooks,
-    'react-refresh': reactRefresh,
   },
   rules: {
     ...reactHooks.configs.recommended.rules,
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
-    'no-console': 'error',
+    'react-hooks/purity': 'warn',
+    'react-hooks/refs': 'warn',
+    'react-hooks/set-state-in-render': 'warn',
+    'react-hooks/set-state-in-effect': 'warn',
+    'react-hooks/immutability': 'warn',
+    'react-hooks/preserve-manual-memoization': 'warn',
+    'no-console': 'warn',
   },
 }
 
 const backendBuilderConfig = {
-  files: ['apps/backend/**/*.ts'],
+  files: ['apps/server/**/*.ts'],
   languageOptions: {
     globals: {
       ...globals.node,
@@ -52,7 +62,7 @@ const backendBuilderConfig = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    'no-console': 'error',
+    'no-console': 'warn',
   },
 }
 
@@ -77,5 +87,6 @@ module.exports = tseslint.config(
     },
   },
   frontendBuilderConfig,
+  reactRefreshConfig,
   backendBuilderConfig
 )

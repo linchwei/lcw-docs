@@ -18,7 +18,7 @@ import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UseGuards 
 import { AuthGuard } from '@nestjs/passport'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import type { Response } from 'express'
-import { Throttle } from '@nestjs/throttler'
+import { Throttle, SkipThrottle } from '@nestjs/throttler'
 
 import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
 import {
@@ -65,6 +65,7 @@ import { RagService } from './rag/rag.service'
 @ApiBearerAuth('jwt')
 @Controller('ai')
 @UseGuards(AuthGuard('jwt'))
+@SkipThrottle({ short: true, medium: true, long: true })
 export class AiController {
     constructor(
         private readonly aiService: AiService,

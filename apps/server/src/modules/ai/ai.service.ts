@@ -20,6 +20,7 @@
  *
  * @module ai/service
  */
+import { nanoid } from 'nanoid'
 import { Injectable, Inject, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PostgresqlPersistence } from 'y-postgresql'
@@ -50,6 +51,7 @@ import { createSmartSummaryGraph } from './graphs/smart-summary.graph'
 import { createLearningPathGraph } from './graphs/learning-path.graph'
 import { KnowledgeBookmarkService } from './knowledge/knowledge-bookmark.service'
 import { PageService } from '../page/page.service'
+import { UserEntity } from '../../entities/user.entity'
 import { docs } from '../../fundamentals/yjs-postgresql/utils'
 
 @Injectable()
@@ -556,10 +558,14 @@ export class AiService {
      * @returns 创建的页面 ID
      */
     async saveKnowledgeCard(dto: SaveKnowledgeCardDto, userId: number) {
+        const pageId = 'page' + nanoid(6)
+        const user = new UserEntity()
+        user.id = userId
         const page = await this.pageService.create({
+            pageId,
             title: dto.title,
             emoji: '🃏',
-            userId,
+            user,
             folderId: dto.folderId,
         })
 

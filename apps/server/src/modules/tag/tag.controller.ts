@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger'
-import { Throttle } from '@nestjs/throttler'
+import { Throttle, SkipThrottle } from '@nestjs/throttler'
 
 import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
 import {
@@ -21,6 +21,7 @@ import { TagService } from './tag.service'
 @ApiUnauthorizedResponse({ description: '未认证' })
 @Controller()
 @UseGuards(AuthGuard('jwt'))
+@SkipThrottle({ short: true, medium: true, long: true })
 export class TagController {
     constructor(private readonly tagService: TagService) {}
 
@@ -32,8 +33,7 @@ export class TagController {
         },
     })
     @ApiOperation({ summary: '获取标签列表', description: '返回当前用户的所有标签' })
-    @Throttle({ default: { ttl: 10000, limit: 100 } })
-    @Get('tags')
+        @Get('tags')
     async list(@Request() req) {
         const data = await this.tagService.list({ userId: req.user.id })
         return { data, success: true }
@@ -57,7 +57,7 @@ export class TagController {
         },
     })
     @ApiOperation({ summary: '创建标签', description: '创建新标签，需提供名称，颜色可选' })
-    @Post('tag')
+        @Post('tag')
     async create(@Body(new ZodValidationPipe(createTagSchema)) body: CreateTagDto, @Request() req) {
         const data = await this.tagService.create({
             name: body.name,
@@ -127,7 +127,7 @@ export class TagController {
         },
     })
     @ApiOperation({ summary: '为页面添加标签', description: '将标签关联到指定页面' })
-    @Post('page-tag')
+        @Post('page-tag')
     async addPageTag(@Body(new ZodValidationPipe(addPageTagSchema)) body: AddPageTagDto, @Request() req) {
         const data = await this.tagService.addPageTag({
             pageId: body.pageId,
@@ -166,8 +166,7 @@ export class TagController {
     })
     @ApiOperation({ summary: '获取页面的标签', description: '返回指定页面关联的所有标签' })
     @ApiParam({ name: 'pageId', description: '页面 ID' })
-    @Throttle({ default: { ttl: 10000, limit: 100 } })
-    @Get('page/:pageId/tags')
+        @Get('page/:pageId/tags')
     async getPageTags(@Param('pageId') pageId: string) {
         const data = await this.tagService.getPageTags({ pageId })
         return { data, success: true }
@@ -189,8 +188,7 @@ export class TagController {
     })
     @ApiOperation({ summary: '批量获取页面标签', description: '一次请求获取多个页面的标签，最多 50 个页面 ID' })
     @Post('page-tags/batch')
-    @Throttle({ default: { ttl: 10000, limit: 100 } })
-    async batchGetPageTags(@Body(new ZodValidationPipe(batchGetPageTagsSchema)) body: BatchGetPageTagsDto) {
+        async batchGetPageTags(@Body(new ZodValidationPipe(batchGetPageTagsSchema)) body: BatchGetPageTagsDto) {
         const data = await this.tagService.batchGetPageTags({ pageIds: body.pageIds })
         return { data, success: true }
     }
@@ -204,8 +202,7 @@ export class TagController {
     })
     @ApiOperation({ summary: '获取标签下的页面', description: '返回指定标签关联的所有页面' })
     @ApiParam({ name: 'tagId', description: '标签 ID' })
-    @Throttle({ default: { ttl: 10000, limit: 100 } })
-    @Get('tag/:tagId/pages')
+        @Get('tag/:tagId/pages')
     async getTagPages(@Param('tagId') tagId: string, @Request() req) {
         const data = await this.tagService.getTagPages({ tagId, userId: req.user.id })
         return { data, success: true }

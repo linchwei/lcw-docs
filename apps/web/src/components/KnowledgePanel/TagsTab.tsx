@@ -31,14 +31,16 @@ interface AutoTagResult {
 
 /** 已有标签项 */
 interface ExistingTagItem {
-    id: string
+    id: number
+    tagId: string
     name: string
     color?: string
 }
 
 /** 新建标签返回项 */
 interface CreatedTagItem {
-    id: string
+    id: number
+    tagId: string
     name: string
     color?: string
 }
@@ -103,27 +105,28 @@ export default function TagsTab({ pageId }: TagsTabProps) {
         setApplying(true)
         try {
             // 获取已有标签列表
-            const existingTags: ExistingTagItem[] = await fetchTags()
+            const existingTags: ExistingTagItem[] = (await fetchTags()).data
             const existingTagMap = new Map<string, string>(
-                existingTags.map((t: ExistingTagItem) => [t.name, t.id]),
+                existingTags.map((t: ExistingTagItem) => [t.name, t.tagId]),
             )
 
-            // 逐个处理选中的标签
-            for (const tagName of selectedTags) {
+            // 并行处理选中的标签：先并行创建不存在的标签，再并行关联
+            const tagsToCreate = Array.from(selectedTags).map(tagName => {
                 const tagInfo = result.tags.find(t => t.name === tagName)
-                if (!tagInfo) continue
+                return { tagName, tagInfo, existingTagId: existingTagMap.get(tagName) }
+            }).filter(t => t.tagInfo)
 
-                let tagId = existingTagMap.get(tagName)
+            // 并行创建缺失的标签
+            const createPromises = tagsToCreate.map(async ({ tagName, tagInfo, existingTagId }) => {
+                if (existingTagId) return { tagName, tagId: existingTagId }
+                const newTag: CreatedTagItem = (await createTag({ name: tagName, color: tagInfo!.color })).data
+                return { tagName, tagId: newTag.tagId }
+            })
+            const resolved = await Promise.all(createPromises)
 
-                // 如果标签不存在，先创建
-                if (!tagId) {
-                    const newTag: CreatedTagItem = await createTag({ name: tagName, color: tagInfo.color })
-                    tagId = newTag.id
-                }
-
-                // 将标签关联到当前页面
-                await addPageTag({ pageId, tagId })
-            }
+            // 并行关联标签到页面
+            const addPromises = resolved.map(({ tagId }) => addPageTag({ pageId, tagId }))
+            await Promise.all(addPromises)
 
             toast({ title: '标签应用成功', description: `已应用 ${selectedTags.size} 个标签` })
         } catch (e: any) {

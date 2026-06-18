@@ -22,8 +22,7 @@ export class PageService {
     ) {}
 
     async create(payload) {
-        this.pageRepository.save(payload)
-        return payload
+        return await this.pageRepository.save(payload)
     }
 
     async update(payload) {

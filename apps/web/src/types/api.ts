@@ -251,6 +251,7 @@ export interface SharedPage {
     title: string
     role: 'owner' | 'editor' | 'commenter' | 'viewer'
     ownerName: string
+    isFavorite: boolean
     updatedAt: string
     createdAt: string
 }

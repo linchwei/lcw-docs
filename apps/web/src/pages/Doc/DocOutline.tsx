@@ -1,4 +1,5 @@
-import { LcwDocEditor, useDocOutline } from '@lcw-doc/react'
+import { LcwDocEditor } from '@lcw-doc/core'
+import { useDocOutline } from '@lcw-doc/react'
 import { ChevronLeft, FileText, List } from 'lucide-react'
 
 interface DocOutlineProps {

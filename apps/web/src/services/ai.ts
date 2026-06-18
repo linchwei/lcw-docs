@@ -494,7 +494,7 @@ export async function generateLearningPath(
 export async function getRelatedDocuments(
     pageId: string,
     topK: number = 5
-): Promise<Array<{ pageId: string; score: number; matchedContent: string }>> {
+): Promise<Array<{ pageId: string; title?: string; score: number; matchedContent: string }>> {
     const res = await fetch(`/api/ai/knowledge/related/${pageId}?topK=${topK}`, {
         headers: getAuthHeaders(),
     })

@@ -39,6 +39,7 @@ interface SmartSummaryResult {
 /** 关联文档结果 */
 interface RelatedDocsResult {
     pageId: string
+    title?: string
     score: number
     matchedContent: string
 }

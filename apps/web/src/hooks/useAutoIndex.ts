@@ -31,7 +31,7 @@ interface UseAutoIndexReturn {
 
 export function useAutoIndex({ pageId, isIndexed, getBlocks }: UseAutoIndexParams): UseAutoIndexReturn {
     const [isIndexing, setIsIndexing] = useState(false)
-    const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
     const pageIdRef = useRef(pageId)
     const isIndexedRef = useRef(isIndexed)
     const getBlocksRef = useRef(getBlocks)

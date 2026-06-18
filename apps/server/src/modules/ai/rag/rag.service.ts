@@ -28,6 +28,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { DocumentChunker } from './chunker/document.chunker'
 import { ChunkingConfig } from './chunker/chunker.types'
 import { EmbeddingService } from './embedding/embedding.service'
+import { DocumentChunkRepository } from './vector/document-chunk.repository'
 import { VectorSearchOptions, VectorSearchResult } from './vector/vector.types'
 import { VectorStore } from './vector/vector.store'
 import { VectorSetupService } from './vector/vector.setup'
@@ -48,6 +49,20 @@ interface BlockInput {
     level?: number
 }
 
+/** 知识库索引状态 */
+interface KnowledgeIndexStatus {
+    /** 是否已索引 */
+    isIndexed: boolean
+    /** 总分块数 */
+    totalChunks: number
+    /** 已嵌入分块数 */
+    embeddedChunks: number
+    /** 未嵌入分块数 */
+    unembeddedChunks: number
+    /** 最后索引时间（近似值，基于最大 ID） */
+    lastIndexedAt: Date | null
+}
+
 @Injectable()
 export class RagService {
     private readonly logger = new Logger(RagService.name)
@@ -57,6 +72,7 @@ export class RagService {
         private embeddingService: EmbeddingService,
         private vectorStore: VectorStore,
         private vectorSetup: VectorSetupService,
+        private chunkRepo: DocumentChunkRepository,
     ) {}
 
     /**
@@ -183,12 +199,137 @@ export class RagService {
     }
 
     /**
+     * 列出指定文档的分块（非语义搜索）
+     *
+     * 直接按 chunkIndex 排序查询分块，不需要向量化。
+     * 用于需要列出/遍历分块的场景（如获取文档结构、分块列表），
+     * 而非语义搜索场景。
+     *
+     * @param pageId - 文档 pageId
+     * @param limit - 每页数量
+     * @param offset - 偏移量
+     * @returns 分块列表和总数，score 固定为 1（非相似度匹配）
+     */
+    async listChunks(pageId: string, limit: number, offset: number): Promise<{ items: VectorSearchResult[]; total: number }> {
+        if (!this.vectorSetup.getIsReady()) {
+            return { items: [], total: 0 }
+        }
+        const result = await this.chunkRepo.listChunksByPageId(pageId, limit, offset)
+        return {
+            items: result.items.map((row: any) => ({
+                chunkId: row.id,
+                pageId: row.pageId,
+                blockId: row.blockId,
+                content: row.content,
+                score: 1,
+                chunkIndex: row.chunkIndex,
+            })),
+            total: result.total,
+        }
+    }
+
+    /**
+     * 获取分块及其上下文（前后相邻分块）
+     *
+     * 直接按 chunkIndex 查询目标分块及其前后文，不需要向量化。
+     * 用于查看分块详情时了解其上下文环境。
+     *
+     * @param chunkId - 目标分块 ID
+     * @param contextBlocks - 前后各取的上下文分块数量
+     */
+    async getChunkWithContext(chunkId: number, contextBlocks: number): Promise<{
+        chunk: VectorSearchResult
+        before: VectorSearchResult[]
+        after: VectorSearchResult[]
+    }> {
+        const result = await this.chunkRepo.getChunkWithContext(chunkId, contextBlocks)
+        const mapRow = (row: any): VectorSearchResult => ({
+            chunkId: row.id,
+            pageId: row.pageId,
+            blockId: row.blockId,
+            content: row.content,
+            score: 1,
+            chunkIndex: row.chunkIndex,
+        })
+        return {
+            chunk: mapRow(result.chunk),
+            before: result.before.map(mapRow),
+            after: result.after.map(mapRow),
+        }
+    }
+
+    /**
      * 检查 RAG 服务是否可用
      *
      * @returns true 表示 Embedding 服务和 pgvector 均已就绪
      */
     isAvailable(): boolean {
         return this.embeddingService.isAvailable() && this.vectorSetup.getIsReady()
+    }
+
+    /**
+     * 获取指定文档的索引状态
+     *
+     * 返回文档的分块统计信息，包括是否已索引、总/已嵌入/未嵌入分块数。
+     * pgvector 未就绪时返回默认空状态。
+     *
+     * @param pageId - 文档 pageId
+     */
+    async getIndexStatus(pageId: string): Promise<KnowledgeIndexStatus> {
+        if (!this.vectorSetup.getIsReady()) {
+            return { isIndexed: false, totalChunks: 0, embeddedChunks: 0, unembeddedChunks: 0, lastIndexedAt: null }
+        }
+        const stats = await this.chunkRepo.getChunkStatsByPageId(pageId)
+        return {
+            isIndexed: stats.total > 0,
+            totalChunks: stats.total,
+            embeddedChunks: stats.embedded,
+            unembeddedChunks: stats.unembedded,
+            lastIndexedAt: stats.lastIndexedAt,
+        }
+    }
+
+    /**
+     * 获取用户的索引统计信息
+     *
+     * 返回用户关联的已索引文档数、总分块数和已嵌入分块数。
+     * pgvector 未就绪时返回默认空状态。
+     *
+     * @param userId - 用户 ID
+     */
+    async getUserIndexStats(userId: number): Promise<{ indexedPageCount: number; totalChunks: number; embeddedChunks: number }> {
+        if (!this.vectorSetup.getIsReady()) {
+            return { indexedPageCount: 0, totalChunks: 0, embeddedChunks: 0 }
+        }
+        const stats = await this.chunkRepo.getUserChunkStats(userId)
+        return {
+            indexedPageCount: stats.indexedPageIds.length,
+            totalChunks: stats.totalChunks,
+            embeddedChunks: stats.embeddedChunks,
+        }
+    }
+
+    /**
+     * 清除指定文档的索引数据
+     *
+     * 删除指定 pageId 关联的所有分块和向量数据。
+     * pgvector 未就绪时直接返回成功。
+     *
+     * @param pageId - 文档页面 ID
+     */
+    async clearPageIndex(pageId: string): Promise<{ success: boolean }> {
+        if (!this.vectorSetup.getIsReady()) {
+            this.logger.warn('pgvector 未就绪，跳过清除索引')
+            return { success: true }
+        }
+        try {
+            await this.vectorStore.deleteByPageId(pageId)
+            this.logger.log(`已清除文档 ${pageId} 的索引数据`)
+            return { success: true }
+        } catch (error) {
+            this.logger.error(`清除文档 ${pageId} 索引失败:`, error)
+            return { success: false }
+        }
     }
 
     /**

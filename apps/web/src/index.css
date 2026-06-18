@@ -40,6 +40,12 @@
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
+  /* 品牌色系统 */
+  --color-brand: #6B45FF;
+  --color-brand-foreground: #ffffff;
+  --color-brand-soft: #F3EEFF;
+  --color-brand-border: #E0D4FF;
+
   /* Border Radius */
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -47,6 +53,8 @@
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-cursor-blink: cursor-blink 1s infinite;
+  --animate-dot-bounce: dot-bounce 1.2s ease-in-out infinite;
 }
 
 :root {
@@ -137,4 +145,27 @@ body {
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
+}
+
+@keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+@keyframes dot-bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); }
+}
+
+/* 知识库来源定位高亮样式 */
+.knowledge-highlight {
+    background-color: color-mix(in srgb, var(--color-brand) 15%, transparent) !important;
+    border-left: 3px solid var(--color-brand) !important;
+    transition: background-color 0.3s ease;
+    animation: knowledge-highlight-pulse 1s ease-in-out 2;
+}
+
+@keyframes knowledge-highlight-pulse {
+    0%, 100% { background-color: color-mix(in srgb, var(--color-brand) 15%, transparent); }
+    50% { background-color: color-mix(in srgb, var(--color-brand) 30%, transparent); }
 }

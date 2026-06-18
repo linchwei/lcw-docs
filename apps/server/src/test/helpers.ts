@@ -9,6 +9,7 @@ import { AuditLogEntity } from '../entities/audit-log.entity'
 import { CollaboratorEntity } from '../entities/collaborator.entity'
 import { CommentEntity } from '../entities/comment.entity'
 import { FolderEntity } from '../entities/folder.entity'
+import { KnowledgeBookmarkEntity } from '../entities/knowledge-bookmark.entity'
 import { NotificationEntity } from '../entities/notification.entity'
 import { PageEntity } from '../entities/page.entity'
 import { PageTagEntity } from '../entities/page-tag.entity'
@@ -65,21 +66,25 @@ export async function cleanupUsers(app: INestApplication): Promise<void> {
 export async function cleanupAll(app: INestApplication): Promise<void> {
     const dataSource = app.get(DataSource)
 
-    // 按外键依赖顺序清理
-    const entities = [
-        PageTagEntity,
-        TagEntity,
-        CommentEntity,
-        ShareEntity,
-        CollaboratorEntity,
-        NotificationEntity,
-        VersionEntity,
-        FolderEntity,
-        PageEntity,
-        AuditLogEntity,
-    ]
-    for (const entity of entities) {
-        await dataSource.getRepository(entity).delete({})
+    // 按外键依赖顺序清理，使用 TRUNCATE CASCADE 避免外键约束问题
+    try {
+        await dataSource.query(`
+            TRUNCATE TABLE
+                knowledge_bookmark,
+                page_tag,
+                tag,
+                comment,
+                share,
+                collaborator,
+                notification,
+                version,
+                folder,
+                page,
+                audit_log
+            CASCADE
+        `)
+    } catch {
+        // 如果某些表不存在则忽略
     }
 
     // 清理测试用户

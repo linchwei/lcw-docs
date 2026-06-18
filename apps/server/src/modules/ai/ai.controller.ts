@@ -14,10 +14,11 @@
  *
  * @module ai/controller
  */
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import type { Response } from 'express'
+import { Throttle } from '@nestjs/throttler'
 
 import { ZodValidationPipe } from '../../pipes/zod-validation.pipe'
 import {
@@ -35,8 +36,29 @@ import {
     semanticSearchSchema,
     SummaryDto,
     summarySchema,
+    KnowledgeChatDto,
+    knowledgeChatSchema,
+    KnowledgeIndexDto,
+    knowledgeIndexSchema,
+    AutoTagDto,
+    autoTagSchema,
+    KnowledgeGraphDto,
+    knowledgeGraphSchema,
+    SaveKnowledgeCardDto,
+    saveKnowledgeCardSchema,
+    SmartSummaryDto,
+    smartSummarySchema,
+    LearningPathDto,
+    learningPathSchema,
+    CreateBookmarkDto,
+    createBookmarkSchema,
+    SearchBookmarksDto,
+    searchBookmarksSchema,
+    KnowledgeGlobalSearchDto,
+    knowledgeGlobalSearchSchema,
 } from './ai.dto'
 import { AiService } from './ai.service'
+import { KnowledgeBookmarkService } from './knowledge/knowledge-bookmark.service'
 import { RagService } from './rag/rag.service'
 
 @ApiTags('AI 助手')
@@ -47,7 +69,39 @@ export class AiController {
     constructor(
         private readonly aiService: AiService,
         private readonly ragService: RagService,
+        private readonly bookmarkService: KnowledgeBookmarkService,
     ) {}
+
+    /**
+     * 通用 SSE 流式响应
+     *
+     * 监听客户端连接断开事件，提前终止迭代避免资源泄漏。
+     */
+    private streamSSE(res: Response, stream: AsyncGenerator<string>) {
+        this.setupSSEHeaders(res)
+
+        let aborted = false
+        const req = res.req!
+
+        req.on('close', () => {
+            aborted = true
+        })
+
+        ;(async () => {
+            try {
+                for await (const chunk of stream) {
+                    if (aborted) break
+                    res.write(chunk)
+                }
+            } catch (error: unknown) {
+                if (!aborted) {
+                    res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'AI 服务异常' })}\n\n`)
+                }
+            }
+
+            res.end()
+        })()
+    }
 
     /**
      * 通用对话（带文档工具的 Agent）
@@ -60,17 +114,7 @@ export class AiController {
         @Body(new ZodValidationPipe(chatSchema)) body: ChatDto,
         @Res() res: Response,
     ) {
-        this.setupSSEHeaders(res)
-
-        try {
-            for await (const chunk of this.aiService.chatStream(body)) {
-                res.write(chunk)
-            }
-        } catch (error: unknown) {
-            res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'AI 服务异常' })}\n\n`)
-        }
-
-        res.end()
+        this.streamSSE(res, this.aiService.chatStream(body))
     }
 
     /**
@@ -84,17 +128,7 @@ export class AiController {
         @Body(new ZodValidationPipe(summarySchema)) body: SummaryDto,
         @Res() res: Response,
     ) {
-        this.setupSSEHeaders(res)
-
-        try {
-            for await (const chunk of this.aiService.summaryStream(body)) {
-                res.write(chunk)
-            }
-        } catch (error: unknown) {
-            res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'AI 服务异常' })}\n\n`)
-        }
-
-        res.end()
+        this.streamSSE(res, this.aiService.summaryStream(body))
     }
 
     /**
@@ -108,17 +142,7 @@ export class AiController {
         @Body(new ZodValidationPipe(outlineSchema)) body: OutlineDto,
         @Res() res: Response,
     ) {
-        this.setupSSEHeaders(res)
-
-        try {
-            for await (const chunk of this.aiService.outlineStream(body)) {
-                res.write(chunk)
-            }
-        } catch (error: unknown) {
-            res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'AI 服务异常' })}\n\n`)
-        }
-
-        res.end()
+        this.streamSSE(res, this.aiService.outlineStream(body))
     }
 
     /**
@@ -132,17 +156,7 @@ export class AiController {
         @Body(new ZodValidationPipe(rewriteSchema)) body: RewriteDto,
         @Res() res: Response,
     ) {
-        this.setupSSEHeaders(res)
-
-        try {
-            for await (const chunk of this.aiService.rewriteStream(body)) {
-                res.write(chunk)
-            }
-        } catch (error: unknown) {
-            res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'AI 服务异常' })}\n\n`)
-        }
-
-        res.end()
+        this.streamSSE(res, this.aiService.rewriteStream(body))
     }
 
     /**
@@ -156,17 +170,7 @@ export class AiController {
         @Body(new ZodValidationPipe(resumeSchema)) body: ResumeDto,
         @Res() res: Response,
     ) {
-        this.setupSSEHeaders(res)
-
-        try {
-            for await (const chunk of this.aiService.resumeAgent(body)) {
-                res.write(chunk)
-            }
-        } catch (error: unknown) {
-            res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'AI 服务异常' })}\n\n`)
-        }
-
-        res.end()
+        this.streamSSE(res, this.aiService.resumeAgent(body))
     }
 
     /**
@@ -213,6 +217,232 @@ export class AiController {
         })
 
         return { success: true, results }
+    }
+
+    // ─── 知识库端点 ───
+
+    /**
+     * 知识库问答（SSE 流式响应）
+     *
+     * 支持跨文档搜索的 AI 问答，
+     * 根据搜索范围（当前文档/全部文档）检索相关内容后生成回答。
+     */
+    @Post('knowledge/chat')
+    async knowledgeChat(
+        @Body(new ZodValidationPipe(knowledgeChatSchema)) body: KnowledgeChatDto,
+        @Req() req: any,
+        @Res() res: Response,
+    ) {
+        this.streamSSE(res, this.aiService.knowledgeChatStream(body, req.user.id))
+    }
+
+    /**
+     * 查询知识库索引状态
+     *
+     * 返回指定文档的索引状态（是否已索引、分块数量等）。
+     */
+    @Get('knowledge/status/:pageId')
+    async getKnowledgeStatus(@Param('pageId') pageId: string) {
+        return this.aiService.getKnowledgeStatus(pageId)
+    }
+
+    /**
+     * 触发知识库索引
+     *
+     * 将文档内容分块、生成嵌入向量并存储到 pgvector，
+     * 供知识库问答和语义搜索使用。
+     */
+    @Post('knowledge/index')
+    async indexForKnowledge(
+        @Body(new ZodValidationPipe(knowledgeIndexSchema)) body: KnowledgeIndexDto,
+    ) {
+        return this.aiService.indexForKnowledge(body as { pageId: string; blocks: any[] })
+    }
+
+    /**
+     * 清除文档索引
+     *
+     * 删除指定文档的所有分块和向量数据。
+     */
+    @Delete('knowledge/index/:pageId')
+    async clearIndex(@Param('pageId') pageId: string) {
+        return this.aiService.clearIndex(pageId)
+    }
+
+    /**
+     * 自动标签生成
+     *
+     * 基于文档内容自动生成标签，便于分类和检索。
+     */
+    @Post('knowledge/auto-tag')
+    async autoTag(
+        @Body(new ZodValidationPipe(autoTagSchema)) body: AutoTagDto,
+    ) {
+        return this.aiService.autoTag(body)
+    }
+
+    /**
+     * 知识图谱生成
+     *
+     * 基于文档内容生成知识图谱，展示概念之间的关系。
+     */
+    @Post('knowledge/graph')
+    async generateKnowledgeGraph(
+        @Body(new ZodValidationPipe(knowledgeGraphSchema)) body: KnowledgeGraphDto,
+    ) {
+        return this.aiService.generateKnowledgeGraph(body)
+    }
+
+    /**
+     * 保存知识卡片
+     *
+     * 将 AI 生成的知识卡片保存到用户的收藏中。
+     */
+    @Post('knowledge/save-card')
+    async saveKnowledgeCard(
+        @Body(new ZodValidationPipe(saveKnowledgeCardSchema)) body: SaveKnowledgeCardDto,
+        @Req() req: any,
+    ) {
+        return this.aiService.saveKnowledgeCard(body, req.user.id)
+    }
+
+    /**
+     * 智能摘要生成
+     *
+     * 基于文档内容和上下文生成结构化摘要。
+     */
+    @Post('knowledge/smart-summary')
+    async smartSummary(
+        @Body(new ZodValidationPipe(smartSummarySchema)) body: SmartSummaryDto,
+    ) {
+        return this.aiService.smartSummary(body)
+    }
+
+    /**
+     * 学习路径推荐
+     *
+     * 基于文档内容推荐学习路径，帮助用户系统化学习。
+     */
+    @Post('knowledge/learning-path')
+    async generateLearningPath(
+        @Body(new ZodValidationPipe(learningPathSchema)) body: LearningPathDto,
+        @Req() req: any,
+    ) {
+        return this.aiService.generateLearningPath(body, req.user.id)
+    }
+
+    /**
+     * 查询关联文档
+     *
+     * 基于向量相似度查找与指定文档相关联的其他文档。
+     */
+    @Get('knowledge/related/:pageId')
+    async getRelatedDocuments(
+        @Param('pageId') pageId: string,
+        @Query() query: any,
+        @Req() req: any,
+    ) {
+        return this.aiService.getRelatedDocuments({ pageId, topK: parseInt(query.topK) || 5 }, req.user.id)
+    }
+
+    /**
+     * 知识库全局搜索
+     *
+     * 跨文档的语义搜索，返回按相似度排序的结果。
+     */
+    @Post('knowledge/global-search')
+    async knowledgeGlobalSearch(
+        @Body(new ZodValidationPipe(knowledgeGlobalSearchSchema)) body: KnowledgeGlobalSearchDto,
+        @Req() req: any,
+    ) {
+        return this.aiService.knowledgeGlobalSearch(body, req.user.id)
+    }
+
+    /**
+     * 搜索知识收藏
+     *
+     * 根据关键词搜索当前用户的知识收藏。
+     * 注意：此路由必须在 @Post('knowledge/bookmark') 之前定义，
+     * 否则 /bookmark/search 会被 /bookmark 路由先匹配到。
+     */
+    @Post('knowledge/bookmark/search')
+    async searchBookmarks(
+        @Body(new ZodValidationPipe(searchBookmarksSchema)) body: SearchBookmarksDto,
+        @Req() req: any,
+    ) {
+        return this.bookmarkService.search({ userId: req.user.id, query: body.query })
+    }
+
+    /**
+     * 创建知识收藏
+     *
+     * 收藏文档中的知识片段，支持关联问题和对话线程。
+     */
+    @Post('knowledge/bookmark')
+    async createBookmark(
+        @Body(new ZodValidationPipe(createBookmarkSchema)) body: CreateBookmarkDto,
+        @Req() req: any,
+    ) {
+        return this.bookmarkService.create({
+            ...body,
+            userId: req.user.id,
+        } as Parameters<typeof this.bookmarkService.create>[0])
+    }
+
+    /**
+     * 查询知识收藏列表
+     *
+     * 分页返回当前用户的知识收藏列表。
+     */
+    @Get('knowledge/bookmarks')
+    async listBookmarks(
+        @Query() query: any,
+        @Req() req: any,
+    ) {
+        return this.bookmarkService.list({
+            userId: req.user.id,
+            page: parseInt(query.page) || 1,
+            pageSize: parseInt(query.pageSize) || 20,
+        })
+    }
+
+    /**
+     * 删除知识收藏
+     *
+     * 根据收藏 ID 删除指定的知识收藏。
+     */
+    @Delete('knowledge/bookmark/:id')
+    async deleteBookmark(
+        @Param('id') id: string,
+        @Req() req: any,
+    ) {
+        return this.bookmarkService.delete({ bookmarkId: parseInt(id), userId: req.user.id })
+    }
+
+    /**
+     * 查询对话线程列表
+     *
+     * 分页返回当前用户的对话线程列表。
+     */
+    @Get('knowledge/threads')
+    async listThreads(
+        @Query() query: any,
+        @Req() req: any,
+    ) {
+        return this.aiService.listThreads(req.user.id, parseInt(query.page) || 1, parseInt(query.pageSize) || 20)
+    }
+
+    /**
+     * 删除对话线程
+     *
+     * 根据线程 ID 删除指定的对话线程及其历史记录。
+     */
+    @Delete('knowledge/thread/:threadId')
+    async deleteThread(
+        @Param('threadId') threadId: string,
+        @Req() req: any,
+    ) {
+        return this.aiService.deleteThread(threadId)
     }
 
     /**

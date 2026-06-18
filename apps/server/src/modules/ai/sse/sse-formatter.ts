@@ -122,9 +122,14 @@ export function formatDiffEvent(blockId: string, oldContent: string, newContent:
  *
  * 所有 SSE 流必须以此事件结束。
  * 前端收到 [DONE] 后关闭流读取。
+ * 如果提供 threadId，则使用标准 SSE 格式返回，前端可提取 threadId 用于对话持久化。
  *
+ * @param threadId - 对话线程 ID（可选，知识库问答需要）
  * @returns SSE 文本
  */
-export function formatDoneEvent(): string {
+export function formatDoneEvent(threadId?: string): string {
+    if (threadId) {
+        return formatSSEEvent({ type: 'done', data: { threadId } })
+    }
     return 'data: [DONE]\n\n'
 }

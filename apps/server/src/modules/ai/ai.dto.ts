@@ -49,8 +49,8 @@ export const blockItemSchema = z.object({
     id: z.string(),
     /** Block 类型 */
     type: z.string(),
-    /** Block 的文本内容 */
-    content: z.string(),
+    /** Block 的文本内容（部分类型如 divider 可能为空） */
+    content: z.string().optional(),
     /** 标题层级（仅 heading 类型有值） */
     level: z.number().optional(),
 })
@@ -157,6 +157,108 @@ export const semanticSearchSchema = z.object({
     pageId: z.string().optional(),
 })
 
+// === 知识库模块 Schema ===
+
+/** 知识库问答请求（支持跨文档搜索） */
+export const knowledgeChatSchema = z.object({
+    messages: z.array(chatMessageSchema).min(1, '消息列表不能为空'),
+    threadId: z.string().optional(),
+    pageId: z.string(),
+    provider: z.enum(['openai', 'deepseek']).optional(),
+    context: structuredContextSchema.optional(),
+    /** 搜索范围：current=当前文档, all=全部文档 */
+    scope: z.enum(['current', 'all']).default('current'),
+})
+
+/** 知识库索引状态查询 */
+export const knowledgeStatusSchema = z.object({
+    pageId: z.string(),
+})
+
+/** 知识库索引触发 */
+export const knowledgeIndexSchema = z.object({
+    pageId: z.string(),
+    blocks: z.array(blockItemSchema).min(1, '文档块列表不能为空'),
+})
+
+/** 自动标签生成 */
+export const autoTagSchema = z.object({
+    pageId: z.string(),
+    context: structuredContextSchema.optional(),
+})
+
+/** 知识图谱生成 */
+export const knowledgeGraphSchema = z.object({
+    pageId: z.string(),
+    context: structuredContextSchema.optional(),
+})
+
+/** 知识卡片保存 */
+export const saveKnowledgeCardSchema = z.object({
+    title: z.string().min(1).max(200),
+    content: z.string().min(1),
+    sourcePageId: z.string(),
+    folderId: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+})
+
+/** 智能摘要生成 */
+export const smartSummarySchema = z.object({
+    pageId: z.string(),
+    context: structuredContextSchema.optional(),
+})
+
+/** 学习路径推荐 */
+export const learningPathSchema = z.object({
+    pageId: z.string(),
+    context: structuredContextSchema.optional(),
+})
+
+/** 知识收藏 - 创建 */
+export const createBookmarkSchema = z.object({
+    sourcePageId: z.string(),
+    sourceBlockId: z.string().optional(),
+    title: z.string().min(1).max(200),
+    content: z.string().min(1),
+    question: z.string().optional(),
+    threadId: z.string().optional(),
+})
+
+/** 知识收藏 - 列表查询 */
+export const listBookmarksSchema = z.object({
+    page: z.number().min(1).default(1),
+    pageSize: z.number().min(1).max(50).default(20),
+})
+
+/** 知识收藏 - 搜索 */
+export const searchBookmarksSchema = z.object({
+    query: z.string().min(1),
+})
+
+/** 对话历史 - 列表查询 */
+export const listThreadsSchema = z.object({
+    page: z.number().min(1).default(1),
+    pageSize: z.number().min(1).max(50).default(20),
+})
+
+/** 对话历史 - 删除 */
+export const deleteThreadSchema = z.object({
+    threadId: z.string(),
+})
+
+/** 关联文档查询 */
+export const relatedDocumentsSchema = z.object({
+    pageId: z.string(),
+    topK: z.number().min(1).max(20).default(5),
+})
+
+/** 知识库全局搜索 */
+export const knowledgeGlobalSearchSchema = z.object({
+    query: z.string().min(1),
+    topK: z.number().min(1).max(20).default(10),
+    minScore: z.number().min(0).max(1).default(0.5),
+})
+
 // ─── 类型导出 ───
 
 export type ChatMessage = z.infer<typeof chatMessageSchema>
@@ -168,3 +270,18 @@ export type ResumeDto = z.infer<typeof resumeSchema>
 export type StructuredContextDto = z.infer<typeof structuredContextSchema>
 export type IndexDocumentDto = z.infer<typeof indexDocumentSchema>
 export type SemanticSearchDto = z.infer<typeof semanticSearchSchema>
+export type KnowledgeChatDto = z.infer<typeof knowledgeChatSchema>
+export type KnowledgeStatusDto = z.infer<typeof knowledgeStatusSchema>
+export type KnowledgeIndexDto = z.infer<typeof knowledgeIndexSchema>
+export type AutoTagDto = z.infer<typeof autoTagSchema>
+export type KnowledgeGraphDto = z.infer<typeof knowledgeGraphSchema>
+export type SaveKnowledgeCardDto = z.infer<typeof saveKnowledgeCardSchema>
+export type SmartSummaryDto = z.infer<typeof smartSummarySchema>
+export type LearningPathDto = z.infer<typeof learningPathSchema>
+export type CreateBookmarkDto = z.infer<typeof createBookmarkSchema>
+export type ListBookmarksDto = z.infer<typeof listBookmarksSchema>
+export type SearchBookmarksDto = z.infer<typeof searchBookmarksSchema>
+export type ListThreadsDto = z.infer<typeof listThreadsSchema>
+export type DeleteThreadDto = z.infer<typeof deleteThreadSchema>
+export type RelatedDocumentsDto = z.infer<typeof relatedDocumentsSchema>
+export type KnowledgeGlobalSearchDto = z.infer<typeof knowledgeGlobalSearchSchema>

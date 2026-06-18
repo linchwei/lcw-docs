@@ -10,6 +10,7 @@ import {
 } from '@lcw-doc/shadcn-shared-ui/components/ui/dropdown-menu'
 import { Separator } from '@lcw-doc/shadcn-shared-ui/components/ui/separator'
 import { SidebarInset, SidebarTrigger, useSidebar } from '@lcw-doc/shadcn-shared-ui/components/ui/sidebar'
+import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@lcw-doc/shadcn-shared-ui/components/ui/tooltip'
 import { useToast } from '@lcw-doc/shadcn-shared-ui/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
@@ -42,6 +43,7 @@ import { WebsocketProvider } from 'y-websocket'
 import * as Y from 'yjs'
 
 const AIReadingPanel = lazy(() => import('@/components/AIReadingPanel').then(m => ({ default: m.AIReadingPanel })))
+const KnowledgePanel = lazy(() => import('@/components/KnowledgePanel'))
 import { BacklinksPanel } from '@/components/BacklinksPanel'
 import { CollaboratorPanel } from '@/components/CollaboratorPanel'
 import { CommentButton } from '@/components/CommentButton'
@@ -55,6 +57,7 @@ import { PageTags } from '@/components/PageTags'
 import { SearchBar } from '@/components/SearchBar'
 import { SharePopover } from '@/components/SharePopover'
 import { ShortcutPanel } from '@/components/ShortcutPanel'
+import { ResizableDrawer } from '@/components/ResizableDrawer'
 import { StatusBar } from '@/components/StatusBar'
 import { VersionPanel } from '@/components/VersionPanel'
 import { useEditorContext } from '@/context/EditorContext'
@@ -90,6 +93,19 @@ export const Doc = () => {
     const [shortcutPanelOpen, setShortcutPanelOpen] = useState(false)
     const [docInfoOpen, setDocInfoOpen] = useState(false)
     const [aiReadingPanelOpen, setAIReadingPanelOpen] = useState(false)
+    const [knowledgePanelOpen, setKnowledgePanelOpen] = useState(false)
+
+    /** 切换 AI 阅读面板（与知识库面板互斥） */
+    const handleAIReadingPanelToggle = () => {
+        setAIReadingPanelOpen(prev => !prev)
+        if (!aiReadingPanelOpen) setKnowledgePanelOpen(false)
+    }
+
+    /** 切换知识库面板（与 AI 阅读面板互斥） */
+    const handleKnowledgePanelToggle = () => {
+        setKnowledgePanelOpen(prev => !prev)
+        if (!knowledgePanelOpen) setAIReadingPanelOpen(false)
+    }
     const [mode, setMode] = useState<'edit' | 'read' | 'review'>('edit')
     const [outlineCollapsed, setOutlineCollapsed] = useState(() => {
         return localStorage.getItem('doc-outline-collapsed') === 'true'
@@ -359,6 +375,22 @@ export const Doc = () => {
             setGlobalEditor(null)
         }
     }, [pageId, provider, doc, indexeddbProvider, setGlobalEditor])
+
+    // 监听 YJS 文档更新，防抖派发 doc-saved 事件供 useAutoIndex 使用
+    useEffect(() => {
+        let timer: ReturnType<typeof setTimeout>
+        const handleUpdate = () => {
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('doc-saved'))
+            }, 3000)
+        }
+        doc.on('update', handleUpdate)
+        return () => {
+            doc.off('update', handleUpdate)
+            clearTimeout(timer)
+        }
+    }, [doc])
 
     return (
         <SidebarInset className="flex flex-col h-screen min-w-0">
@@ -774,14 +806,7 @@ export const Doc = () => {
                                                     : undefined
                                             }
                                         />
-                                        <button
-                                            onClick={() => setAIReadingPanelOpen(!aiReadingPanelOpen)}
-                                            className="shrink-0 ml-2 mt-2 inline-flex items-center gap-1 h-7 px-2.5 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                                            title="AI 阅读"
-                                        >
-                                            <Sparkles size={14} />
-                                            AI 阅读
-                                        </button>
+
                                     </h1>
                                     {mode === 'read' && (page?.role === 'editor' || page?.role === 'owner') && (
                                         <div className="flex items-center gap-1.5 mb-4 px-3 py-1.5 bg-zinc-100 rounded-md w-fit">
@@ -827,14 +852,37 @@ export const Doc = () => {
                     {backlinksPanelOpen && page?.pageId && (
                         <BacklinksPanel pageId={page.pageId} onClose={() => setBacklinksPanelOpen(false)} />
                     )}
-                    {aiReadingPanelOpen && (
-                        <Suspense fallback={null}>
-                            <AIReadingPanel onClose={() => setAIReadingPanelOpen(false)} />
+                    <ResizableDrawer
+                        open={aiReadingPanelOpen}
+                        onOpenChange={setAIReadingPanelOpen}
+                        title="AI 阅读"
+                        icon={<Sparkles size={16} className="text-brand" />}
+                        storageKey="ai-reading"
+                    >
+                        <Suspense fallback={<div className="flex items-center justify-center h-full text-sm text-muted-foreground">加载中...</div>}>
+                            <AIReadingPanel />
                         </Suspense>
-                    )}
+                    </ResizableDrawer>
+                    <ResizableDrawer
+                        open={knowledgePanelOpen}
+                        onOpenChange={setKnowledgePanelOpen}
+                        title="知识库"
+                        icon={<BookOpen size={16} className="text-brand" />}
+                        storageKey="knowledge"
+                    >
+                        <Suspense fallback={<div className="flex items-center justify-center h-full text-sm text-muted-foreground">加载中...</div>}>
+                            <KnowledgePanel pageId={params?.id || ''} />
+                        </Suspense>
+                    </ResizableDrawer>
                 </div>
             </div>
-            <StatusBar editor={editorInstance} />
+            <StatusBar
+                editor={editorInstance}
+                onAIReadingToggle={() => setAIReadingPanelOpen(prev => !prev)}
+                onKnowledgePanelToggle={() => setKnowledgePanelOpen(prev => !prev)}
+                aiReadingOpen={aiReadingPanelOpen}
+                knowledgePanelOpen={knowledgePanelOpen}
+            />
             <ExportPanel open={exportOpen} onOpenChange={setExportOpen} editor={editorInstance} fileName={page?.title || 'document'} />
             <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} username={currentUser?.username} />
             <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />

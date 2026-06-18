@@ -69,12 +69,18 @@ export interface UseAIStreamReturn {
     reset: () => void
 }
 
+/** useAIStream 参数 */
+export interface UseAIStreamOptions {
+    /** 流结束回调，接收 done 事件数据（可能包含 threadId 等） */
+    onDone?: (data: Record<string, any>) => void
+}
+
 /**
  * 统一的 AI SSE 流式响应 Hook
  *
  * @returns UseAIStreamReturn
  */
-export function useAIStream(): UseAIStreamReturn {
+export function useAIStream(options?: UseAIStreamOptions): UseAIStreamReturn {
     const [content, setContent] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
     const [interrupt, setInterrupt] = useState<InterruptEventData | null>(null)
@@ -85,6 +91,10 @@ export function useAIStream(): UseAIStreamReturn {
     const abortRef = useRef<AbortController | null>(null)
     // 使用 ref 保存累积内容，避免频繁 setState 导致的性能问题
     const contentRef = useRef('')
+
+    // 使用 ref 保存 onDone 回调，避免 handleEvent 闭包问题
+    const onDoneRef = useRef(options?.onDone)
+    onDoneRef.current = options?.onDone
 
     /**
      * 处理解析后的 SSE 事件
@@ -155,7 +165,10 @@ export function useAIStream(): UseAIStreamReturn {
             }
 
             case 'done': {
-                // 流结束，不做额外处理（isGenerating 在 startStream 中重置）
+                // 流结束，调用 onDone 回调传递事件数据（如 threadId）
+                if (onDoneRef.current && event.data) {
+                    onDoneRef.current(event.data)
+                }
                 break
             }
         }

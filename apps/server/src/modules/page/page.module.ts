@@ -14,6 +14,6 @@ import { PageService } from './page.service'
     ],
     controllers: [PageController],
     providers: [PageService],
-    exports: [],
+    exports: [PageService],
 })
 export class PageModule {}

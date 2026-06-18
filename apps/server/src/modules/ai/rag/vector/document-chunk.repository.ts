@@ -169,6 +169,140 @@ export class DocumentChunkRepository {
     }
 
     /**
+     * 获取指定文档的分块统计信息
+     *
+     * 返回总分块数、已嵌入数、未嵌入数等信息。
+     * 由于表无 createdAt 列，lastIndexedAt 返回 null。
+     *
+     * @param pageId - 文档 pageId
+     */
+    async getChunkStatsByPageId(pageId: string): Promise<{
+        total: number
+        embedded: number
+        unembedded: number
+        lastIndexedAt: Date | null
+    }> {
+        const rows = await this.dataSource.query(
+            `SELECT COUNT(*) as total, COUNT(${COL.embedding}) as embedded, COUNT(*) - COUNT(${COL.embedding}) as unembedded
+             FROM ${TABLE}
+             WHERE ${COL.pageId} = $1`,
+            [pageId],
+        )
+        const row = rows[0]
+        return {
+            total: Number(row.total),
+            embedded: Number(row.embedded),
+            unembedded: Number(row.unembedded),
+            lastIndexedAt: null,
+        }
+    }
+
+    /**
+     * 获取用户相关的分块统计信息
+     *
+     * 通过 JOIN page 表按用户过滤，只返回该用户拥有的文档的分块统计。
+     *
+     * @param userId - 用户 ID
+     */
+    async getUserChunkStats(userId: number): Promise<{
+        indexedPageIds: string[]
+        totalChunks: number
+        embeddedChunks: number
+    }> {
+        const [pageRows, countRows] = await Promise.all([
+            this.dataSource.query(
+                `SELECT DISTINCT dc.${COL.pageId} as page_id FROM ${TABLE} dc JOIN page p ON dc.${COL.pageId} = p."pageId" WHERE p."userId" = $1`,
+                [userId],
+            ),
+            this.dataSource.query(
+                `SELECT COUNT(*) as total, COUNT(dc.${COL.embedding}) as embedded FROM ${TABLE} dc JOIN page p ON dc.${COL.pageId} = p."pageId" WHERE p."userId" = $1`,
+                [userId],
+            ),
+        ])
+        return {
+            indexedPageIds: pageRows.map((r: any) => r.page_id),
+            totalChunks: Number(countRows[0].total),
+            embeddedChunks: Number(countRows[0].embedded),
+        }
+    }
+
+    /**
+     * 分页查询指定文档的分块列表
+     *
+     * 按 chunkIndex 排序，支持分页。
+     *
+     * @param pageId - 文档 pageId
+     * @param limit - 每页数量
+     * @param offset - 偏移量
+     */
+    async listChunksByPageId(pageId: string, limit: number, offset: number): Promise<{
+        items: any[]
+        total: number
+    }> {
+        const [countRows, items] = await Promise.all([
+            this.dataSource.query(
+                `SELECT COUNT(*) as total FROM ${TABLE} WHERE ${COL.pageId} = $1`,
+                [pageId],
+            ),
+            this.dataSource.query(
+                `SELECT ${COL.id}, ${COL.pageId}, ${COL.blockId}, ${COL.content}, ${COL.chunkIndex}, ${COL.startOffset}, ${COL.endOffset}
+                 FROM ${TABLE}
+                 WHERE ${COL.pageId} = $1
+                 ORDER BY ${COL.chunkIndex}
+                 LIMIT $2 OFFSET $3`,
+                [pageId, limit, offset],
+            ),
+        ])
+        return {
+            items,
+            total: Number(countRows[0].total),
+        }
+    }
+
+    /**
+     * 获取分块及其上下文（前后相邻分块）
+     *
+     * 根据同一 pageId 和 chunkIndex 范围获取目标分块的前后上下文，
+     * 用于知识库 AI 助手展示完整上下文。
+     *
+     * @param chunkId - 目标分块 ID
+     * @param contextBlocks - 前后各取的上下文分块数量
+     */
+    async getChunkWithContext(chunkId: number, contextBlocks: number): Promise<{
+        chunk: any
+        before: any[]
+        after: any[]
+    }> {
+        const chunkRows = await this.dataSource.query(
+            `SELECT * FROM ${TABLE} WHERE ${COL.id} = $1`,
+            [chunkId],
+        )
+        if (chunkRows.length === 0) {
+            throw new Error(`分块不存在: id=${chunkId}`)
+        }
+        const chunk = chunkRows[0]
+
+        const [before, after] = await Promise.all([
+            this.dataSource.query(
+                `SELECT * FROM ${TABLE}
+                 WHERE ${COL.pageId} = $1 AND ${COL.chunkIndex} < $2
+                 ORDER BY ${COL.chunkIndex} DESC
+                 LIMIT $3`,
+                [chunk.pageId, chunk.chunkIndex, contextBlocks],
+            ),
+            this.dataSource.query(
+                `SELECT * FROM ${TABLE}
+                 WHERE ${COL.pageId} = $1 AND ${COL.chunkIndex} > $2
+                 ORDER BY ${COL.chunkIndex} ASC
+                 LIMIT $3`,
+                [chunk.pageId, chunk.chunkIndex, contextBlocks],
+            ),
+        ])
+
+        return { chunk, before: before.reverse(), after }
+    }
+
+    /**
      * 校验向量维度是否合法
      *
      * @param dimensions - 向量维度

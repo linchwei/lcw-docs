@@ -20,8 +20,11 @@
  *
  * @module ai/service
  */
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Inject, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { PostgresqlPersistence } from 'y-postgresql'
+import { DataSource } from 'typeorm'
+import * as Y from 'yjs'
 
 import { PostgresCheckpointerService } from './checkpointer/postgres.checkpointer'
 import { HumanMessage, AIMessage, SystemMessage, BaseMessage } from '@langchain/core/messages'
@@ -39,7 +42,15 @@ import {
     formatInterruptEvent,
     formatToolCallEvent,
 } from './sse/sse-formatter'
-import { ChatDto, ChatMessage, OutlineDto, ResumeDto, RewriteDto, SummaryDto } from './ai.dto'
+import { ChatDto, ChatMessage, OutlineDto, ResumeDto, RewriteDto, SummaryDto, KnowledgeChatDto, AutoTagDto, KnowledgeGraphDto, SaveKnowledgeCardDto, SmartSummaryDto, LearningPathDto, RelatedDocumentsDto, KnowledgeGlobalSearchDto } from './ai.dto'
+import { createKnowledgeGraph } from './graphs/knowledge.graph'
+import { createAutoTagGraph } from './graphs/auto-tag.graph'
+import { createKnowledgeGraphGraph } from './graphs/knowledge-graph.graph'
+import { createSmartSummaryGraph } from './graphs/smart-summary.graph'
+import { createLearningPathGraph } from './graphs/learning-path.graph'
+import { KnowledgeBookmarkService } from './knowledge/knowledge-bookmark.service'
+import { PageService } from '../page/page.service'
+import { docs } from '../../fundamentals/yjs-postgresql/utils'
 
 @Injectable()
 export class AiService {
@@ -50,6 +61,10 @@ export class AiService {
         private readonly llmFactory: LlmFactory,
         private readonly checkpointerService: PostgresCheckpointerService,
         private readonly ragService: RagService,
+        private readonly bookmarkService: KnowledgeBookmarkService,
+        private readonly pageService: PageService,
+        @Inject('YJS_POSTGRESQL_ADAPTER') private readonly yjsPostgresqlAdapter: PostgresqlPersistence,
+        private readonly dataSource: DataSource,
     ) {}
 
     /**
@@ -385,5 +400,386 @@ export class AiService {
         })
 
         return response
+    }
+
+    /**
+     * 知识库问答（SSE 流式）
+     *
+     * 使用知识库 Agent 处理对话，支持 RAG 检索增强生成。
+     * 流式输出通过 SSE 格式转换层统一格式。
+     *
+     * @param dto - 知识库问答请求参数
+     * @returns AsyncGenerator，每次 yield 一段 SSE 格式的文本
+     */
+    async *knowledgeChatStream(dto: KnowledgeChatDto, userId: number): AsyncGenerator<string> {
+        const graph = createKnowledgeGraph(this.llmFactory, this.checkpointerService.getCheckpointer())
+        const threadId = dto.threadId || `knowledge-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        const configurable: Record<string, any> = {
+            thread_id: threadId,
+            ragService: this.ragService,
+            pageId: dto.pageId,
+            userId,
+            context: dto.context,
+            scope: dto.scope,
+        }
+        // 转换消息格式
+        const messages = dto.messages.map(m => ({ type: m.role === 'user' ? 'human' : m.role === 'assistant' ? 'ai' : 'system', content: m.content }))
+        // 注入上下文到 system message
+        if (dto.context) {
+            const contextText = formatStructuredContext(dto.context as StructuredContext)
+            const systemIdx = messages.findIndex(m => m.type === 'system')
+            if (systemIdx >= 0) {
+                messages[systemIdx] = { ...messages[systemIdx], content: messages[systemIdx].content + '\n\n' + contextText }
+            } else {
+                messages.unshift({ type: 'system', content: contextText })
+            }
+        }
+        try {
+            const stream = await graph.streamEvents({ messages }, { configurable, version: 'v2' })
+            for await (const event of stream) {
+                // 与 chatStream 相同的事件处理逻辑
+                const { event: eventType, data, name } = event
+                if (eventType === 'on_chat_model_stream') {
+                    const chunk = data?.chunk
+                    if (chunk?.content && typeof chunk.content === 'string') {
+                        yield formatContentEvent(chunk.content)
+                    }
+                } else if (eventType === 'on_tool_start') {
+                    yield formatAgentStatusEvent(name, 'running')
+                } else if (eventType === 'on_tool_end') {
+                    yield formatAgentStatusEvent(name, 'completed')
+                }
+            }
+            yield formatDoneEvent(threadId)
+        } catch (error) {
+            this.logger.error(`知识库问答失败: ${error instanceof Error ? error.message : error}`)
+            yield formatDoneEvent(threadId)
+        }
+    }
+
+    /**
+     * 获取知识库索引状态
+     *
+     * @param pageId - 页面 ID
+     * @returns 索引状态信息
+     */
+    async getKnowledgeStatus(pageId: string) {
+        return this.ragService.getIndexStatus(pageId)
+    }
+
+    /**
+     * 为知识库建立索引
+     *
+     * @param dto - 索引请求参数（包含页面 ID 和文档块）
+     * @returns 操作结果
+     */
+    async indexForKnowledge(dto: { pageId: string; blocks: any[] }) {
+        await this.ragService.indexDocument(dto.pageId, dto.blocks)
+        return { success: true }
+    }
+
+    /**
+     * 清除指定文档的索引数据
+     *
+     * 删除文档关联的所有分块和向量数据。
+     *
+     * @param pageId - 文档页面 ID
+     * @returns 操作结果
+     */
+    async clearIndex(pageId: string) {
+        return this.ragService.clearPageIndex(pageId)
+    }
+
+    /**
+     * 自动标签生成
+     *
+     * 使用自动标签 Agent 分析文档并生成标签建议。
+     * 非流式，直接返回标签结果。
+     *
+     * @param dto - 自动标签请求参数
+     * @returns 标签建议结果
+     */
+    async autoTag(dto: AutoTagDto) {
+        const graph = createAutoTagGraph(this.llmFactory)
+        const configurable = { ragService: this.ragService, pageId: dto.pageId, context: dto.context }
+        const result = await graph.invoke(
+            { messages: [{ role: 'user', content: '请分析这篇文档并生成标签建议' }] },
+            { configurable },
+        )
+        const rawContent = result.messages[result.messages.length - 1].content
+        const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
+        try {
+            const jsonMatch = content.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/)
+            const jsonStr = jsonMatch ? jsonMatch[1].trim() : content
+            return JSON.parse(jsonStr)
+        } catch {
+            return { tags: [], suggestedFolder: '', summary: content }
+        }
+    }
+
+    /**
+     * 生成知识图谱
+     *
+     * 使用知识图谱 Agent 分析文档并生成实体关系图谱。
+     * 非流式，直接返回图谱数据。
+     *
+     * @param dto - 知识图谱请求参数
+     * @returns 知识图谱数据（实体、关系、Mermaid 图）
+     */
+    async generateKnowledgeGraph(dto: KnowledgeGraphDto) {
+        const graph = createKnowledgeGraphGraph(this.llmFactory)
+        const configurable = { ragService: this.ragService, pageId: dto.pageId, context: dto.context }
+        const result = await graph.invoke(
+            { messages: [{ role: 'user', content: '请分析这篇文档并生成知识图谱' }] },
+            { configurable },
+        )
+        const rawContent = result.messages[result.messages.length - 1].content
+        const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
+        try {
+            // LLM 可能返回 markdown 代码块包裹的 JSON，需要提取
+            const jsonMatch = content.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/)
+            const jsonStr = jsonMatch ? jsonMatch[1].trim() : content
+            return JSON.parse(jsonStr)
+        } catch {
+            this.logger.warn(`知识图谱 JSON 解析失败，原始内容: ${content.substring(0, 200)}`)
+            return { entities: [], relations: [], mermaid: '' }
+        }
+    }
+
+    /**
+     * 保存知识卡片
+     *
+     * 创建新页面作为知识卡片，将内容写入文档。
+     *
+     * @param dto - 知识卡片保存参数
+     * @param userId - 用户 ID
+     * @returns 创建的页面 ID
+     */
+    async saveKnowledgeCard(dto: SaveKnowledgeCardDto, userId: number) {
+        const page = await this.pageService.create({
+            title: dto.title,
+            emoji: '🃏',
+            userId,
+            folderId: dto.folderId,
+        })
+
+        // 将 content 写入 Yjs 文档
+        await this.writeContentToYjsDoc(page.pageId, dto.content)
+
+        return { pageId: page.pageId }
+    }
+
+    /**
+     * 将文本内容写入 Yjs 文档
+     *
+     * 创建或获取 Yjs 文档，将纯文本内容作为段落写入 XmlFragment。
+     * 处理内存中和持久化两种情况。
+     *
+     * @param pageId - 页面 ID
+     * @param content - 要写入的文本内容
+     */
+    private async writeContentToYjsDoc(pageId: string, content: string) {
+        const docName = `doc-yjs-${pageId}`
+        const fragmentKey = `document-store-${pageId}`
+
+        let doc: Y.Doc
+        let needsPersist = false
+
+        const existingDoc = docs.get(docName)
+        if (existingDoc) {
+            doc = existingDoc
+        } else {
+            doc = await this.yjsPostgresqlAdapter.getYDoc(docName)
+            needsPersist = true
+        }
+
+        const fragment = doc.getXmlFragment(fragmentKey)
+
+        doc.transact(() => {
+            // 清空现有内容
+            while (fragment.length > 0) {
+                fragment.delete(0)
+            }
+
+            // 将文本按段落分割并写入
+            const paragraphs = content.split('\n').filter(p => p.trim() !== '')
+            for (const paragraph of paragraphs) {
+                const paragraphNode = new Y.XmlElement('paragraph')
+                const textNode = new Y.XmlText()
+                textNode.insert(0, paragraph)
+                paragraphNode.push([textNode])
+                fragment.push([paragraphNode])
+            }
+        }, 'save-knowledge-card')
+
+        // 如果文档不在内存中，需要手动持久化
+        if (needsPersist) {
+            const update = Y.encodeStateAsUpdate(doc)
+            await this.yjsPostgresqlAdapter.storeUpdate(docName, update)
+        }
+    }
+
+    /**
+     * 智能摘要
+     *
+     * 使用智能摘要 Agent 生成文档的结构化摘要，
+     * 包含关键要点、核心结论和建议行动。
+     * 非流式，直接返回摘要结果。
+     *
+     * @param dto - 智能摘要请求参数
+     * @returns 结构化摘要结果
+     */
+    async smartSummary(dto: SmartSummaryDto) {
+        const graph = createSmartSummaryGraph(this.llmFactory)
+        const configurable = { ragService: this.ragService, pageId: dto.pageId, context: dto.context }
+        const result = await graph.invoke(
+            { messages: [{ role: 'user', content: '请生成这篇文档的智能摘要' }] },
+            { configurable },
+        )
+        const rawContent = result.messages[result.messages.length - 1].content
+        const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
+        try {
+            const jsonMatch = content.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/)
+            const jsonStr = jsonMatch ? jsonMatch[1].trim() : content
+            return JSON.parse(jsonStr)
+        } catch {
+            return { keyPoints: [], coreConclusion: content, suggestedActions: [], readingTime: '' }
+        }
+    }
+
+    /**
+     * 生成学习路径
+     *
+     * 使用学习路径 Agent 基于当前文档推荐学习路径。
+     * 非流式，直接返回学习路径。
+     *
+     * @param dto - 学习路径请求参数
+     * @param userId - 用户 ID
+     * @returns 学习路径数据
+     */
+    async generateLearningPath(dto: LearningPathDto, userId: number) {
+        const graph = createLearningPathGraph(this.llmFactory)
+        const configurable = { ragService: this.ragService, pageId: dto.pageId, userId, context: dto.context }
+        const result = await graph.invoke(
+            { messages: [{ role: 'user', content: '请基于当前文档推荐学习路径' }] },
+            { configurable },
+        )
+        const rawContent = result.messages[result.messages.length - 1].content
+        const content = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
+        try {
+            const jsonMatch = content.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/)
+            const jsonStr = jsonMatch ? jsonMatch[1].trim() : content
+            return JSON.parse(jsonStr)
+        } catch {
+            return { path: [] }
+        }
+    }
+
+    /**
+     * 获取相关文档
+     *
+     * 基于当前文档内容检索其他相关文档，
+     * 自动过滤当前文档并按页面 ID 去重。
+     *
+     * @param dto - 相关文档请求参数
+     * @param userId - 用户 ID
+     * @returns 相关文档列表
+     */
+    async getRelatedDocuments(dto: RelatedDocumentsDto, userId: number) {
+        // 获取当前文档的代表性内容
+        const chunks = await this.ragService.retrieve('', { pageId: dto.pageId, topK: 3, minScore: 0 })
+        if (!chunks.length) return []
+        // 用当前文档内容搜索其他文档
+        const queryText = chunks.map(c => c.content).join(' ').slice(0, 500)
+        const results = await this.ragService.retrieve(queryText, { topK: dto.topK, minScore: 0.6 })
+        // 过滤当前文档 + 按 pageId 去重
+        const seen = new Set<string>([dto.pageId])
+        return results
+            .filter(r => !seen.has(r.pageId) && seen.add(r.pageId))
+            .map(r => ({ pageId: r.pageId, score: r.score, matchedContent: r.content.slice(0, 200) }))
+    }
+
+    /**
+     * 知识库全局搜索
+     *
+     * 在所有已索引的文档中搜索匹配内容。
+     *
+     * @param dto - 全局搜索请求参数
+     * @param userId - 用户 ID
+     * @returns 搜索结果列表
+     */
+    async knowledgeGlobalSearch(dto: KnowledgeGlobalSearchDto, userId: number) {
+        const results = await this.ragService.retrieve(dto.query, { topK: dto.topK, minScore: dto.minScore })
+        return results.map(r => ({ pageId: r.pageId, blockId: r.blockId, content: r.content, score: r.score }))
+    }
+
+    /**
+     * 获取对话线程列表
+     *
+     * 查询用户的对话线程列表，支持分页。
+     * TODO: 实现 PostgresSaver 的 thread 查询。
+     *
+     * @param userId - 用户 ID
+     * @param page - 页码（默认 1）
+     * @param pageSize - 每页数量（默认 20）
+     * @returns 线程列表和总数
+     */
+    async listThreads(userId: number, page: number = 1, pageSize: number = 20) {
+        const checkpointer = this.checkpointerService.getCheckpointer()
+        if (!checkpointer) {
+            return { items: [], total: 0 }
+        }
+
+        try {
+            // 直接查询 checkpoints 表获取线程列表
+            // 注意：LangGraph 的 checkpoints 表不存储 userId，
+            // 当前通过 thread_id 前缀 "knowledge-" 过滤知识库线程
+            const countResult = await this.dataSource.query(
+                `SELECT COUNT(DISTINCT thread_id) as total FROM checkpoints WHERE thread_id LIKE 'knowledge-%'`,
+            )
+            const total = Number(countResult[0]?.total || 0)
+
+            const offset = (page - 1) * pageSize
+            const rows = await this.dataSource.query(
+                `SELECT DISTINCT thread_id, MAX(created_at) as last_active
+                 FROM checkpoints
+                 WHERE thread_id LIKE 'knowledge-%'
+                 GROUP BY thread_id
+                 ORDER BY last_active DESC
+                 LIMIT $1 OFFSET $2`,
+                [pageSize, offset],
+            )
+
+            const items = rows.map((row: any) => ({
+                threadId: row.thread_id,
+                lastActive: row.last_active,
+            }))
+
+            return { items, total }
+        } catch (error) {
+            this.logger.warn(`查询线程列表失败: ${error instanceof Error ? error.message : error}`)
+            return { items: [], total: 0 }
+        }
+    }
+
+    /**
+     * 删除对话线程
+     *
+     * 从 checkpoints 相关表中删除指定线程的所有数据。
+     *
+     * @param threadId - 线程 ID
+     */
+    async deleteThread(threadId: string) {
+        try {
+            await Promise.all([
+                this.dataSource.query(`DELETE FROM checkpoints WHERE thread_id = $1`, [threadId]),
+                this.dataSource.query(`DELETE FROM checkpoint_blobs WHERE thread_id = $1`, [threadId]),
+                this.dataSource.query(`DELETE FROM checkpoint_writes WHERE thread_id = $1`, [threadId]),
+            ])
+            return { success: true }
+        } catch (error) {
+            this.logger.warn(`删除线程失败: ${error instanceof Error ? error.message : error}`)
+            return { success: false }
+        }
     }
 }

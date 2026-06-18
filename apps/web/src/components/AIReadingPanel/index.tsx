@@ -9,9 +9,9 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { useEditorContext } from '@/context/EditorContext'
 import { ChatMessage, StructuredContext, chatWithAgent, extractStructuredContextFromEditor } from '@/services'
 import { useAIStream } from '@/hooks/useAIStream'
+import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 
 interface AIReadingPanelProps {
-    onClose: () => void
 }
 
 interface ChatMessageItem {
@@ -29,7 +29,7 @@ const presetActions = [
     { icon: Globe, title: '内容翻译', description: '将文档翻译为指定语言', prompt: '请将这篇文档的内容翻译为英文，保持原文的语义和风格。' },
 ]
 
-export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
+export function AIReadingPanel({}: AIReadingPanelProps) {
     const { editor } = useEditorContext()
     const [input, setInput] = useState('')
     const [messages, setMessages] = useState<ChatMessageItem[]>([])
@@ -44,21 +44,6 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
     useEffect(() => {
         if (streamContent) scrollToBottom()
     }, [streamContent])
-
-    useEffect(() => {
-        const styleId = 'ai-reading-panel-animations'
-        if (document.getElementById(styleId)) return
-        const style = document.createElement('style')
-        style.id = styleId
-        style.textContent = `
-            @keyframes aiReadingBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-            @keyframes aiReadingDotBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
-        `
-        document.head.appendChild(style)
-        return () => {
-            document.getElementById(styleId)?.remove()
-        }
-    }, [])
 
     const scrollToBottom = () => {
         setTimeout(() => {
@@ -135,28 +120,18 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
     }
 
     return (
-        <div className="w-80 lg:w-[400px] h-full border-l border-zinc-200 bg-white flex flex-col">
-            <div className="flex items-center justify-between h-12 px-4 border-b border-zinc-200">
-                <div className="flex items-center gap-2">
-                    <Sparkles size={18} color="#6B45FF" />
-                    <span className="font-medium">AI 阅读</span>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
-                    <X size={16} />
-                </Button>
-            </div>
-
+        <div className="h-full flex flex-col">
             <div className="flex-1 overflow-y-auto p-4">
                 {messages.length === 0 && !streamContent ? (
                     <div className="grid grid-cols-2 gap-3">
                         {presetActions.map(action => (
                             <div
                                 key={action.title}
-                                className="border border-zinc-200 rounded-lg p-3 cursor-pointer hover:shadow-sm hover:border-zinc-300 transition-colors"
+                                className="border border-zinc-200 rounded-lg p-3 cursor-pointer hover:shadow-sm hover:border-brand/30 transition-colors"
                                 onClick={() => handlePresetClick(action)}
                             >
                                 <div className="flex items-center gap-2 mb-1">
-                                    <action.icon size={16} className="text-[#6B45FF]" />
+                                    <action.icon size={16} className="text-brand" />
                                     <span className="font-medium text-sm">{action.title}</span>
                                 </div>
                                 <p className="text-xs text-zinc-500">{action.description}</p>
@@ -168,11 +143,12 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div
-                                    className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
+                                    className={cn(
+                                        'max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed',
                                         msg.role === 'user'
-                                            ? 'bg-[#6B45FF] text-white rounded-br-sm'
-                                            : 'bg-zinc-100 text-zinc-800 rounded-bl-sm'
-                                    }`}
+                                            ? 'bg-brand text-brand-foreground rounded-br-sm'
+                                            : 'bg-zinc-100 text-zinc-800 rounded-bl-sm',
+                                    )}
                                 >
                                     {msg.role === 'assistant' ? (
                                         <div className="prose-sm">
@@ -213,7 +189,7 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                                                     ),
                                                     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                                                     a: ({ href, children }) => (
-                                                        <a href={href} className="text-[#6B45FF] underline" target="_blank" rel="noopener noreferrer">
+                                                        <a href={href} className="text-brand underline" target="_blank" rel="noopener noreferrer">
                                                             {children}
                                                         </a>
                                                     ),
@@ -234,8 +210,8 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                                     {[0, 1, 2].map(i => (
                                         <span
                                             key={i}
-                                            className="inline-block w-1.5 h-1.5 rounded-full bg-[#6B45FF]"
-                                            style={{ animation: `aiReadingDotBounce 1.2s ${i * 0.15}s infinite ease-in-out` }}
+                                            className="inline-block w-1.5 h-1.5 rounded-full bg-brand animate-dot-bounce"
+                                            style={{ animationDelay: `${i * 0.15}s` }}
                                         />
                                     ))}
                                 </div>
@@ -282,7 +258,7 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                                                 ),
                                                 strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                                                 a: ({ href, children }) => (
-                                                    <a href={href} className="text-[#6B45FF] underline" target="_blank" rel="noopener noreferrer">
+                                                    <a href={href} className="text-brand underline" target="_blank" rel="noopener noreferrer">
                                                         {children}
                                                     </a>
                                                 ),
@@ -292,10 +268,7 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                                         </ReactMarkdown>
                                     </div>
                                     {isGenerating && (
-                                        <span
-                                            className="inline-block w-0.5 h-3.5 bg-[#6B45FF] ml-0.5 align-text-bottom"
-                                            style={{ animation: 'aiReadingBlink 1s infinite' }}
-                                        />
+                                        <span className="inline-block w-0.5 h-3.5 bg-brand ml-0.5 align-text-bottom animate-cursor-blink" />
                                     )}
                                 </div>
                             </div>
@@ -305,8 +278,8 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                 )}
             </div>
 
-            <div className="p-4 border-t border-zinc-200">
-                <div className="flex items-end gap-2 border border-zinc-200 rounded-lg p-2">
+            <div className="p-4 border-t border-zinc-100">
+                <div className="flex items-end gap-2 border border-zinc-200 rounded-lg p-2 focus-within:border-brand/50 transition-colors">
                     <TextareaAutosize
                         ref={textareaRef}
                         value={input}
@@ -320,7 +293,7 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                     {isGenerating ? (
                         <button
                             onClick={handleCancel}
-                            className="flex items-center justify-center w-7 h-7 rounded-md border border-zinc-200 bg-white cursor-pointer shrink-0"
+                            className="flex items-center justify-center w-7 h-7 rounded-md border border-zinc-200 bg-white cursor-pointer shrink-0 transition-colors hover:bg-zinc-50"
                         >
                             <X size={14} className="text-zinc-500" />
                         </button>
@@ -328,11 +301,12 @@ export function AIReadingPanel({ onClose }: AIReadingPanelProps) {
                         <button
                             onClick={() => handleSend()}
                             disabled={!input.trim()}
-                            className="flex items-center justify-center w-7 h-7 rounded-md border-none cursor-pointer shrink-0 transition-all duration-150"
-                            style={{
-                                backgroundColor: input.trim() ? '#6B45FF' : '#ebebea',
-                                color: input.trim() ? '#fff' : '#9b9a97',
-                            }}
+                            className={cn(
+                                'flex items-center justify-center w-7 h-7 rounded-md border-none cursor-pointer shrink-0 transition-all duration-150',
+                                input.trim()
+                                    ? 'bg-brand text-brand-foreground hover:bg-brand/90'
+                                    : 'bg-zinc-100 text-zinc-400',
+                            )}
                         >
                             <ArrowUp size={14} />
                         </button>

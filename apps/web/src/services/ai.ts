@@ -308,6 +308,356 @@ export async function resumeAgent(
 }
 
 // ============================================================
+// 知识库 API
+// ============================================================
+
+/**
+ * 知识库问答（SSE 流式）
+ *
+ * 基于 RAG 索引的深度问答，支持当前文档和跨文档搜索。
+ *
+ * @param messages - 对话消息列表
+ * @param pageId - 当前文档 ID
+ * @param threadId - 对话线程 ID（可选）
+ * @param signal - AbortSignal
+ * @param context - 文档结构化上下文（可选）
+ * @param scope - 搜索范围：'current'=当前文档, 'all'=全部文档
+ * @returns Response 对象
+ */
+export async function chatWithKnowledge(
+    messages: ChatMessage[],
+    pageId: string,
+    threadId?: string,
+    signal?: AbortSignal,
+    context?: StructuredContext,
+    scope: 'current' | 'all' = 'current',
+): Promise<Response> {
+    return fetch('/api/ai/knowledge/chat', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ messages, pageId, threadId, context, scope }),
+        ...(signal ? { signal } : {}),
+    })
+}
+
+/**
+ * 获取文档索引状态
+ *
+ * @param pageId - 文档 ID
+ * @returns 索引状态信息
+ */
+export async function getKnowledgeStatus(pageId: string): Promise<{
+    isIndexed: boolean
+    totalChunks: number
+    embeddedChunks: number
+    unembeddedChunks: number
+    lastIndexedAt: string | null
+}> {
+    const res = await fetch(`/api/ai/knowledge/status/${pageId}`, { headers: getAuthHeaders(), cache: 'no-store' })
+    return res.json()
+}
+
+/**
+ * 触发文档索引
+ *
+ * @param pageId - 文档 ID
+ * @param blocks - 文档 block 列表
+ * @returns 索引结果
+ */
+export async function indexForKnowledge(
+    pageId: string,
+    blocks: Array<{ id: string; type: string; content: string; level?: number }>,
+): Promise<{ success: boolean }> {
+    const res = await fetch('/api/ai/knowledge/index', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ pageId, blocks }),
+    })
+    return res.json()
+}
+
+/**
+ * 自动标签生成
+ *
+ * AI 分析文档内容，生成标签建议和分类推荐。
+ *
+ * @param pageId - 文档 ID
+ * @param context - 文档结构化上下文（可选）
+ * @returns 标签建议结果
+ */
+export async function autoTag(
+    pageId: string,
+    context?: StructuredContext,
+): Promise<{
+    tags: Array<{ name: string; color: string; confidence: number }>
+    suggestedFolder: string
+    summary: string
+}> {
+    const res = await fetch('/api/ai/knowledge/auto-tag', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ pageId, context }),
+    })
+    return res.json()
+}
+
+/**
+ * 知识图谱生成
+ *
+ * @param pageId - 文档 ID
+ * @param context - 文档结构化上下文（可选）
+ * @returns 知识图谱数据
+ */
+export async function generateKnowledgeGraph(
+    pageId: string,
+    context?: StructuredContext,
+): Promise<{
+    entities: Array<{ id: string; name: string; type: string }>
+    relations: Array<{ source: string; target: string; label: string; type: string }>
+    mermaid: string
+}> {
+    const res = await fetch('/api/ai/knowledge/graph', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ pageId, context }),
+    })
+    return res.json()
+}
+
+/**
+ * 保存知识卡片
+ *
+ * 将问答结果保存为新文档。
+ *
+ * @param params - 保存参数
+ * @returns 新创建的页面 ID
+ */
+export async function saveKnowledgeCard(params: {
+    title: string
+    content: string
+    sourcePageId: string
+    folderId?: string
+    tags?: string[]
+}): Promise<{ pageId: string }> {
+    const res = await fetch('/api/ai/knowledge/save-card', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(params),
+    })
+    return res.json()
+}
+
+/**
+ * 智能摘要生成
+ *
+ * AI 生成文档的结构化摘要，包含关键要点、核心结论和建议行动。
+ *
+ * @param pageId - 文档 ID
+ * @param context - 文档结构化上下文（可选）
+ * @returns 智能摘要结果
+ */
+export async function smartSummary(
+    pageId: string,
+    context?: StructuredContext,
+): Promise<{
+    keyPoints: string[]
+    coreConclusion: string
+    suggestedActions: string[]
+    readingTime: string
+}> {
+    const res = await fetch('/api/ai/knowledge/smart-summary', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ pageId, context }),
+    })
+    return res.json()
+}
+
+/**
+ * 学习路径推荐
+ *
+ * AI 基于当前文档推荐相关文档的阅读顺序。
+ *
+ * @param pageId - 文档 ID
+ * @param context - 文档结构化上下文（可选）
+ * @returns 学习路径
+ */
+export async function generateLearningPath(
+    pageId: string,
+    context?: StructuredContext,
+): Promise<{
+    path: Array<{ pageId: string; title: string; reason: string; order: number }>
+}> {
+    const res = await fetch('/api/ai/knowledge/learning-path', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ pageId, context }),
+    })
+    return res.json()
+}
+
+/**
+ * 获取关联文档
+ *
+ * 发现与当前文档语义相关的其他文档。
+ *
+ * @param pageId - 文档 ID
+ * @param topK - 返回数量上限（默认 5）
+ * @returns 关联文档列表
+ */
+export async function getRelatedDocuments(
+    pageId: string,
+    topK: number = 5,
+): Promise<Array<{ pageId: string; score: number; matchedContent: string }>> {
+    const res = await fetch(`/api/ai/knowledge/related/${pageId}?topK=${topK}`, {
+        headers: getAuthHeaders(),
+    })
+    return res.json()
+}
+
+/**
+ * 知识库全局搜索
+ *
+ * 跨所有已索引文档的语义搜索。
+ *
+ * @param query - 搜索查询
+ * @param topK - 返回数量上限（默认 10）
+ * @param minScore - 最低相似度（默认 0.5）
+ * @returns 搜索结果列表
+ */
+export async function knowledgeGlobalSearch(
+    query: string,
+    topK: number = 10,
+    minScore: number = 0.5,
+): Promise<Array<{ pageId: string; blockId: string; content: string; score: number }>> {
+    const res = await fetch('/api/ai/knowledge/global-search', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ query, topK, minScore }),
+    })
+    return res.json()
+}
+
+/**
+ * 创建知识收藏
+ *
+ * @param params - 收藏参数
+ * @returns 创建的收藏对象
+ */
+export async function createBookmark(params: {
+    sourcePageId: string
+    sourceBlockId?: string
+    title: string
+    content: string
+    question?: string
+    threadId?: string
+}): Promise<any> {
+    const res = await fetch('/api/ai/knowledge/bookmark', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(params),
+    })
+    return res.json()
+}
+
+/**
+ * 获取收藏列表
+ *
+ * @param page - 页码（默认 1）
+ * @param pageSize - 每页数量（默认 20）
+ * @returns 分页收藏列表
+ */
+export async function listBookmarks(
+    page: number = 1,
+    pageSize: number = 20,
+): Promise<{ items: any[]; total: number }> {
+    const res = await fetch(`/api/ai/knowledge/bookmarks?page=${page}&pageSize=${pageSize}`, {
+        headers: getAuthHeaders(),
+    })
+    return res.json()
+}
+
+/**
+ * 删除收藏
+ *
+ * @param bookmarkId - 收藏 ID
+ * @returns 删除结果
+ */
+export async function deleteBookmark(bookmarkId: number): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/ai/knowledge/bookmark/${bookmarkId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    })
+    return res.json()
+}
+
+/**
+ * 搜索收藏
+ *
+ * @param query - 搜索关键词
+ * @returns 匹配的收藏列表
+ */
+export async function searchBookmarks(query: string): Promise<any[]> {
+    const res = await fetch('/api/ai/knowledge/bookmark/search', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ query }),
+    })
+    return res.json()
+}
+
+/**
+ * 获取对话历史线程列表
+ *
+ * @param page - 页码（默认 1）
+ * @param pageSize - 每页数量（默认 20）
+ * @returns 分页线程列表
+ */
+export async function listKnowledgeThreads(
+    page: number = 1,
+    pageSize: number = 20,
+): Promise<{ items: any[]; total: number }> {
+    const res = await fetch(`/api/ai/knowledge/threads?page=${page}&pageSize=${pageSize}`, {
+        headers: getAuthHeaders(),
+    })
+    return res.json()
+}
+
+/**
+ * 删除对话线程
+ *
+ * @param threadId - 线程 ID
+ * @returns 删除结果
+ */
+export async function deleteKnowledgeThread(threadId: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/ai/knowledge/thread/${threadId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    })
+    return res.json()
+}
+
+/**
+ * 清除文档索引
+ *
+ * 删除指定文档的所有分块和向量数据。
+ *
+ * @param pageId - 文档页面 ID
+ * @returns 操作结果
+ */
+export async function clearKnowledgeIndex(pageId: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/ai/knowledge/index/${pageId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    })
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: '清除索引失败' }))
+        throw new Error(error.message || `HTTP ${res.status}`)
+    }
+    return res.json()
+}
+
+// ============================================================
 // SSE 解析工具
 // ============================================================
 

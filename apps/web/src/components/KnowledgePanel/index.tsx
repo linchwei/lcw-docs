@@ -19,6 +19,7 @@ import { Button } from '@lcw-doc/shadcn-shared-ui/components/ui/button'
 import { cn } from '@lcw-doc/shadcn-shared-ui/lib/utils'
 import { useEditorContext } from '@/context/EditorContext'
 import { getKnowledgeStatus, indexForKnowledge, extractStructuredContextFromEditor } from '@/services'
+import { ChatMessage } from '@/services/ai'
 import { useAutoIndex } from '@/hooks/useAutoIndex'
 
 /** Tab 类型定义 */
@@ -28,6 +29,18 @@ type KnowledgeTab = 'qa' | 'discover' | 'tags' | 'graph' | 'bookmarks' | 'manage
 interface KnowledgePanelProps {
     /** 当前文档 ID */
     pageId: string
+    /** QA 对话消息列表 */
+    qaMessages: Array<{ role: 'user' | 'assistant'; content: string }>
+    onQaMessagesChange: (messages: Array<{ role: 'user' | 'assistant'; content: string }>) => void
+    /** QA API 对话历史 */
+    qaChatHistory: ChatMessage[]
+    onQaChatHistoryChange: (history: ChatMessage[]) => void
+    /** QA 线程 ID */
+    qaThreadId: string | undefined
+    onQaThreadIdChange: (id: string | undefined) => void
+    /** QA 搜索范围 */
+    qaScope: 'current' | 'all'
+    onQaScopeChange: (scope: 'current' | 'all') => void
 }
 
 /** 懒加载各 Tab 组件 */
@@ -47,7 +60,17 @@ interface IndexStatus {
     lastIndexedAt: string | null
 }
 
-export function KnowledgePanel({ pageId }: KnowledgePanelProps) {
+export function KnowledgePanel({
+    pageId,
+    qaMessages,
+    onQaMessagesChange,
+    qaChatHistory,
+    onQaChatHistoryChange,
+    qaThreadId,
+    onQaThreadIdChange,
+    qaScope,
+    onQaScopeChange,
+}: KnowledgePanelProps) {
     const { editor } = useEditorContext()
     const [activeTab, setActiveTab] = useState<KnowledgeTab>('qa')
     const [indexStatus, setIndexStatus] = useState<IndexStatus | null>(null)
@@ -159,15 +182,39 @@ export function KnowledgePanel({ pageId }: KnowledgePanelProps) {
                 )}
             </div>
 
-            {/* Tab 内容 */}
-            <div className="flex-1 overflow-y-auto">
+            {/* Tab 内容 — 使用 CSS hidden 代替条件渲染，避免组件卸载丢失状态 */}
+            <div className="flex-1 overflow-y-auto relative">
                 <Suspense fallback={<div className="p-4 text-center text-sm text-zinc-500">加载中...</div>}>
-                    {activeTab === 'qa' && <QATab pageId={pageId} indexStatus={indexStatus} onIndex={handleIndexDocument} />}
-                    {activeTab === 'discover' && <DiscoverTab pageId={pageId} />}
-                    {activeTab === 'tags' && <TagsTab pageId={pageId} />}
-                    {activeTab === 'graph' && <GraphTab pageId={pageId} />}
-                    {activeTab === 'bookmarks' && <BookmarksTab />}
-                    {activeTab === 'manage' && <ManageTab pageId={pageId} indexStatus={indexStatus} onIndex={handleIndexDocument} onLoadStatus={loadIndexStatus} />}
+                    <div className={activeTab === 'qa' ? '' : 'hidden'}>
+                        <QATab
+                            pageId={pageId}
+                            indexStatus={indexStatus}
+                            onIndex={handleIndexDocument}
+                            messages={qaMessages}
+                            onMessagesChange={onQaMessagesChange}
+                            chatHistory={qaChatHistory}
+                            onChatHistoryChange={onQaChatHistoryChange}
+                            threadId={qaThreadId}
+                            onThreadIdChange={onQaThreadIdChange}
+                            scope={qaScope}
+                            onScopeChange={onQaScopeChange}
+                        />
+                    </div>
+                    <div className={activeTab === 'discover' ? '' : 'hidden'}>
+                        <DiscoverTab pageId={pageId} />
+                    </div>
+                    <div className={activeTab === 'tags' ? '' : 'hidden'}>
+                        <TagsTab pageId={pageId} />
+                    </div>
+                    <div className={activeTab === 'graph' ? '' : 'hidden'}>
+                        <GraphTab pageId={pageId} />
+                    </div>
+                    <div className={activeTab === 'bookmarks' ? '' : 'hidden'}>
+                        <BookmarksTab />
+                    </div>
+                    <div className={activeTab === 'manage' ? '' : 'hidden'}>
+                        <ManageTab pageId={pageId} indexStatus={indexStatus} onIndex={handleIndexDocument} onLoadStatus={loadIndexStatus} />
+                    </div>
                 </Suspense>
             </div>
         </div>

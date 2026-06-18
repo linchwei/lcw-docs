@@ -62,6 +62,7 @@ import { StatusBar } from '@/components/StatusBar'
 import { VersionPanel } from '@/components/VersionPanel'
 import { useEditorContext } from '@/context/EditorContext'
 import * as srv from '@/services'
+import { ChatMessage } from '@/services/ai'
 import { Comment } from '@/types/api'
 import { debounce } from '@/utils/debounce'
 import { queryClient } from '@/utils/query-client'
@@ -94,6 +95,12 @@ export const Doc = () => {
     const [docInfoOpen, setDocInfoOpen] = useState(false)
     const [aiReadingPanelOpen, setAIReadingPanelOpen] = useState(false)
     const [knowledgePanelOpen, setKnowledgePanelOpen] = useState(false)
+
+    // QA 对话状态（提升到页面级别，避免标签页切换和抽屉关闭时丢失）
+    const [qaMessages, setQaMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
+    const [qaChatHistory, setQaChatHistory] = useState<ChatMessage[]>([])
+    const [qaThreadId, setQaThreadId] = useState<string | undefined>()
+    const [qaScope, setQaScope] = useState<'current' | 'all'>('current')
 
     /** 切换 AI 阅读面板（与知识库面板互斥） */
     const handleAIReadingPanelToggle = () => {
@@ -871,7 +878,17 @@ export const Doc = () => {
                         storageKey="knowledge"
                     >
                         <Suspense fallback={<div className="flex items-center justify-center h-full text-sm text-muted-foreground">加载中...</div>}>
-                            <KnowledgePanel pageId={params?.id || ''} />
+                            <KnowledgePanel
+                                pageId={params?.id || ''}
+                                qaMessages={qaMessages}
+                                onQaMessagesChange={setQaMessages}
+                                qaChatHistory={qaChatHistory}
+                                onQaChatHistoryChange={setQaChatHistory}
+                                qaThreadId={qaThreadId}
+                                onQaThreadIdChange={setQaThreadId}
+                                qaScope={qaScope}
+                                onQaScopeChange={setQaScope}
+                            />
                         </Suspense>
                     </ResizableDrawer>
                 </div>

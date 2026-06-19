@@ -4,7 +4,7 @@ import '@/editor-styles.css'
 import { defaultBlockSpecs, defaultInlineContentSpecs, LcwDocSchema } from '@lcw-doc/core'
 import { useCreateLcwDoc } from '@lcw-doc/react'
 import { LcwDocView } from '@lcw-doc/shadcn'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { WebsocketProvider } from 'y-websocket'
 import * as Y from 'yjs'
 
@@ -40,15 +40,18 @@ export function ShareDocEditor({ pageId, shareId, password, permission }: ShareD
         return () => observer.disconnect()
     }, [])
 
-    const visitorInfo = useMemo(() => {
+    const visitorInfoRef = useRef<{ name: string; color: string } | null>(null)
+    useEffect(() => {
+        if (visitorInfoRef.current !== null) return
         let stored = sessionStorage.getItem('lcwdoc-visitor-info')
         if (!stored) {
             const id = Math.floor(Math.random() * 9000 + 1000)
             stored = JSON.stringify({ name: `访客${id}`, color: `hsl(${Math.floor(Math.random() * 360)}, 60%, 65%)` })
             sessionStorage.setItem('lcwdoc-visitor-info', stored)
         }
-        return JSON.parse(stored)
+        visitorInfoRef.current = JSON.parse(stored)
     }, [])
+    const visitorInfo = visitorInfoRef.current
 
     const doc = useMemo(() => new Y.Doc(), [pageId])
     const provider = useMemo(() => {

@@ -38,6 +38,7 @@ export function DocGraph() {
     const [simulationReady, setSimulationReady] = useState(false)
     const navigate = useNavigate()
     const pagesRef = useRef<string>('')
+    const simulationRef = useRef<d3.Simulation<any, undefined> | null>(null)
 
     const { data: pages = [], isLoading } = useQuery({
         queryKey: ['pageGraph'],
@@ -72,13 +73,8 @@ export function DocGraph() {
         pagesRef.current = pagesKey
 
         if (pages.length === 0) {
-            setNodes([])
-            setEdges([])
-            setSimulationReady(true)
             return
         }
-
-        setSimulationReady(false)
 
         const initialNodes = pages.map(page => {
             return {
@@ -122,6 +118,8 @@ export function DocGraph() {
             .force('center', d3.forceCenter(500, 350))
             .force('radial', d3.forceRadial(150, 500, 350).strength(0.3))
 
+        simulationRef.current = simulation
+
         simulation.on('end', () => {
             setSimulationReady(true)
         })
@@ -137,11 +135,13 @@ export function DocGraph() {
 
         return () => {
             simulation.stop()
+            simulationRef.current = null
         }
     }, [pages, pagesKey])
 
     const isEmpty = pages.length === 0
     const hasNoLinks = !isEmpty && edgeCount === 0
+    const isReady = isEmpty || simulationReady
 
     return (
         <SidebarInset>
@@ -165,7 +165,7 @@ export function DocGraph() {
                     )}
                 </div>
                 <div className="w-full h-full relative">
-                    {(isLoading || !simulationReady) && (
+                    {(isLoading || !isReady) && (
                         <div className="w-full h-full flex justify-center items-center bg-zinc-50/30 absolute z-10">
                             <div className="flex flex-col items-center gap-2">
                                 <Loader className="w-8 h-8 animate-spin text-zinc-400" />
@@ -173,7 +173,7 @@ export function DocGraph() {
                             </div>
                         </div>
                     )}
-                    {isEmpty && simulationReady && (
+                    {isEmpty && isReady && (
                         <div className="w-full h-full flex justify-center items-center">
                             <div className="flex flex-col items-center gap-3 text-zinc-400">
                                 <FileText className="w-12 h-12" />
@@ -182,7 +182,7 @@ export function DocGraph() {
                             </div>
                         </div>
                     )}
-                    {hasNoLinks && simulationReady && (
+                    {hasNoLinks && isReady && (
                         <div className="w-full h-full">
                             <ReactFlow
                                 nodesDraggable

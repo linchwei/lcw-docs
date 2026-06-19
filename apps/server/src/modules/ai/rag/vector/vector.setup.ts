@@ -81,7 +81,7 @@ export class VectorSetupService implements OnModuleInit {
         this.dimensions = parseInt(
             String(
                 (await this.systemConfigService.get('EMBEDDING_DIMENSIONS')) ||
-                this.configService.get<string | number>('EMBEDDING_DIMENSIONS', providerDefaults.dimensions)
+                    this.configService.get<string | number>('EMBEDDING_DIMENSIONS', providerDefaults.dimensions)
             ),
             10
         )

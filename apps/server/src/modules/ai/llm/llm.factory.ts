@@ -45,7 +45,8 @@ export class LlmFactory {
      */
     create(options?: LlmCreateOptions) {
         // 确定提供商：优先使用参数，否则从数据库/环境变量读取，默认 deepseek
-        const provider = options?.provider ||
+        const provider =
+            options?.provider ||
             this.systemConfigService.getSync('LLM_PROVIDER') ||
             this.configService.get<string>('LLM_PROVIDER', 'deepseek')
         const config = LLM_CONFIG[provider as LlmProvider]
@@ -61,8 +62,8 @@ export class LlmFactory {
         }
 
         // 读取模型名称：优先从数据库读取，未配置则使用环境变量，再回退到默认值
-        const modelName = this.systemConfigService.getSync(config.modelEnv) ||
-            this.configService.get<string>(config.modelEnv, config.defaultModel)
+        const modelName =
+            this.systemConfigService.getSync(config.modelEnv) || this.configService.get<string>(config.modelEnv, config.defaultModel)
         const temperature = options?.temperature ?? 0.7
         const streaming = options?.streaming ?? true
 

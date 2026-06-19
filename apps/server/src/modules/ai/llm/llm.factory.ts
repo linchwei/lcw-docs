@@ -22,11 +22,15 @@ import { ChatOpenAI } from '@langchain/openai'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
+import { SystemConfigService } from '../../system-config/system-config.service'
 import { LLM_CONFIG, LlmCreateOptions, LlmProvider } from './llm.types'
 
 @Injectable()
 export class LlmFactory {
-    constructor(private configService: ConfigService) {}
+    constructor(
+        private configService: ConfigService,
+        private systemConfigService: SystemConfigService
+    ) {}
 
     /**
      * 创建 ChatModel 实例
@@ -40,22 +44,25 @@ export class LlmFactory {
      * @throws 当 API Key 未配置时抛出错误
      */
     create(options?: LlmCreateOptions) {
-        // 确定提供商：优先使用参数，否则使用环境变量，默认 deepseek
-        const provider = options?.provider || this.configService.get<string>('LLM_PROVIDER', 'deepseek')
+        // 确定提供商：优先使用参数，否则从数据库/环境变量读取，默认 deepseek
+        const provider = options?.provider ||
+            this.systemConfigService.getSync('LLM_PROVIDER') ||
+            this.configService.get<string>('LLM_PROVIDER', 'deepseek')
         const config = LLM_CONFIG[provider as LlmProvider]
 
         if (!config) {
             throw new Error(`未知的 LLM 提供商: ${provider}，支持的提供商: ${Object.keys(LLM_CONFIG).join(', ')}`)
         }
 
-        // 读取 API Key，未配置则抛出明确错误
-        const apiKey = this.configService.get<string>(config.apiKeyEnv)
+        // 优先从数据库读取 API Key，回退到环境变量
+        const apiKey = this.systemConfigService.getSync(config.apiKeyEnv) || this.configService.get<string>(config.apiKeyEnv)
         if (!apiKey) {
-            throw new Error(`LLM API Key 未配置: 请设置环境变量 ${config.apiKeyEnv}`)
+            throw new Error(`LLM API Key 未配置: 请设置环境变量 ${config.apiKeyEnv} 或在系统配置中设置`)
         }
 
-        // 读取模型名称，未配置则使用默认值
-        const modelName = this.configService.get<string>(config.modelEnv, config.defaultModel)
+        // 读取模型名称：优先从数据库读取，未配置则使用环境变量，再回退到默认值
+        const modelName = this.systemConfigService.getSync(config.modelEnv) ||
+            this.configService.get<string>(config.modelEnv, config.defaultModel)
         const temperature = options?.temperature ?? 0.7
         const streaming = options?.streaming ?? true
 

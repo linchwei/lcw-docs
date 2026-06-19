@@ -24,6 +24,7 @@ import { NotificationModule } from './modules/notification/notification.module'
 import { PageModule } from './modules/page/page.module'
 import { ShareModule } from './modules/share/share.module'
 import { SyncModule } from './modules/sync/sync.module'
+import { SystemConfigModule } from './modules/system-config/system-config.module'
 import { TagModule } from './modules/tag/tag.module'
 import { TemplateModule } from './modules/template/template.module'
 import { UploadModule } from './modules/upload/upload.module'
@@ -77,6 +78,7 @@ import { VersionModule } from './modules/version/version.module'
         UploadModule,
         AiModule,
         VersionModule,
+        SystemConfigModule,
         SyncModule,
         YjsPostgresqlModule.forRoot(),
     ],

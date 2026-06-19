@@ -17,40 +17,69 @@
  *   EMBEDDING_DIMENSIONS=1024        # 向量维度
  *
  * 降级策略：
- *   - API Key 未配置 → embedQuery/embedDocuments 返回空数组
- *   - 调用方应检查返回值长度，为空时降级为关键词搜索
+ *   - API Key 未配置 → 服务标记为不可用，调用 embedQuery/embedDocuments 将抛出错误
+ *   - 调用方应先检查 isAvailable()，不可用时降级为关键词搜索
  *
  * @module rag/embedding/service
  */
 import { OpenAIEmbeddings } from '@langchain/openai'
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
+import { SystemConfigService } from '../../../system-config/system-config.service'
 import { DEFAULT_EMBEDDING_CONFIG, EmbeddingConfig, EmbeddingProvider, PROVIDER_DEFAULTS } from './embedding.types'
 
 @Injectable()
-export class EmbeddingService {
+export class EmbeddingService implements OnModuleInit {
     private readonly logger = new Logger(EmbeddingService.name)
 
     /** LangChain OpenAIEmbeddings 实例 */
     private embeddings: OpenAIEmbeddings | null = null
 
     /** 当前配置 */
-    private config: EmbeddingConfig
+    private config: EmbeddingConfig = DEFAULT_EMBEDDING_CONFIG
 
-    constructor(private configService: ConfigService) {
-        const provider = (this.configService.get<string>('EMBEDDING_PROVIDER') || 'dashscope') as EmbeddingProvider
+    constructor(
+        private configService: ConfigService,
+        private systemConfigService: SystemConfigService
+    ) {}
+
+    async onModuleInit() {
+        await this.initConfig()
+        try {
+            await this.initEmbeddings()
+        } catch (error) {
+            this.logger.error(`Embedding 服务初始化失败: ${error instanceof Error ? error.message : error}`)
+        }
+    }
+
+    /**
+     * 从数据库/环境变量初始化配置
+     *
+     * 优先从数据库读取 provider/model/dimensions，
+     * 未配置时回退到环境变量，再回退到提供商默认值。
+     */
+    private async initConfig() {
+        const provider = ((await this.systemConfigService.get('EMBEDDING_PROVIDER')) ||
+            this.configService.get<string>('EMBEDDING_PROVIDER') ||
+            'dashscope') as EmbeddingProvider
         const providerDefaults = PROVIDER_DEFAULTS[provider] || PROVIDER_DEFAULTS.dashscope
 
         this.config = {
             provider,
-            model: this.configService.get<string>('EMBEDDING_MODEL', providerDefaults.model),
-            dimensions: this.configService.get<number>('EMBEDDING_DIMENSIONS', providerDefaults.dimensions),
+            model:
+                (await this.systemConfigService.get('EMBEDDING_MODEL')) ||
+                this.configService.get<string>('EMBEDDING_MODEL', providerDefaults.model),
+            dimensions: parseInt(
+                String(
+                    (await this.systemConfigService.get('EMBEDDING_DIMENSIONS')) ||
+                        this.configService.get<string | number>('EMBEDDING_DIMENSIONS', providerDefaults.dimensions)
+                ),
+                10
+            ),
             batchSize: DEFAULT_EMBEDDING_CONFIG.batchSize,
             baseURL: providerDefaults.baseURL,
         }
-
-        this.initEmbeddings()
     }
 
     /**
@@ -63,12 +92,15 @@ export class EmbeddingService {
      * 优先使用 EMBEDDING_API_KEY（专用于 Embedding 的 Key），
      * 未配置时回退到 OPENAI_API_KEY（与 LLM 共享）。
      */
-    private initEmbeddings() {
-        const apiKey = this.configService.get<string>('EMBEDDING_API_KEY') || this.configService.get<string>('OPENAI_API_KEY')
+    private async initEmbeddings() {
+        // 优先从数据库读取，回退到环境变量
+        const apiKey =
+            (await this.systemConfigService.get('EMBEDDING_API_KEY')) ||
+            this.configService.get<string>('EMBEDDING_API_KEY') ||
+            this.configService.get<string>('OPENAI_API_KEY')
 
         if (!apiKey) {
-            this.logger.warn('EMBEDDING_API_KEY 和 OPENAI_API_KEY 均未配置，Embedding 服务不可用')
-            return
+            throw new Error('EMBEDDING_API_KEY 和 OPENAI_API_KEY 均未配置，Embedding 服务不可用')
         }
 
         this.embeddings = new OpenAIEmbeddings({
@@ -91,12 +123,12 @@ export class EmbeddingService {
      * 用于语义搜索时将用户查询向量化。
      *
      * @param query - 用户查询文本
-     * @returns 嵌入向量，服务不可用时返回空数组
+     * @returns 嵌入向量
+     * @throws 当服务不可用时抛出错误
      */
     async embedQuery(query: string): Promise<number[]> {
         if (!this.embeddings) {
-            this.logger.warn('Embedding 服务不可用，返回空向量')
-            return []
+            throw new Error('Embedding 服务不可用：API Key 未配置，请先检查 isAvailable()')
         }
 
         try {
@@ -116,12 +148,13 @@ export class EmbeddingService {
      * 注意：阿里云百炼单次最多 10 条，OpenAI 单次最多 2048 条。
      *
      * @param texts - 待嵌入的文本数组
-     * @returns 嵌入向量数组，与输入文本一一对应；服务不可用时返回空数组
+     * @returns 嵌入向量数组，与输入文本一一对应
+     * @throws 当服务不可用时抛出错误
      */
     async embedDocuments(texts: string[]): Promise<number[][]> {
         if (!this.embeddings || texts.length === 0) {
-            this.logger.warn('Embedding 服务不可用或输入为空，返回空向量数组')
-            return []
+            if (texts.length === 0) return []
+            throw new Error('Embedding 服务不可用：API Key 未配置，请先检查 isAvailable()')
         }
 
         try {

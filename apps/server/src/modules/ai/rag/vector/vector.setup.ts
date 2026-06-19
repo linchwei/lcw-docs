@@ -20,6 +20,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { DataSource } from 'typeorm'
 
+import { SystemConfigService } from '../../../system-config/system-config.service'
 import { EmbeddingProvider, PROVIDER_DEFAULTS } from '../embedding/embedding.types'
 import { DocumentChunkRepository } from './document-chunk.repository'
 
@@ -36,24 +37,23 @@ export class VectorSetupService implements OnModuleInit {
     private isReady = false
 
     /** 向量维度（从 Embedding 配置读取） */
-    private dimensions: number
+    private dimensions = 0
 
     constructor(
         private dataSource: DataSource,
-        private configService: ConfigService
-    ) {
-        const provider = (this.configService.get<string>('EMBEDDING_PROVIDER') || 'dashscope') as EmbeddingProvider
-        const providerDefaults = PROVIDER_DEFAULTS[provider] || PROVIDER_DEFAULTS.dashscope
-        this.dimensions = this.configService.get<number>('EMBEDDING_DIMENSIONS', providerDefaults.dimensions)
-    }
+        private configService: ConfigService,
+        private systemConfigService: SystemConfigService
+    ) {}
 
     /**
      * 模块初始化时执行 pgvector 设置
      *
-     * 依次执行：启用扩展 → 添加 embedding 列 → 创建 HNSW 索引
+     * 依次执行：读取配置 → 启用扩展 → 添加 embedding 列 → 创建 HNSW 索引
      * 任何步骤失败都不阻塞启动，只将 isReady 置为 false
      */
     async onModuleInit() {
+        await this.initDimensions()
+
         try {
             await this.enablePgvectorExtension()
             await this.addEmbeddingColumn()
@@ -64,6 +64,27 @@ export class VectorSetupService implements OnModuleInit {
             this.logger.warn(`pgvector 初始化失败，RAG 功能将降级为关键词搜索: ${error instanceof Error ? error.message : error}`)
             this.isReady = false
         }
+    }
+
+    /**
+     * 从数据库/环境变量初始化向量维度
+     *
+     * 优先从数据库读取 EMBEDDING_PROVIDER 和 EMBEDDING_DIMENSIONS，
+     * 未配置时回退到环境变量，再回退到提供商默认值。
+     */
+    private async initDimensions() {
+        const provider = ((await this.systemConfigService.get('EMBEDDING_PROVIDER')) ||
+            this.configService.get<string>('EMBEDDING_PROVIDER') ||
+            'dashscope') as EmbeddingProvider
+        const providerDefaults = PROVIDER_DEFAULTS[provider] || PROVIDER_DEFAULTS.dashscope
+
+        this.dimensions = parseInt(
+            String(
+                (await this.systemConfigService.get('EMBEDDING_DIMENSIONS')) ||
+                this.configService.get<string | number>('EMBEDDING_DIMENSIONS', providerDefaults.dimensions)
+            ),
+            10
+        )
     }
 
     /**

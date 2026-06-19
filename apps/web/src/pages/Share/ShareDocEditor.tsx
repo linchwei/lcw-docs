@@ -78,7 +78,7 @@ export function ShareDocEditor({ pageId, shareId, password, permission }: ShareD
             collaboration: {
                 provider,
                 fragment: doc.getXmlFragment(`document-store-${pageId}`),
-                user: visitorInfo,
+                user: visitorInfo as { name: string; color: string },
             },
         },
         [pageId, provider, doc]
